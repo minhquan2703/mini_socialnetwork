@@ -1,34 +1,48 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AuthsService } from './auths.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { ActiveAuthDto, CreateAuthDto, VerifyAuthDto } from './dto/create-auth.dto';
+import { Public, ResponseMessage } from './decorator/customize';
+import { AuthsService } from './auths.service';
+import { LocalAuthGuard } from './passport/local-auth.guard';
+import { UsersService } from '@/modules/users/users.service';
 
 @Controller('auths')
 export class AuthsController {
-  constructor(private readonly authsService: AuthsService) {}
+  constructor(private readonly authsService: AuthsService, private readonly usersServices: UsersService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authsService.create(createAuthDto);
+  @Public()
+  @Post('register')
+  @ResponseMessage('otp sẽ hết hạn sau 10 phút')
+  register(@Body() registerDto: CreateAuthDto) {
+    return this.authsService.handleRegister(registerDto);
   }
 
-  @Get()
-  findAll() {
-    return this.authsService.findAll();
+  @Post('login')
+  @Public()
+  @UseGuards(LocalAuthGuard)
+  @ResponseMessage('Fetch login')
+  async handleLogin(@Request() req) {
+    return this.authsService.login(req.user);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authsService.findOne(+id);
+  @Public()
+  @Post('verify')
+  async Verify(@Body() verifyDto: VerifyAuthDto) {
+    return await this.usersServices.handleVerify(verifyDto);
   }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authsService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authsService.remove(+id);
+  @Public()
+  @Post('resend-active-code')
+  async ResendActiveCode(@Body() activeDto: ActiveAuthDto) {
+    return await this.authsService.handleSendCode(activeDto);
   }
 }

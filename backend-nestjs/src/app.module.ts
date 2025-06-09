@@ -16,11 +16,17 @@ import { Message } from './modules/messages/entities/message.entity';
 import { Comment } from './modules/comments/entities/comment.entity';
 import { Like } from './modules/likes/entities/like.entity';
 import { Post } from './modules/posts/entities/post.entity';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './core/transform.interceptor';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { JwtAuthGuard } from './auths/passport/jwt-auth.guard';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksModule } from './modules/tasks/tasks.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -37,6 +43,34 @@ import { TransformInterceptor } from './core/transform.interceptor';
         entities: [User, Photo, Message, Comment, Like, Post],
       }),
     }),
+
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: 'smtp.gmail.com',
+          port: 465,
+          // ignoreTLS: true,
+          secure: true,
+          auth: {
+            user: configService.get<string>('MAIL_USER'),
+            pass: configService.get<string>('MAIL_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: '"No Reply" <no-reply@localhost>',
+        },
+        // preview: true,
+        template: {
+          dir: process.cwd() + '/src/mail/templates/',
+          adapter: new HandlebarsAdapter(), // or new PugAdapter() or new EjsAdapter()
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      inject: [ConfigService],
+    }),
     UsersModule,
     PostsModule,
     CommentsModule,
@@ -44,10 +78,15 @@ import { TransformInterceptor } from './core/transform.interceptor';
     PhotosModule,
     MessagesModule,
     AuthsModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,

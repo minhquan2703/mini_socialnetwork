@@ -43,6 +43,12 @@ export class User {
   @Column({ default: false })
   isActive: boolean;
 
+  @Column({ nullable: true })
+  codeId!: string;
+
+  @Column({ nullable: true })
+  codeExpired!: Date;
+
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
 

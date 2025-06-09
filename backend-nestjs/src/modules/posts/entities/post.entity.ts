@@ -12,6 +12,12 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+export enum MediaType {
+  TEXT = 'text',
+  IMAGE = 'image',
+  VIDEO = 'video',
+}
+
 @Entity()
 export class Post {
   @PrimaryGeneratedColumn('uuid')
@@ -23,8 +29,9 @@ export class Post {
   @Column({ type: 'text' })
   content: string;
 
-  @Column({ type: 'enum', enum: ['text', 'image', 'video'], default: 'text' })
-  mediaType: 'text' | 'image' | 'video';
+  @Column({ type: 'enum', enum: MediaType, default: MediaType.TEXT })
+  mediaType: MediaType;
+
 
   @Column({ nullable: true })
   mediaURL: string;
