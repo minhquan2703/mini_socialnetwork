@@ -32,7 +32,6 @@ export class Post {
   @Column({ type: 'enum', enum: MediaType, default: MediaType.TEXT })
   mediaType: MediaType;
 
-
   @Column({ nullable: true })
   mediaURL: string;
 

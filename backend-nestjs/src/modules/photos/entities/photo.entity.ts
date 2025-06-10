@@ -15,14 +15,17 @@ import {
 
 @Entity()
 export class Photo extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  body: string;
+  caption: string;
 
   @Column()
   key: string;
+
+  @Column()
+  url: string;
 
   @ManyToOne(() => User, (user) => user.photos, { onDelete: 'CASCADE' })
   user: User;

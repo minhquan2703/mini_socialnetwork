@@ -1,7 +1,30 @@
+import axios from "axios";
+import { getSession } from "next-auth/react";
 import queryString from "query-string";
 
-export const sendRequest = async <T>(props: IRequest) => {
-    //type
+// 1. Tạo axios instance
+const api = axios.create({
+    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
+});
+
+// 2. Gắn interceptor tự động thêm access_token vào mọi request
+api.interceptors.request.use(
+    async (config) => {
+        const session = await getSession();
+        const token = session?.user?.access_token;
+        if (token) {
+            config.headers = {
+                ...config.headers,
+                Authorization: `Bearer ${token}`,
+            };
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+// 3. Hàm gửi request (gửi JSON)
+export const sendRequest = async <T>(props: IRequest): Promise<T> => {
     let {
         url,
         method,
@@ -12,40 +35,34 @@ export const sendRequest = async <T>(props: IRequest) => {
         nextOption = {},
     } = props;
 
-    const options: any = {
-        method: method,
-        // by default setting the content-type to be json type
-        headers: new Headers({
-            "content-type": "application/json",
-            ...headers,
-        }),
-        body: body ? JSON.stringify(body) : null,
-        ...nextOption,
-    };
-    if (useCredentials) options.credentials = "include";
-
-    if (queryParams) {
+    if (queryParams && Object.keys(queryParams).length > 0) {
         url = `${url}?${queryString.stringify(queryParams)}`;
     }
 
-    return fetch(url, options).then((res) => {
-        if (res.ok) {
-            return res.json() as T; //generic
-        } else {
-            return res.json().then(function (json) {
-                // to be able to access error status when you catch the error
-                return {
-                    statusCode: res.status,
-                    message: json?.message ?? "",
-                    error: json?.error ?? "",
-                } as T;
-            });
-        }
-    });
+    const config: any = {
+        url,
+        method,
+        headers: { "Content-Type": "application/json", ...headers },
+        ...nextOption,
+    };
+
+    if (body) config.data = body;
+    if (useCredentials) config.withCredentials = true;
+
+    try {
+        const res = await api.request<T>(config);
+        return res.data;
+    } catch (error: any) {
+        return {
+            statusCode: error.response?.status,
+            message: error.response?.data?.message ?? error.message ?? "",
+            error: error.response?.data?.error ?? "",
+        } as T;
+    }
 };
 
-export const sendRequestFile = async <T>(props: IRequest) => {
-    //type
+// 4. Hàm gửi request file (FormData, upload file, v.v)
+export const sendRequestFile = async <T>(props: IRequest): Promise<T> => {
     let {
         url,
         method,
@@ -56,31 +73,30 @@ export const sendRequestFile = async <T>(props: IRequest) => {
         nextOption = {},
     } = props;
 
-    const options: any = {
-        method: method,
-        // by default setting the content-type to be json type
-        headers: new Headers({ ...headers }),
-        body: body ? body : null,
-        ...nextOption,
-    };
-    if (useCredentials) options.credentials = "include";
-
-    if (queryParams) {
+    if (queryParams && Object.keys(queryParams).length > 0) {
         url = `${url}?${queryString.stringify(queryParams)}`;
     }
 
-    return fetch(url, options).then((res) => {
-        if (res.ok) {
-            return res.json() as T; //generic
-        } else {
-            return res.json().then(function (json) {
-                // to be able to access error status when you catch the error
-                return {
-                    statusCode: res.status,
-                    message: json?.message ?? "",
-                    error: json?.error ?? "",
-                } as T;
-            });
-        }
-    });
+    const config: any = {
+        url,
+        method,
+        headers: { ...headers }, // Không set Content-Type, để axios tự detect boundary
+        ...nextOption,
+    };
+
+    if (body) config.data = body;
+    if (useCredentials) config.withCredentials = true;
+
+    try {
+        const res = await api.request<T>(config);
+        return res.data;
+    } catch (error: any) {
+        return {
+            statusCode: error.response?.status,
+            message: error.response?.data?.message ?? error.message ?? "",
+            error: error.response?.data?.error ?? "",
+        } as T;
+    }
 };
+
+export default api;

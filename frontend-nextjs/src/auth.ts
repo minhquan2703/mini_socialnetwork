@@ -28,6 +28,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         email: res.data?.user?.email,
                         username: res.data?.user?.username,
                         name: res.data?.user?.name,
+                        role: res.data?.user?.role,
+                        image: res.data?.user?.image,
                         access_token: res.data?.access_token,
                     };
                 } else if (+res.statusCode === 401) {
@@ -43,7 +45,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }),
     ],
     pages: {
-        signIn: "/auth/login",
+        signIn: "/auth",
     },
     callbacks: {
         jwt({ token, user }) {
@@ -60,6 +62,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 email: token?.user?.email,
                 username: token?.user?.username,
                 name: token?.user?.name,
+                role: token?.user?.role,
+                image: token?.user?.image,
                 access_token: token?.user?.access_token,
             };
             return session;

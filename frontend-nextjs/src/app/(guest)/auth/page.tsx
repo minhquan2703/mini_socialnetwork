@@ -1,6 +1,10 @@
-const AuthPage = () =>{
+import Login from "@/components/auth/login"
+
+const LoginPage = async() =>{
     return(
-        <> auth page </>
+        <>
+            <Login/>
+        </>
     )
 }
-export default AuthPage
+export default LoginPage

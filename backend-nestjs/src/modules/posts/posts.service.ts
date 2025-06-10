@@ -5,6 +5,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MediaType, Post } from './entities/post.entity';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
+import { Like } from '../likes/entities/like.entity';
+import { Comment } from '../comments/entities/comment.entity';
+import aqp from 'api-query-params';
 
 @Injectable()
 export class PostsService {
@@ -13,9 +16,85 @@ export class PostsService {
     private postRepository: Repository<Post>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Like)
+    private likesRepository: Repository<Like>,
+    @InjectRepository(Comment)
+    private commentsRepository: Repository<Comment>,
   ) {}
   createtest(createPostDto: CreatePostDto) {
     return createPostDto;
+  }
+  async getAll(
+    query: string,
+    current: number,
+    pageSize: number,
+    userId: string | null,
+  ) {
+    const { filter, sort } = aqp(query);
+    if (filter.current) delete filter.current;
+    if (filter.pageSize) delete filter.pageSize;
+    if (!current) current = 1;
+    if (!pageSize) pageSize = 10;
+    const skip = (current - 1) * pageSize;
+
+    const totalItems = await this.postRepository.count({ where: filter });
+    const totalPages = Math.ceil(totalItems / pageSize);
+    const data = await this.postRepository.find({
+      where: filter,
+      take: pageSize,
+      skip: skip,
+      order: sort,
+      relations: [`user`, `likes`, `likes.user`, `comments`, `comments.user`],
+      select: {
+        id: true,
+        content: true,
+        mediaType: true,
+        mediaURL: true,
+        comments: {
+          id: true,
+          content: true,
+          user: {
+            id: true,
+            username: true,
+            name: true,
+          },
+        },
+        likes: {
+          id: true,
+          user: {
+            id: true,
+          },
+        },
+        user: {
+          id: true,
+          name: true,
+          username: true,
+          image: true,
+        },
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    const results = data.map((post) => {
+      // Tính tổng số likes
+      const likeCount = post.likes?.length || 0;
+
+      // Kiểm tra user hiện tại đã like chưa (chỉ khi có userId)
+      const isLiked = userId
+        ? post.likes?.some((like) => like.user.id === userId) || false
+        : undefined;
+
+      // Loại bỏ mảng likes khỏi response để bảo mật
+      const { likes, ...postWithoutLikes } = post;
+
+      // Trả về post với thông tin đã transform
+      return {
+        ...postWithoutLikes,
+        likeCount,
+        ...(userId && { isLiked }), // Chỉ thêm field isLiked khi có userId
+      };
+    });
+    return { results, totalPages };
   }
 
   async create(createPostDto: CreatePostDto, userId: string) {
@@ -29,21 +108,5 @@ export class PostsService {
     post.mediaType = createPostDto.mediaType || MediaType.TEXT;
 
     return await this.postRepository.save(post);
-  }
-
-  findAll() {
-    return `This action returns all posts`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
-  }
-
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} post`;
   }
 }

@@ -131,6 +131,8 @@ import { SearchOutlined, BellOutlined, BellFilled } from "@ant-design/icons";
 import { Input, Layout, Avatar, Dropdown, Badge, Button, Space } from "antd";
 import type { MenuProps } from "antd";
 import { signOut } from "next-auth/react";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 const UserHeader = (props: any) => {
     const { session } = props;
@@ -155,6 +157,7 @@ const UserHeader = (props: any) => {
             onClick: () => signOut(),
         },
     ];
+    console.log('check session header', session)
 
     return (
         <Header
@@ -230,7 +233,7 @@ const UserHeader = (props: any) => {
                     menu={{ items: dropdownItems }} 
                     placement="bottomRight"
                     trigger={['click']}
-                    dropdownRender={(menu) => (
+                    popupRender={(menu) => (
                         <div style={{
                             backgroundColor: '#fff',
                             borderRadius: '8px',

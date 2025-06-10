@@ -3,20 +3,17 @@ import { Button, Col, Divider, Form, Input, Row } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { authenticate } from "@/utils/action";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ModalForgotPassword from "./modal.forgotpass";
 import { toast } from "sonner";
 import ModalActive from "./modal.active";
 
 const Login = () => {
-    const [isModalOpen, setIsModalOpen] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalForgotPasswordOpen, setIsModalForgotPasswordOpen] =
         useState(false);
-    const router = useRouter();
-    console.log("router: ", router);
     const [userEmail, setUserEmail] = useState("");
-    const [usernameModal, setUsernameModal] = useState("")
+    const [usernameModal, setUsernameModal] = useState("");
     const onFinish = async (values: any) => {
         const { username, password } = values;
         setUserEmail("");
@@ -25,15 +22,32 @@ const Login = () => {
             authenticate(username, password).then((res) => {
                 if (res.error && +res.code === 2) {
                     setIsModalOpen(true);
-                    setUsernameModal(username)
+                    setUsernameModal(username);
                     setUserEmail(username);
                     throw new Error(res.error);
                 }
                 if (res.error) {
                     throw new Error(res.error);
                 }
-                router.push("/dashboard");
+                setTimeout(async () => {
+                    try {
+                        const response = await fetch("/api/auth/session");
+                        const session = await response.json();
+
+                        console.log("Session after login:", session);
+
+                        if (session?.user?.role === "ADMIN") {
+                            window.location.href = "/dashboard";
+                        } else {
+                            window.location.href = "/";
+                        }
+                    } catch (error) {
+                        console.error("Error getting session:", error);
+                        window.location.href = "/";
+                    }
+                }, 1000);
             }),
+
             {
                 loading: "Vui lòng đợi...",
                 success: "Đăng nhập thành công!",
@@ -54,7 +68,9 @@ const Login = () => {
                             borderRadius: "5px",
                         }}
                     >
-                        <legend style={{fontSize: "18px", fontWeight: "600"}}>Đăng Nhập</legend>
+                        <legend style={{ fontSize: "18px", fontWeight: "600" }}>
+                            Đăng Nhập
+                        </legend>
                         <Form
                             size="large"
                             name="basic"
@@ -89,14 +105,24 @@ const Login = () => {
                             </Form.Item>
                             <div style={{ display: "flex" }}>
                                 <Form.Item>
-                                    <Button color="default" variant="solid" htmlType="submit" size="middle">
+                                    <Button
+                                        color="default"
+                                        variant="solid"
+                                        htmlType="submit"
+                                        size="middle"
+                                    >
                                         Đăng nhập
                                     </Button>
                                 </Form.Item>
-                                <Button 
-                                color="primary" variant="text" size="middle"
-                                onClick={() => setIsModalForgotPasswordOpen(true)}
-                                style={{marginLeft:"auto"}}>
+                                <Button
+                                    color="primary"
+                                    variant="text"
+                                    size="middle"
+                                    onClick={() =>
+                                        setIsModalForgotPasswordOpen(true)
+                                    }
+                                    style={{ marginLeft: "auto" }}
+                                >
                                     Quên mật khẩu
                                 </Button>
                             </div>

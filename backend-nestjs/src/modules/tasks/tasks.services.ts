@@ -13,7 +13,7 @@ export class TasksService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  // Chạy mỗi 1 phút
+  //chạy mỗi 1 phút
   @Cron('* * * * *')
   async handleDeleteExpiredUsers() {
     const now = new Date();

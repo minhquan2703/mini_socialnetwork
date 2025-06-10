@@ -34,7 +34,9 @@ declare global {
             id: string,      
             username: string,
             email: string,
-            name: string            
+            name: string,       
+            role: string,
+            image: string,    
         },
         access_token: string
     }

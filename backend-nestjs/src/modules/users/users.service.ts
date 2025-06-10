@@ -234,4 +234,14 @@ export class UsersService {
       email: user.email,
     };
   }
+
+  async updateImage(userId: string, imageUrl: string) {
+    const fullImageUrl = `http://localhost:8081${imageUrl}`;
+    await this.userRepository.update(userId, {
+      image: fullImageUrl,
+    });
+    return {
+      imageUrl: fullImageUrl,
+    };
+  }
 }

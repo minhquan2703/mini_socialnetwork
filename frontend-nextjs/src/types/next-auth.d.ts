@@ -6,6 +6,8 @@ interface IUser {
     username: string;
     email: string;
     name: string;
+    role: string;
+    image: string
     access_token: string;
 }
 
@@ -32,6 +34,4 @@ declare module "next-auth" {
         access_expire: number;
         error: string;
     }
-
-
 }

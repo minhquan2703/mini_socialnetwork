@@ -90,7 +90,7 @@ const Register = () => {
                     <Divider />
                     <div style={{ textAlign: "center" }}>
                         Đã có tài khoản?{" "}
-                        <Link href={"/auth/login"}>Đăng nhập</Link>
+                        <Link href={"/auth"}>Đăng nhập</Link>
                     </div>
                 </fieldset>
             </Col>

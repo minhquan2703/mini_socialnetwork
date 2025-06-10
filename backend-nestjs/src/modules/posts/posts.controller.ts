@@ -3,16 +3,15 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   UseGuards,
   Req,
+  Query,
+  Request,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
 import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
+import { PublicOptional } from '@/auths/decorator/customize';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -30,27 +29,19 @@ export class PostsController {
     @Body() createPostDto: CreatePostDto,
     @Req() req: AuthenticatedRequest,
   ) {
-    console.log('check req', req);
     return await this.postsService.create(createPostDto, req.user.id);
   }
 
   @Get()
-  findAll() {
-    return this.postsService.findAll();
-  }
+  @PublicOptional()
+  async findAll(
+    @Query() query: string,
+    @Query('current') current: number,
+    @Query('pageSize') pageSize: number,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user?.id || null;
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(+id, updatePostDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postsService.remove(+id);
+    return await this.postsService.getAll(query, +current, +pageSize, userId);
   }
 }
