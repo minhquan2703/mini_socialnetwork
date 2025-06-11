@@ -20,7 +20,7 @@ export class Like {
   @ManyToOne(() => Comment, (comment) => comment.likes, { onDelete: 'CASCADE' })
   comment: Comment;
 
-  @ManyToOne(() => User, (user) => user.likes)
+  @ManyToOne(() => User, (user) => user.likes, { onDelete: 'CASCADE' })
   user: User;
 
   @ManyToOne(() => Photo, (photo) => photo.likes, { onDelete: 'CASCADE' })

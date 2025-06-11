@@ -7,7 +7,7 @@ export class CreatePostDto {
 
   @IsOptional()
   @IsUrl()
-  mediaURL: string;
+  mediaURL?: string;
 
   @IsEnum(MediaType, {
     message: 'mediaType phải là 1 trong các giá trị: text, image, video',

@@ -24,7 +24,7 @@ const Verify = ({ id }: { id: string }) => {
         }
         if (res?.data && +res?.statusCode === 201) {
             toast.success("Xác thực thành công 🎉");
-            router.push(`/auth/login`);
+            router.push(`/auth`);
         } else {
             toast.error(res.message);
         }

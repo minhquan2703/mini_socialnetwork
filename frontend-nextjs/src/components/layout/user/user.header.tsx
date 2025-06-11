@@ -157,7 +157,6 @@ const UserHeader = (props: any) => {
             onClick: () => signOut(),
         },
     ];
-    console.log('check session header', session)
 
     return (
         <Header
@@ -258,7 +257,7 @@ const UserHeader = (props: any) => {
                                 size={36} 
                                 src={session?.user?.image}
                                 style={{ 
-                                    backgroundColor: '#000',
+                                    backgroundColor: `${session?.user?.avatarColor}`,
                                     border: '1px solid #f0f0f0',
                                     color: '#fff'
                                 }}

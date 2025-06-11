@@ -116,7 +116,7 @@ const UserSideBar = (props: any) => {
                         size={44}
                         src={session?.user?.image}
                         style={{ 
-                            backgroundColor: "#000",
+                            backgroundColor: `${session?.user?.avatarColor}`,
                             color: '#fff',
                             fontSize: '18px',
                             fontWeight: '600'

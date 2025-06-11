@@ -14,7 +14,7 @@ import {
 
 @Entity()
 export class Comment {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ManyToOne(() => Post, (post) => post.comments, { onDelete: 'CASCADE' })

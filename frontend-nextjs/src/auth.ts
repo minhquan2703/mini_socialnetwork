@@ -22,6 +22,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         password: credentials.password,
                     },
                 });
+                console.log('check res', res)
                 if (+res.statusCode === 201) {
                     return {
                         id: res.data?.user?.id,
@@ -30,6 +31,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         name: res.data?.user?.name,
                         role: res.data?.user?.role,
                         image: res.data?.user?.image,
+                        avatarColor: res.data?.user?.avatarColor,
                         access_token: res.data?.access_token,
                     };
                 } else if (+res.statusCode === 401) {
@@ -64,6 +66,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 name: token?.user?.name,
                 role: token?.user?.role,
                 image: token?.user?.image,
+                avatarColor: token?.user?.avatarColor,
                 access_token: token?.user?.access_token,
             };
             return session;

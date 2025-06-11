@@ -40,6 +40,9 @@ export class User {
   @Column({ nullable: true })
   image: string;
 
+  @Column({ nullable: true })
+  avatarColor: string;
+
   @Column({ default: false })
   isActive: boolean;
 
@@ -49,10 +52,10 @@ export class User {
   @Column({ nullable: true })
   codeExpired!: Date;
 
-  @OneToMany(() => Post, (post) => post.user)
+  @OneToMany(() => Post, (post) => post.user, { onDelete: 'CASCADE' })
   posts: Post[];
 
-  @OneToMany(() => Comment, (comment) => comment.user)
+  @OneToMany(() => Comment, (comment) => comment.user, { onDelete: 'CASCADE' })
   comments: Comment[];
 
   @OneToMany(() => Like, (like) => like.user, { onDelete: 'CASCADE' })

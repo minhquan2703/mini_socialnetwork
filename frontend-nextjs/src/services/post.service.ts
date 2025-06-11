@@ -1,5 +1,5 @@
 import { IGetAllPosts } from "@/types/post.type";
-import { sendRequest } from "@/utils/api";
+import { sendRequest, sendRequestFile } from "@/utils/api";
 
 const POST_BASE_URL = `/api/v1/posts`;
 
@@ -11,6 +11,18 @@ const getAllPosts = async (data: IGetAllPosts): Promise<IBackendRes<any>> => {
     });
     return response;
 };
+const postNewOne = async (data: any): Promise<IBackendRes<any>> => {
+    const { content, images, video } = data
+    const response = await sendRequestFile<IBackendRes<any>>({
+        url: `${POST_BASE_URL}/create`,
+        method: "POST",
+        body: {
+            content: content,
+            images: images,
+            video: video,
+        },
+    });
+    return response;
+};
 
-
-export { getAllPosts };
+export { getAllPosts, postNewOne };

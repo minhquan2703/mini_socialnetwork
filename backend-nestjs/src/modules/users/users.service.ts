@@ -88,12 +88,25 @@ export class UsersService {
     const hashPassword = await hashPasswordHelper(password);
     const codeId = Math.floor(100000 + Math.random() * 900000);
     // const codeId = Math.floor(100000 + Math.random() * 900000);
+    const avatarColors = [
+      '#fde3cf',
+      '#b5ead7',
+      '#f1c0e8',
+      '#caffbf',
+      '#a0c4ff',
+      '#ffd6a5',
+      '#fdffb6',
+      '#bdb2ff',
+    ];
+    const randomColor =
+      avatarColors[Math.floor(Math.random() * avatarColors.length)];
 
     const user = this.userRepository.create({
       username,
       email,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       password: hashPassword,
+      avatarColor: randomColor,
       name: name,
       isActive: false,
       codeId: codeId.toString(),
@@ -112,6 +125,7 @@ export class UsersService {
       },
     });
     //send email
+
     return {
       id: user.id,
       username: user.username,

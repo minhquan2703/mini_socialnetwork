@@ -18,11 +18,11 @@ export class Photo extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  caption: string;
+  // @Column()
+  // caption: string;
 
-  @Column()
-  key: string;
+  @Column({ nullable: true })
+  key?: string;
 
   @Column()
   url: string;

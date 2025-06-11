@@ -1,13 +1,13 @@
-import { auth } from "@/auth"
-import HomePage from "@/components/layout/homepage"
+import { auth } from "@/auth";
+import HomePage from "@/components/homepage/homepage";
 
-const Home = async() =>{
-  const session = await auth();
+const Home = async () => {
+    const session = await auth();
 
-  return(
-    <div>
-      <HomePage session={session}/>
-    </div>
-  )
-}
-export default Home
+    return (
+        <div>
+            <HomePage session={session} />
+        </div>
+    );
+};
+export default Home;

@@ -39,6 +39,7 @@ export class AuthsService {
         name: user.name,
         role: user.role,
         image: user.image,
+        avatarColor: user.avatarColor,
       },
       access_token: this.jwtService.sign(payload),
     };

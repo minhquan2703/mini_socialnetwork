@@ -41,7 +41,7 @@ export class Post {
   @OneToMany(() => Like, (like) => like.post, { onDelete: 'CASCADE' })
   likes: Like[];
 
-  @OneToMany(() => Photo, (photo) => photo.user, { onDelete: 'CASCADE' })
+  @OneToMany(() => Photo, (photo) => photo.post, { onDelete: 'CASCADE' })
   photos: Photo[];
 
   @CreateDateColumn()

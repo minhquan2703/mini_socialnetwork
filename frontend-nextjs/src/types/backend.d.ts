@@ -37,6 +37,7 @@ declare global {
             name: string,       
             role: string,
             image: string,    
+            avatarColor: string,
         },
         access_token: string
     }

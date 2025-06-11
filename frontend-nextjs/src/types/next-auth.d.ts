@@ -7,7 +7,8 @@ interface IUser {
     email: string;
     name: string;
     role: string;
-    image: string
+    image: string;
+    avatarColor: string;
     access_token: string;
 }
 

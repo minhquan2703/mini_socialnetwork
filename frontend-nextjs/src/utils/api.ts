@@ -8,16 +8,34 @@ const api = axios.create({
 });
 
 // 2. Gắn interceptor tự động thêm access_token vào mọi request
+// api.interceptors.request.use(
+//     async (config) => {
+//         const session = await getSession();
+//         const token = session?.user?.access_token;
+//         if (token) {
+//             config.headers = {
+//                 ...config.headers,
+//                 Authorization: `Bearer ${token}`,
+//             };
+//         }
+//         return config;
+//     },
+//     (error) => Promise.reject(error)
+// );
 api.interceptors.request.use(
     async (config) => {
-        const session = await getSession();
-        const token = session?.user?.access_token;
-        if (token) {
-            config.headers = {
-                ...config.headers,
-                Authorization: `Bearer ${token}`,
-            };
+        if (typeof window !== "undefined") {
+            // Client: có thể dùng getSession
+            const session = await getSession();
+            const token = session?.user?.access_token;
+            if (token) {
+                config.headers = {
+                    ...config.headers,
+                    Authorization: `Bearer ${token}`,
+                };
+            }
         }
+        // Server: phải tự truyền token qua config.headers từ chỗ gọi
         return config;
     },
     (error) => Promise.reject(error)
