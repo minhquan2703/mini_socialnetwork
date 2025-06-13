@@ -1,8 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+  Query,
+  Request,
+} from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
+import { PublicOptional } from '@/auths/decorator/customize';
+
+interface AuthenticatedRequest extends Request {
+  user: {
+    id: string;
+    username: string;
+  };
+}
 
 @Controller('comments')
 export class CommentsController {
@@ -15,23 +35,22 @@ export class CommentsController {
     return this.commentsService.create(createCommentDto, userId);
   }
 
-  @Get()
-  findAll() {
-    return this.commentsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.commentsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto) {
-    return this.commentsService.update(+id, updateCommentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.commentsService.remove(+id);
+  @Get('getallcomment-post')
+  @PublicOptional()
+  async getAllCommentOfOnePost(
+    @Query() query: string,
+    @Query('current') current: number,
+    @Query('pageSize') pageSize: number,
+    @Query('postId') postId: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user?.id || null;
+    return await this.commentsService.getAllCommentOfOnePost(
+      query,
+      +current,
+      +pageSize,
+      userId,
+      postId,
+    );
   }
 }

@@ -1,0 +1,124 @@
+"use client";
+
+import { getAllCommentOfOnePost } from "@/services/comment.service";
+import CreateComment from "./create.comment";
+import ListComment from "./list.comment";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { postToggleLike } from "@/services/like.service";
+
+const LIMIT = 5;
+
+const CommentPost = ({ postId, session, showComment, commentCount }) => {
+    const [current, setCurrent] = useState(1);
+    const [comments, setComments] = useState([]);
+    const [loading, setLoading] = useState(true);    
+    const [likeCommentLoading, setCommentLikeLoading] = useState({});    
+
+    const likeRequestCache = useRef(new Map());
+
+
+    useEffect(() => {
+        if(showComment){
+            fetchListComment()
+        }
+    }, [current, showComment]);
+
+    const handleLikeComment = useCallback(async (commentId: string) => {
+        if (likeRequestCache.current.has(commentId)) {
+            return likeRequestCache.current.get(commentId);
+        }
+        const likePromise = (async () => {
+            try {
+                const res = await postToggleLike({
+                    type: "comment",
+                    commentId: commentId,
+                });
+                if (res && res.data) {
+                    //update global state sau khi response
+                    setComments((currentComments) =>
+                        currentComments.map((comment) => {
+                            if (comment.id !== commentId) return comment;
+                            return {
+                                ...comment,
+                                isLiked: res.data.isLiked ?? !comment.isLiked,
+                                likeCount:
+                                    res.data.likeCount ??
+                                    (comment.isLiked
+                                        ? comment.likeCount - 1
+                                        : comment.likeCount + 1),
+                            };
+                        })
+                    );
+                }
+                return res;
+            } catch (error) {
+                console.error("Like error:", error);
+                throw error;
+            } finally {
+                //clear cache timout 500ms
+                setTimeout(() => {
+                    likeRequestCache.current.delete(commentId);
+                }, 500);
+            }
+        })();
+
+        likeRequestCache.current.set(commentId, likePromise);
+        return likePromise;
+    }, []);
+
+    const handleCommentCreated = useCallback((newComment: string) => {
+        setComments((currentComments) => [newComment, ...currentComments]);
+    }, []);
+    const fetchListComment = async () => {
+        setLoading(true);
+        const res = await getAllCommentOfOnePost({
+            current: current,
+            pageSize: LIMIT,
+            postId: postId,
+        });
+        if (res?.data) {
+            setComments(res.data.results);
+        }
+        console.log("check res comment", res);
+        setLoading(false)
+    };
+    return (
+        <>
+            {!showComment ? (
+                <div></div>
+            ) : (
+                <>
+                    {commentCount > 0 ? (
+                        <div>
+                            <CreateComment postId={postId} handleCommentCreated={handleCommentCreated}/>
+                            <ListComment
+                                postId={postId}
+                                comments={comments}
+                                handleLikeComment={handleLikeComment}
+                                loading={loading}
+                                likeCommentLoading={likeCommentLoading}
+                                session={session}
+                            />
+                        </div>
+                    ) : (
+                        <>
+                            <CreateComment postId={postId} handleCommentCreated={handleCommentCreated}/>
+                            <div
+                                style={{
+                                    marginTop: "20px",
+                                    textAlign: "center",
+                                    fontSize: "18px",
+                                    fontWeight: "800px",
+                                    color: "gray",
+                                }}
+                            >
+                                Không có bình luận
+                            </div>
+                        </>
+                    )}
+                </>
+            )}
+        </>
+    );
+};
+export default CommentPost;

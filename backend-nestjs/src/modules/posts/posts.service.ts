@@ -124,19 +124,15 @@ export class PostsService {
         post.mediaURL = finalMediaURL;
       }
 
-      console.log('Saving post...');
       const savedPost = await this.postRepository.save(post);
-      console.log('Post saved:', savedPost.id);
 
       // XỬ LÝ MULTIPLE IMAGES
       let photos: Array<{ id: string; url: string }> = [];
 
       if (finalMediaType === MediaType.IMAGE && files?.images) {
-        console.log('Processing images...');
 
         try {
           for (const file of files.images) {
-            console.log('Processing file:', file.filename);
 
             const photo = this.photosRepository.create({
               url: this.createFileUrl(file.filename),
@@ -174,6 +170,8 @@ export class PostsService {
           id: user.id,
           name: user.name,
           username: user.username,
+          avatarColor: user.avatarColor,
+          image: user.image,
         },
         createdAt: dayjs(savedPost.createdAt).fromNow(),
         createdAtFormatted: dayjs(savedPost.createdAt).format(

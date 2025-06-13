@@ -7,8 +7,6 @@ import { IUser } from "./types/next-auth";
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [
         Credentials({
-            // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-            // e.g. domain, username, password, 2FA token, etc.
             credentials: {
                 username: {},
                 password: {},
@@ -22,7 +20,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         password: credentials.password,
                     },
                 });
-                console.log('check res', res)
                 if (+res.statusCode === 201) {
                     return {
                         id: res.data?.user?.id,
@@ -42,7 +39,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     throw new Error("Internal server error");
                 }
 
-                // return user object with their profile data
             },
         }),
     ],

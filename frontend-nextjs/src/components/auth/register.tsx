@@ -34,7 +34,7 @@ const Register = () => {
                     <legend style={{fontSize: "15px", fontWeight: "600"}}>Đăng Ký Tài Khoản</legend>
                     <Form
                         name="basic"
-                        onFinishk={onFinish}
+                        onFinish={onFinish}
                         autoComplete="off"
                         layout="vertical"
                     >

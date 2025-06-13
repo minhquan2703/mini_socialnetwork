@@ -2,8 +2,7 @@ import React from "react";
 import PostCard from "./post.card";
 import SkeletonCard from "./skeleton.card";
 
-
-const PostList =({ posts, handleLike, loading, likeLoading }) => {
+const PostList = ({ posts, handleLike, loading, likeLoading, session }) => {
     if (loading) {
         // Render 4 skeleton cards khi loading
         return (
@@ -17,7 +16,13 @@ const PostList =({ posts, handleLike, loading, likeLoading }) => {
     return (
         <>
             {posts.map((post) => (
-                <PostCard key={post.id} post={post} handleLike={handleLike} likeLoading={likeLoading} />
+                <PostCard
+                    key={post.id}
+                    post={post}
+                    handleLike={handleLike}
+                    likeLoading={likeLoading}
+                    session={session}
+                />
             ))}
         </>
     );

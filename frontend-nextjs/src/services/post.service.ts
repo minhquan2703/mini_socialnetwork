@@ -11,16 +11,11 @@ const getAllPosts = async (data: IGetAllPosts): Promise<IBackendRes<any>> => {
     });
     return response;
 };
-const postNewOne = async (data: any): Promise<IBackendRes<any>> => {
-    const { content, images, video } = data
+const postNewOne = async (formData: FormData): Promise<IBackendRes<any>> => {
     const response = await sendRequestFile<IBackendRes<any>>({
         url: `${POST_BASE_URL}/create`,
         method: "POST",
-        body: {
-            content: content,
-            images: images,
-            video: video,
-        },
+        body: formData,
     });
     return response;
 };

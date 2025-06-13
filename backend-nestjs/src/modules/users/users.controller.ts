@@ -11,6 +11,8 @@ import {
   UploadedFile,
   Req,
   UseGuards,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,10 +21,15 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
+import { AuthsService } from '@/auths/auths.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject(forwardRef(() => AuthsService))
+    private readonly authService: AuthsService,
+  ) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -37,6 +44,7 @@ export class UsersController {
   ) {
     return this.usersService.findAll(query, +current, +pageSize);
   }
+
   @Post('upload-image')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
@@ -57,6 +65,28 @@ export class UsersController {
     const userId = req.user.id; // User id từ JWT
     const imageUrl = `/uploads/${file.filename}`;
     return this.usersService.updateImage(userId, imageUrl);
+  }
+
+  @Post('upload-avatar')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          const name = Date.now() + extname(file.originalname);
+          callback(null, name);
+        },
+      }),
+    }),
+  )
+  async uploadAvatar(
+    @Req() req, // Lấy user từ JWT token
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const userId = req.user.id; // User id từ JWT
+    const imageUrl = `/uploads/${file.filename}`;
+    return this.authService.uploadAvatar(userId, imageUrl);
   }
 
   @Get(':id')

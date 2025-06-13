@@ -10,7 +10,11 @@ import {
   Request,
 } from '@nestjs/common';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { ActiveAuthDto, CreateAuthDto, VerifyAuthDto } from './dto/create-auth.dto';
+import {
+  ActiveAuthDto,
+  CreateAuthDto,
+  VerifyAuthDto,
+} from './dto/create-auth.dto';
 import { Public, ResponseMessage } from './decorator/customize';
 import { AuthsService } from './auths.service';
 import { LocalAuthGuard } from './passport/local-auth.guard';
@@ -18,7 +22,10 @@ import { UsersService } from '@/modules/users/users.service';
 
 @Controller('auths')
 export class AuthsController {
-  constructor(private readonly authsService: AuthsService, private readonly usersServices: UsersService) {}
+  constructor(
+    private readonly authsService: AuthsService,
+    private readonly usersServices: UsersService,
+  ) {}
 
   @Public()
   @Post('register')

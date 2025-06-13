@@ -80,6 +80,42 @@ export const sendRequest = async <T>(props: IRequest): Promise<T> => {
 };
 
 // 4. Hàm gửi request file (FormData, upload file, v.v)
+// export const sendRequestFile = async <T>(props: IRequest): Promise<T> => {
+//     let {
+//         url,
+//         method,
+//         body,
+//         queryParams = {},
+//         useCredentials = false,
+//         headers = {},
+//         nextOption = {},
+//     } = props;
+
+//     if (queryParams && Object.keys(queryParams).length > 0) {
+//         url = `${url}?${queryString.stringify(queryParams)}`;
+//     }
+
+//     const config: any = {
+//         url,
+//         method,
+//         headers: { ...headers }, // Không set Content-Type, để axios tự detect boundary
+//         ...nextOption,
+//     };
+
+//     if (body) config.data = body;
+//     if (useCredentials) config.withCredentials = true;
+
+//     try {
+//         const res = await api.request<T>(config);
+//         return res.data;
+//     } catch (error: any) {
+//         return {
+//             statusCode: error.response?.status,
+//             message: error.response?.data?.message ?? error.message ?? "",
+//             error: error.response?.data?.error ?? "",
+//         } as T;
+//     }
+// };
 export const sendRequestFile = async <T>(props: IRequest): Promise<T> => {
     let {
         url,
@@ -98,11 +134,21 @@ export const sendRequestFile = async <T>(props: IRequest): Promise<T> => {
     const config: any = {
         url,
         method,
-        headers: { ...headers }, // Không set Content-Type, để axios tự detect boundary
+        headers: {
+            ...headers,
+            // QUAN TRỌNG: Không set Content-Type khi gửi FormData
+            // Axios sẽ tự động set với boundary đúng
+        },
         ...nextOption,
     };
 
-    if (body) config.data = body;
+    // QUAN TRỌNG: Với FormData, phải gửi trực tiếp, không wrap trong object
+    if (body instanceof FormData) {
+        config.data = body; // Gửi FormData trực tiếp
+    } else {
+        config.data = body;
+    }
+
     if (useCredentials) config.withCredentials = true;
 
     try {

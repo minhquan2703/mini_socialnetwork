@@ -11,6 +11,7 @@ import {
     LinkedinFilled,
     GoogleCircleFilled,
     AppstoreOutlined,
+    BugFilled,
 } from "@ant-design/icons";
 import React from "react";
 import type { MenuProps } from "antd";
@@ -25,65 +26,241 @@ const UserSideBar = (props: any) => {
 
     const items: MenuItem[] = [
         {
-            key: 'grp',
-            type: 'group',
+            key: "grp",
+            type: "group",
             children: [
                 {
                     key: "home",
-                    label: <Link href={"/"} style={{ color: 'inherit', textDecoration: 'none' }}>Trang chủ</Link>,
+                    label: (
+                        <Link
+                            href={"/"}
+                            style={{ color: "inherit", textDecoration: "none" }}
+                        >
+                            Trang chủ
+                        </Link>
+                    ),
                     icon: <HomeFilled />,
+                    onClick: () => alert("Tính năng đang phát triển"),
                 },
                 {
                     key: "messages",
                     label: (
-                        <Link href={"/"} style={{ color: 'inherit', textDecoration: 'none' }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                                Tin nhắn 
-                                <Badge 
-                                    count={3} 
-                                    size="small" 
-                                    color="#000"
+                        <Link
+                            href={"/"}
+                            style={{ color: "inherit", textDecoration: "none" }}
+                        >
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    width: "100%",
+                                }}
+                            >
+                                Tin nhắn
+                                <Badge
+                                    count={`99+`}
+                                    size="small"
+                                    color="#FF4D4F"
                                     styles={{
                                         indicator: {
-                                            fontSize: '10px'
-                                        }
+                                            fontSize: "11px",
+                                        },
                                     }}
                                 />
                             </div>
                         </Link>
                     ),
                     icon: <MessageOutlined />,
+                    onClick: () => alert("Tính năng đang phát triển"),
                 },
                 {
                     key: "friends",
-                    label: <Link href={"/"} style={{ color: 'inherit', textDecoration: 'none' }}>Bạn bè</Link>,
+                    label: (
+                        <Link
+                            href={"/"}
+                            style={{ color: "inherit", textDecoration: "none" }}
+                        >
+                            Bạn bè
+                        </Link>
+                    ),
                     icon: <TeamOutlined />,
+                    onClick: () => alert("Tính năng đang phát triển"),
                 },
                 {
-                    key: 'stories',
-                    label: 'Bảng tin',
+                    key: "stories",
+                    label: "Bảng tin",
                     icon: <AppstoreOutlined />,
                     children: [
-                        { key: '5', label: 'Tin của bạn' },
-                        { key: '6', label: 'Kho lưu trữ' },
+                        { key: "5", label: "Tin của bạn" },
+                        { key: "6", label: "Kho lưu trữ" },
                     ],
                 },
                 {
                     key: "settings",
-                    label: <Link href={"/"} style={{ color: 'inherit', textDecoration: 'none' }}>Cài đặt</Link>,
+                    label: (
+                        <Link
+                            href={"/"}
+                            style={{ color: "inherit", textDecoration: "none" }}
+                        >
+                            Cài đặt
+                        </Link>
+                    ),
                     icon: <SettingOutlined />,
+                    onClick: () => alert("Tính năng đang phát triển"),
                 },
                 {
-                    type: 'divider',
+                    type: "divider",
                 },
                 {
-                    key: 'contact',
-                    label: 'Liên hệ với tôi',
+                    key: "contact",
+                    label: "Liên hệ với tôi",
                     icon: <WhatsAppOutlined />,
                     children: [
-                        { key: '9', label: 'Facebook', icon: <FacebookFilled /> },
-                        { key: '10', label: 'Linkedin', icon: <LinkedinFilled /> },
-                        { key: '11', label: 'Email', icon: <GoogleCircleFilled /> },
+                        {
+                            key: "9",
+                            label: (
+                                <Link
+                                    href={"https://www.facebook.com/pmq0207/"}
+                                    style={{
+                                        color: "inherit",
+                                        textDecoration: "none",
+                                    }}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Facebook
+                                </Link>
+                            ),
+                            icon: <FacebookFilled />,
+                        },
+                        {
+                            key: "10",
+                            label: (
+                                <Link
+                                    href={
+                                        "https://www.linkedin.com/in/minhquan02073/"
+                                    }
+                                    style={{
+                                        color: "inherit",
+                                        textDecoration: "none",
+                                    }}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Linkedin
+                                </Link>
+                            ),
+                            icon: <LinkedinFilled />,
+                        },
+                        {
+                            key: "11",
+                            label: (
+                                <Link
+                                    href={"mailto:minhquan02073@gmail.com"}
+                                    style={{
+                                        color: "inherit",
+                                        textDecoration: "none",
+                                    }}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Email
+                                </Link>
+                            ),
+                            icon: <GoogleCircleFilled />,
+                            onClick: () => alert("minhquan02073@gmail.com"),
+                        },
+                    ],
+                },
+            ],
+        },
+    ];
+    const itemsNotAuth: MenuItem[] = [
+        {
+            key: "grp",
+            type: "group",
+            children: [
+                {
+                    key: "home",
+                    label: (
+                        <Link
+                            href={"/"}
+                            style={{ color: "inherit", textDecoration: "none" }}
+                        >
+                            Trang chủ
+                        </Link>
+                    ),
+                    icon: <HomeFilled />,
+                },
+                {
+                    key: "stories",
+                    label: "Bảng tin",
+                    icon: <AppstoreOutlined />,
+                    onClick: () => alert("Tính năng đang phát triển"),
+                },
+                {
+                    type: "divider",
+                },
+                {
+                    key: "contact",
+                    label: "Liên hệ với tôi",
+                    icon: <WhatsAppOutlined />,
+                    children: [
+                        {
+                            key: "9",
+                            label: (
+                                <Link
+                                    href={"https://www.facebook.com/pmq0207/"}
+                                    style={{
+                                        color: "inherit",
+                                        textDecoration: "none",
+                                    }}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Facebook
+                                </Link>
+                            ),
+                            icon: <FacebookFilled />,
+                        },
+                        {
+                            key: "10",
+                            label: (
+                                <Link
+                                    href={
+                                        "https://www.linkedin.com/in/minhquan02073/"
+                                    }
+                                    style={{
+                                        color: "inherit",
+                                        textDecoration: "none",
+                                    }}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Linkedin
+                                </Link>
+                            ),
+                            icon: <LinkedinFilled />,
+                        },
+                        {
+                            key: "11",
+                            label: (
+                                <Link
+                                    href={"mailto:minhquan02073@gmail.com"}
+                                    style={{
+                                        color: "inherit",
+                                        textDecoration: "none",
+                                    }}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Email
+                                </Link>
+                            ),
+                            icon: <GoogleCircleFilled />,
+                            onClick: () => alert("minhquan02073@gmail.com"),
+                        },
                     ],
                 },
             ],
@@ -94,57 +271,87 @@ const UserSideBar = (props: any) => {
         <Sider
             width={220}
             style={{
-                background: '#fff',
-                borderRight: '1px solid #f0f0f0',
-                position: 'fixed',
+                background: "#fff",
+                borderRight: "1px solid #f0f0f0",
+                position: "fixed",
                 left: 0,
                 top: 0,
-                height: '100vh',
+                height: "100vh",
                 zIndex: 100,
             }}
         >
             {/* User Profile Section */}
             <Card
                 variant="borderless"
-                styles={{body:{
-                    padding: "24px 16px",
-                    borderBottom: '1px solid #f0f0f0'
-                }}}
+                styles={{
+                    body: {
+                        padding: "24px 16px",
+                        borderBottom: "1px solid #f0f0f0",
+                    },
+                }}
             >
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <Avatar
-                        size={44}
-                        src={session?.user?.image}
-                        style={{ 
-                            backgroundColor: `${session?.user?.avatarColor}`,
-                            color: '#fff',
-                            fontSize: '18px',
-                            fontWeight: '600'
-                        }}
-                    >
-                        {session?.user?.name?.charAt(0).toUpperCase() || 
-                         session?.user?.username?.charAt(0).toUpperCase()}
-                    </Avatar>
-                    <div style={{ overflow: 'hidden' }}>
-                        <div style={{ 
-                            fontSize: "15px", 
-                            fontWeight: "600", 
-                            color: '#000',
-                            marginBottom: "2px",
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                        }}>
-                            {session?.user?.name || "Khách tới chơi"}
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                    }}
+                >
+                    {!session?.user ? (
+                        <Avatar
+                            size={44}
+                            style={{
+                                backgroundColor: "white",
+                                color: "black",
+                                fontSize: "20px",
+                                fontWeight: "600",
+                            }}
+                        >
+                            <BugFilled />
+                        </Avatar>
+                    ) : (
+                        <Avatar
+                            size={44}
+                            src={session?.user?.image}
+                            style={{
+                                backgroundColor:
+                                    `${session?.user?.avatarColor}` || "#fff",
+                                color: "#222",
+                                fontSize: "20px",
+                                fontWeight: "600",
+                            }}
+                        >
+                            {session?.user?.name?.charAt(0).toUpperCase() ||
+                                session?.user?.username
+                                    ?.charAt(0)
+                                    .toUpperCase()}
+                        </Avatar>
+                    )}
+
+                    <div style={{ overflow: "hidden" }}>
+                        <div
+                            style={{
+                                fontSize: "15px",
+                                fontWeight: "600",
+                                color: "#000",
+                                marginBottom: "2px",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                            }}
+                        >
+                            {session?.user?.name || "Dân thường A"}
                         </div>
-                        <div style={{ 
-                            fontSize: "13px", 
-                            color: "#666",
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                        }}>
-                            @{session?.user?.username}
+                        <div
+                            style={{
+                                fontSize: "13px",
+                                color: "#666",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                            }}
+                        >
+                            {session?.user && <>@{session?.user?.username}</>}
                         </div>
                     </div>
                 </div>
@@ -154,43 +361,43 @@ const UserSideBar = (props: any) => {
             <Menu
                 mode="inline"
                 defaultSelectedKeys={["home"]}
-                items={items}
-                style={{ 
-                    borderRight: 'none',
-                    marginTop: '8px'
+                items={!session?.user?.id ? itemsNotAuth : items}
+                style={{
+                    borderRight: "none",
+                    marginTop: "8px",
                 }}
                 styles={{
                     item: {
                         marginBlock: 4,
                         marginInline: 8,
                         borderRadius: 8,
-                        fontSize: '14px',
-                        height: 42
+                        fontSize: "14px",
+                        height: 42,
                     },
                     subMenuItem: {
                         marginBlock: 4,
                         marginInline: 8,
                         borderRadius: 8,
-                        fontSize: '14px'
+                        fontSize: "14px",
                     },
                     icon: {
-                        fontSize: '16px'
+                        fontSize: "16px",
                     },
                     itemIcon: {
-                        color: '#666'
+                        color: "#666",
                     },
                     itemText: {
-                        color: '#333'
+                        color: "#333",
                     },
-                    itemSelectedBg: '#f5f5f5',
-                    itemSelectedColor: '#000',
-                    itemHoverBg: '#fafafa',
-                    itemHoverColor: '#000',
-                    itemActiveBg: '#f0f0f0',
-                    subMenuItemBg: 'transparent',
-                    horizontalItemHoverBg: '#fafafa',
-                    horizontalItemSelectedBg: '#f5f5f5',
-                    horizontalItemSelectedColor: '#000'
+                    itemSelectedBg: "#f5f5f5",
+                    itemSelectedColor: "#000",
+                    itemHoverBg: "#fafafa",
+                    itemHoverColor: "#000",
+                    itemActiveBg: "#f0f0f0",
+                    subMenuItemBg: "transparent",
+                    horizontalItemHoverBg: "#fafafa",
+                    horizontalItemSelectedBg: "#f5f5f5",
+                    horizontalItemSelectedColor: "#000",
                 }}
             />
         </Sider>

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   ActiveAuthDto,
   CreateAuthDto,
@@ -8,10 +8,15 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UsersService } from '@/modules/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { comparePasswordHelper } from '@/helper/util';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '@/modules/users/entities/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthsService {
   constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
@@ -44,7 +49,32 @@ export class AuthsService {
       access_token: this.jwtService.sign(payload),
     };
   }
+
   handleSendCode = async (data: ActiveAuthDto) => {
     return await this.usersService.handleSendCode(data);
+  };
+  uploadAvatar = async (userId: string, imageUrl: string) => {
+    const fullImageUrl = `http://localhost:8081${imageUrl}`;
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('Người dùng không tồn tại');
+    }
+    const payload = { username: user.username, sub: user.id };
+    await this.userRepository.update(userId, {
+      image: fullImageUrl,
+      avatarColor: null,
+    });
+    return {
+      imageUrl: fullImageUrl,
+      access_token: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        image: user.image,
+      },
+    };
   };
 }

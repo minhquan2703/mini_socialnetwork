@@ -253,6 +253,7 @@ export class UsersService {
     const fullImageUrl = `http://localhost:8081${imageUrl}`;
     await this.userRepository.update(userId, {
       image: fullImageUrl,
+      avatarColor: null,
     });
     return {
       imageUrl: fullImageUrl,

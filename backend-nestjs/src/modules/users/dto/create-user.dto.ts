@@ -15,5 +15,5 @@ export class CreateUserDto {
   phone: string;
   bio: string;
   image: string;
-  avatarColor: string;
+  avatarColor?: string | null;
 }

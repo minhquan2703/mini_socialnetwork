@@ -6,7 +6,7 @@ import { postToggleLike } from "@/services/like.service";
 import CreatePostForm from "./create.post";
 import PostList from "./list.post";
 
-const LIMIT = 10;
+const LIMIT = 7;
 
 const HomePage = (props: any) => {
     const { session } = props;
@@ -14,8 +14,8 @@ const HomePage = (props: any) => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [likeLoading, setLikeLoading] = useState({});
-    
-    // Cache để tránh gọi API trùng lặp
+    const [maxPage, setMaxPage] = useState(10);
+
     const likeRequestCache = useRef(new Map());
 
     useEffect(() => {
@@ -26,34 +26,36 @@ const HomePage = (props: any) => {
         setLoading(true);
         const res = await getAllPosts({ current, pageSize: LIMIT });
         if (res && res?.data) {
+            console.log("check res getAllPost", res);
             setPosts(res.data.results);
+            setMaxPage(res.data.totalPages);
             setLoading(false);
         }
     };
 
     const handleLike = useCallback(async (postId: string) => {
-        // Debounce: Skip nếu request đang được xử lý
         if (likeRequestCache.current.has(postId)) {
             return likeRequestCache.current.get(postId);
         }
-
         const likePromise = (async () => {
             try {
                 const res = await postToggleLike({
                     type: "post",
                     postId: postId,
                 });
-
                 if (res && res.data) {
-                    // Update global state sau khi API response
+                    //update global state sau khi response
                     setPosts((currentPosts) =>
                         currentPosts.map((post) => {
                             if (post.id !== postId) return post;
-                            // Sync với data từ server nếu có
                             return {
                                 ...post,
                                 isLiked: res.data.isLiked ?? !post.isLiked,
-                                likeCount: res.data.likeCount ?? (post.isLiked ? post.likeCount - 1 : post.likeCount + 1),
+                                likeCount:
+                                    res.data.likeCount ??
+                                    (post.isLiked
+                                        ? post.likeCount - 1
+                                        : post.likeCount + 1),
                             };
                         })
                     );
@@ -63,7 +65,7 @@ const HomePage = (props: any) => {
                 console.error("Like error:", error);
                 throw error;
             } finally {
-                // Clear cache sau 500ms
+                //clear cache timout 500ms
                 setTimeout(() => {
                     likeRequestCache.current.delete(postId);
                 }, 500);
@@ -74,31 +76,66 @@ const HomePage = (props: any) => {
         return likePromise;
     }, []);
 
+    const handlePostCreated = useCallback((newPost: string) => {
+        setPosts((currentPosts) => [newPost, ...currentPosts]);
+    }, []);
+        console.log('check post', posts)
+
     return (
         <div style={{ maxWidth: "680px", margin: "0 auto" }}>
-            <CreatePostForm session={session} />
+            <CreatePostForm
+                session={session}
+                onPostCreated={handlePostCreated}
+            />
 
-            <PostList 
-                posts={posts} 
-                handleLike={handleLike} 
-                loading={loading} 
+            <PostList
+                session={session}
+                posts={posts}
+                handleLike={handleLike}
+                loading={loading}
                 likeLoading={likeLoading}
             />
 
             <div style={{ textAlign: "center", padding: "24px 0 48px" }}>
-                <Button
-                    type="default"
-                    style={{
-                        borderRadius: "8px",
-                        height: "40px",
-                        paddingLeft: "32px",
-                        paddingRight: "32px",
-                        fontWeight: "500",
-                    }}
-                    onClick={() => setCurrent(current + 1)}
-                >
-                    Xem thêm bài viết
-                </Button>
+                {+current === +maxPage ? (
+                    <>
+                        <span style={{ fontWeight: "600", fontSize: "20px" }}>
+                            ~ Hết ~
+                        </span>
+                        <div>
+                            <Button
+                                type="default"
+                                style={{
+                                    borderRadius: "8px",
+                                    marginTop: "15px",
+                                    height: "40px",
+                                    paddingLeft: "32px",
+                                    paddingRight: "32px",
+                                    fontWeight: "500",
+                                }}
+                                onClick={() => setCurrent(current - 1)}
+                            >
+                                Quay lại
+                            </Button>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <Button
+                            type="default"
+                            style={{
+                                borderRadius: "8px",
+                                height: "40px",
+                                paddingLeft: "32px",
+                                paddingRight: "32px",
+                                fontWeight: "500",
+                            }}
+                            onClick={() => setCurrent(current + 1)}
+                        >
+                            Xem thêm
+                        </Button>
+                    </>
+                )}
             </div>
         </div>
     );

@@ -44,14 +44,14 @@ export class PostsController {
   @UseInterceptors(
     FileFieldsInterceptor(
       [
-        { name: 'images', maxCount: 10 }, // Tối đa 10 ảnh
-        { name: 'video', maxCount: 1 }, // Tối đa 1 video
+        { name: 'images', maxCount: 9 },
+        { name: 'video', maxCount: 1 },
       ],
       MulterConfigService.getConfig(),
-    ), // ← Sử dụng config từ service
+    ),
   )
   async create(
-    @Body('content') content: string, // ← Lấy trực tiếp field content
+    @Body('content') content: string,
     @Request() req: AuthenticatedRequest,
     @UploadedFiles()
     files: {
@@ -59,17 +59,10 @@ export class PostsController {
       video?: Express.Multer.File[];
     },
   ) {
-    console.log('=== UNIFIED CREATE POST ===');
-    console.log('Content:', content);
-    console.log('Images:', files?.images?.length || 0);
-    console.log('Video:', files?.video?.length || 0);
-
-    // Manual validation cho content
     if (!content || content.trim() === '') {
       throw new BadRequestException('Nội dung không được để trống');
     }
 
-    // Validate files nếu có
     if (files?.images) {
       FileValidationService.validateImages(files.images);
     }
@@ -77,7 +70,6 @@ export class PostsController {
       FileValidationService.validateVideo(files.video[0]);
     }
 
-    // Tạo DTO object
     const createPostDto: CreatePostDto = {
       content: content.trim(),
     };

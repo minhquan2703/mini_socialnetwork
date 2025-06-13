@@ -12,16 +12,16 @@ const UserContent = ({
     return (
         <Content
             style={{
-                marginLeft: '200px',
-                marginTop: '70px',   // Space for fixed header
-                minHeight: 'calc(100vh - 70px)',
-                // backgroundColor: '#f8f9fa'
+                // marginLeft: '100px',
+                marginTop: '60px',   // Space for fixed header
+                minHeight: 'calc(100vh - 60px)',
+                backgroundColor: '#f8f9fa'
             }}
         >
             <div
                 style={{
                     padding: '30px',
-                    maxWidth: '1200px',
+                    maxWidth: '1400px',
                     margin: '0 auto',
                 }}
             >

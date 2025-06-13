@@ -40,8 +40,8 @@ export class User {
   @Column({ nullable: true })
   image: string;
 
-  @Column({ nullable: true })
-  avatarColor: string;
+  @Column({ type: 'text', nullable: true })
+  avatarColor: string | null;
 
   @Column({ default: false })
   isActive: boolean;
