@@ -15,6 +15,7 @@ import { LikesService } from './likes.service';
 import { CreateLikeDto, LikeType } from './dto/create-like.dto';
 import { UpdateLikeDto } from './dto/update-like.dto';
 import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
+import { Throttle } from '@nestjs/throttler';
 
 interface AuthenticatedRequest extends Request {
   user: {

@@ -16,6 +16,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
 import { PublicOptional } from '@/auths/decorator/customize';
+import { Throttle } from '@nestjs/throttler';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -30,6 +31,7 @@ export class CommentsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  // @Throttle({ default: { limit: 3, ttl: 90000 } })
   create(@Body() createCommentDto: CreateCommentDto, @Req() req) {
     const userId = req.user.id;
     return this.commentsService.create(createCommentDto, userId);

@@ -19,6 +19,7 @@ import { Public, ResponseMessage } from './decorator/customize';
 import { AuthsService } from './auths.service';
 import { LocalAuthGuard } from './passport/local-auth.guard';
 import { UsersService } from '@/modules/users/users.service';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auths')
 export class AuthsController {
@@ -30,6 +31,7 @@ export class AuthsController {
   @Public()
   @Post('register')
   @ResponseMessage('otp sẽ hết hạn sau 10 phút')
+  @Throttle({ default: { limit: 1, ttl: 600000 } })
   register(@Body() registerDto: CreateAuthDto) {
     return this.authsService.handleRegister(registerDto);
   }
@@ -49,6 +51,7 @@ export class AuthsController {
   }
   @Public()
   @Post('resend-active-code')
+  @Throttle({ default: { limit: 1, ttl: 90000 } })
   async ResendActiveCode(@Body() activeDto: ActiveAuthDto) {
     return await this.authsService.handleSendCode(activeDto);
   }

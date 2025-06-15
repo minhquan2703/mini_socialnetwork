@@ -7,6 +7,7 @@ import { join } from 'path';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/vi';
+import { ThrottlerExceptionFilter } from './throttler/throttler-exception.filter';
 
 dayjs.extend(relativeTime);
 dayjs.locale('vi');
@@ -15,6 +16,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalFilters(new ThrottlerExceptionFilter());
   app.setGlobalPrefix('api/v1', { exclude: [''] });
   app.enableCors({
     origin: true,

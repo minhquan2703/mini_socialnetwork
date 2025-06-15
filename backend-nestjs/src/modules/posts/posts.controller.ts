@@ -27,6 +27,7 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -41,6 +42,7 @@ export class PostsController {
 
   @Post('create')
   @UseGuards(JwtAuthGuard)
+  // @Throttle({ default: { limit: 1, ttl: 90000 } })
   @UseInterceptors(
     FileFieldsInterceptor(
       [

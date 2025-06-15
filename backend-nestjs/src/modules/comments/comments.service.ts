@@ -78,6 +78,8 @@ export class CommentsService {
       createdAt: createdAtFormat,
       updatedAt: updatedAtFormat,
       timeBefore: timeBefore,
+      likeCount: 0,
+      isLiked: false,
       user: {
         id: user.id,
         name: user.name,

@@ -166,6 +166,9 @@ export class PostsService {
         mediaType: savedPost.mediaType,
         mediaURL: savedPost.mediaURL,
         photos: photos.length > 0 ? photos : [],
+        likeCount: 0,
+        commentCount: 0,
+        isLiked: false,
         user: {
           id: user.id,
           name: user.name,
@@ -173,6 +176,7 @@ export class PostsService {
           avatarColor: user.avatarColor,
           image: user.image,
         },
+        timeBefore: dayjs(savedPost.createdAt).fromNow(),
         createdAt: dayjs(savedPost.createdAt).fromNow(),
         createdAtFormatted: dayjs(savedPost.createdAt).format(
           'DD/MM/YYYY [lúc] HH:mm',
