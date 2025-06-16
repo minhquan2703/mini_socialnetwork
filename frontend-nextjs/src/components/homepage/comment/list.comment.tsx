@@ -1,29 +1,23 @@
 "use client";
-
-import { getAllCommentOfOnePost } from "@/services/comment.service";
 import CommentCard from "./comment.card";
+import { useState } from "react";
+import ModalLoginRequire from "../modals/modal.loginrequire";
 
 const ListComment = (props: any) => {
-    
-    const {
-        comments,
-        handleLikeComment,
-        loading,
-        likeCommentLoading,
-        postId,
-        session,
-    } = props;
+    const { comments, handleLikeComment, likeCommentLoading, setShowModal } =
+        props;
     return (
         <>
             {comments.map((comment) => (
                 <CommentCard
+                    setShowModal={setShowModal}
                     key={comment.id}
                     comment={comment}
                     handleLikeComment={handleLikeComment}
                     likeCommentLoading={likeCommentLoading}
-                    session={session}
                 />
             ))}
+            {/* <ModalLoginRequire show={showModalLoginRequire} setShow={setShowModalLoginRequire}/> */}
         </>
     );
 };

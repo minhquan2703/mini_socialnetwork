@@ -362,7 +362,7 @@ const Register2 = () => {
                         <Typography sx={{ textAlign: "center" }}>
                             Bạn đã có tài khoản?{" "}
                             <Link
-                                href="/auth/login"
+                                href="/auth"
                                 variant="body2"
                                 sx={{ alignSelf: "center", fontSize: "15px" }}
                             >

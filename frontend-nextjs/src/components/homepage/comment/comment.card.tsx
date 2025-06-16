@@ -1,27 +1,17 @@
 "use client";
 
-import {
-    HeartFilled,
-    HeartOutlined,
-    MoreOutlined,
-    StarFilled,
-    StarOutlined,
-} from "@ant-design/icons";
-import { Avatar, Button, Card, Dropdown, MenuProps } from "antd";
-import React, {
-    startTransition,
-    useCallback,
-    useState,
-    useTransition,
-} from "react";
-import ModalLoginRequire from "../modals/modal.loginrequire";
+import { MoreOutlined, StarFilled } from "@ant-design/icons";
+import { Avatar, Button, Dropdown, MenuProps } from "antd";
+import React, { useCallback, useState, useTransition } from "react";
+import { useSession } from "@/library/session.context";
+import { toast } from "sonner";
 
 const CommentCard = (props) => {
     const moreActions: MenuProps["items"] = [
         { key: "1", label: "Báo cáo", danger: true },
         { key: "2", label: "Theo dõi" },
     ];
-    const { comment, handleLikeComment, likeCommentLoading, session } = props;
+    const { comment, handleLikeComment, setShowModal } = props;
     const [localCommentLikeCount, setCommentLocalLikeCount] = useState(
         comment.likeCount
     );
@@ -29,11 +19,10 @@ const CommentCard = (props) => {
         comment.isLiked
     );
     const [isPending, startTransition] = useTransition();
-
-    const [showModalLoginRequire, setShowModalLoginRequire] = useState(false);
+    const session = useSession();
     const handleOptimisticLike = useCallback(() => {
         if (!session?.user) {
-            setShowModalLoginRequire(true);
+            setShowModal(true);
             return;
         }
         // Immediate UI update
@@ -58,6 +47,7 @@ const CommentCard = (props) => {
         comment.id,
         handleLikeComment,
     ]);
+    console.log("Parent render comment");
     return (
         <>
             <div
@@ -75,11 +65,12 @@ const CommentCard = (props) => {
                         top: "0",
                         bottom: "0",
                         width: "2px",
-                        background: "linear-gradient(180deg, #e0e0e0 0%, transparent 100%)",
+                        background:
+                            "linear-gradient(180deg, #e0e0e0 0%, transparent 100%)",
                         opacity: 0.6,
                     }}
                 />
-                
+
                 <div
                     style={{
                         display: "flex",
@@ -103,7 +94,6 @@ const CommentCard = (props) => {
                                 cursor: "pointer",
                                 transition: "transform 0.2s ease",
                             }}
-                            className="comment-avatar"
                         >
                             {comment.user.name.charAt(0) ||
                                 comment.user.username.charAt(0)}
@@ -146,7 +136,13 @@ const CommentCard = (props) => {
                                     marginBottom: "6px",
                                 }}
                             >
-                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                    }}
+                                >
                                     <span
                                         style={{
                                             fontSize: "14px",
@@ -157,25 +153,31 @@ const CommentCard = (props) => {
                                         }}
                                         className="username-hover"
                                     >
-                                        {comment.user.name || comment.user.username}
+                                        {comment.user.name ||
+                                            comment.user.username}
                                     </span>
                                     {/* Verified badge (optional) */}
                                     {comment.user.verified && (
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#1890ff">
-                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="#1890ff"
+                                        >
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                                         </svg>
                                     )}
                                 </div>
                                 <Dropdown
                                     menu={{ items: moreActions }}
                                     placement="bottomRight"
-                                    trigger={['hover']}
+                                    trigger={["hover"]}
                                 >
                                     <Button
                                         type="text"
                                         icon={<MoreOutlined />}
-                                        style={{ 
-                                            color: "#999", 
+                                        style={{
+                                            color: "#999",
                                             fontSize: "16px",
                                             padding: "4px",
                                             height: "auto",
@@ -223,114 +225,54 @@ const CommentCard = (props) => {
                                 {comment.timeBefore}
                             </span>
 
-                            {/* Like button với animation */}
-                            <button
-                                onClick={handleOptimisticLike}
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "4px",
-                                    background: "none",
-                                    border: "none",
-                                    cursor: "pointer",
-                                    padding: "4px 8px",
-                                    borderRadius: "12px",
-                                    transition: "all 0.2s ease",
-                                    transform: localCommentIsLiked ? "scale(1.05)" : "scale(1)",
-                                }}
-                                className="like-button-wrapper"
-                            >
-                                <StarFilled 
-                                    style={{ 
-                                        color: localCommentIsLiked ? "#FFD700" : "#d4d4d4",
-                                        fontSize: "16px",
-                                        filter: localCommentIsLiked ? "drop-shadow(0 0 3px rgba(255, 215, 0, 0.5))" : "none",
+                            {/*like button*/}
+                            <div style={{display: "flex", gap: "8px"}}>
+                                <Button
+                                    icon={<StarFilled />}
+                                    onClick={handleOptimisticLike}
+                                    style={{
+                                        border: `1px solid ${localCommentIsLiked ? "red" : "gold"}`,
+                                        backgroundColor: localCommentIsLiked ? "red" : "white",
+                                        color: localCommentIsLiked ? "yellow" : "gold",
+                                        fontSize: "13px",
+                                        width: "35px",
+                                        height: "22px",
+                                        borderRadius: "2px",
                                         transition: "all 0.3s ease",
-                                    }} 
-                                />
+                                        transform: localCommentIsLiked ? "scale(1.05)" : "scale(1)",
+                                    }}
+                                >
+                                </Button>
                                 <span
                                     style={{
                                         fontSize: "13px",
-                                        color: localCommentIsLiked ? "#FFD700" : "#8c8c8c",
-                                        fontWeight: localCommentIsLiked ? "600" : "500",
+                                        color: localCommentIsLiked
+                                            ? "#FFD700"
+                                            : "#8c8c8c",
+                                        fontWeight: localCommentIsLiked
+                                            ? "600"
+                                            : "500",
                                         transition: "all 0.2s ease",
                                     }}
                                 >
                                     {localCommentLikeCount || 0}
                                 </span>
-                            </button>
-
+                            </div>
                             {/* Reply button */}
-                            <button
-                                style={{
-                                    background: "none",
-                                    border: "none",
-                                    cursor: "pointer",
-                                    fontSize: "12px",
-                                    color: "#8c8c8c",
-                                    fontWeight: "600",
-                                    padding: "4px 8px",
-                                    borderRadius: "12px",
-                                    transition: "all 0.2s ease",
-                                }}
-                                className="reply-button"
+                            <Button
+                                variant="text"
+                                color="default"
+                                size="small"
+                                onClick={() =>
+                                    toast.error("Tính năng đang phát triển")
+                                }
                             >
                                 Trả lời
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            {/* Custom styles */}
-            <style jsx>{`
-                .comment-avatar:hover {
-                    transform: scale(1.1);
-                }
-                
-                .comment-content-wrapper:hover {
-                    background: #f0f2f5 !important;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
-                }
-                
-                .username-hover:hover {
-                    color: #1890ff !important;
-                    text-decoration: underline;
-                }
-                
-                .more-btn:hover {
-                    opacity: 1 !important;
-                    background: rgba(0,0,0,0.04) !important;
-                }
-                
-                .like-button-wrapper:hover {
-                    background: rgba(255, 215, 0, 0.1) !important;
-                }
-                
-                .like-button-wrapper:active {
-                    transform: scale(0.95) !important;
-                }
-                
-                .reply-button:hover {
-                    background: rgba(0,0,0,0.04) !important;
-                    color: #1890ff !important;
-                }
-                
-                @keyframes likeAnimation {
-                    0% { transform: scale(1) rotate(0deg); }
-                    50% { transform: scale(1.3) rotate(-10deg); }
-                    100% { transform: scale(1) rotate(0deg); }
-                }
-                
-                .like-button-wrapper:active .anticon {
-                    animation: likeAnimation 0.4s ease;
-                }
-            `}</style>
-            
-            <ModalLoginRequire
-                show={showModalLoginRequire}
-                setShow={setShowModalLoginRequire}
-            />
         </>
     );
 };

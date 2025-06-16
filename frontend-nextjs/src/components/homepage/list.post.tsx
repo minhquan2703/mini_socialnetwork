@@ -1,8 +1,19 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import PostCard from "./post.card";
 import SkeletonCard from "./skeleton.card";
+import ModalLoginRequire from "./modals/modal.loginrequire";
 
-const PostList = ({ posts, handleLike, loading, likeLoading, session }) => {
+const PostList = ({
+    handleCommentCountUpdate,
+    posts,
+    handleLike,
+    loading,
+    likeLoading,
+    handleDeletePost,
+}) => {
+    const [showModal, setShowModal] = useState(false);
+
     if (loading) {
         // Render 4 skeleton cards khi loading
         return (
@@ -17,13 +28,17 @@ const PostList = ({ posts, handleLike, loading, likeLoading, session }) => {
         <>
             {posts.map((post) => (
                 <PostCard
+                    handleCommentCountUpdate={handleCommentCountUpdate}
                     key={post.id}
                     post={post}
                     handleLike={handleLike}
                     likeLoading={likeLoading}
-                    session={session}
+                    setShowModal={setShowModal}
+                    handleDeletePost={handleDeletePost}
+
                 />
             ))}
+            <ModalLoginRequire showModal={showModal} setShowModal={setShowModal} />
         </>
     );
 };

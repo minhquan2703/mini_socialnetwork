@@ -1,4 +1,14 @@
-import { Card, Avatar, Button, Divider, Dropdown, Space, Image } from "antd";
+"use client";
+import {
+    Card,
+    Avatar,
+    Button,
+    Divider,
+    Dropdown,
+    Space,
+    Image,
+    Tooltip,
+} from "antd";
 import {
     CommentOutlined,
     ShareAltOutlined,
@@ -8,42 +18,51 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import React, { useState, useCallback, useTransition } from "react";
-import ModalLoginRequire from "./modals/modal.loginrequire";
 import { toast } from "sonner";
+import { useSession } from "@/library/session.context";
+import ModalLoginRequire from "./modals/modal.loginrequire";
 import CommentPost from "./comment/post.comment";
-
-const PostCard = ({ session, post, handleLike, likeLoading }) => {
+import { deleteOnePost } from "@/services/post.service";
+const PostCard = (props: any) => {
+    const {
+        handleCommentCountUpdate,
+        post,
+        handleLike,
+        likeLoading,
+        key,
+        setShowModal,
+        handleDeletePost,
+    } = props;
     const moreActions: MenuProps["items"] = [
         { key: "1", label: "Lưu bài viết" },
         { key: "2", label: "Sao chép liên kết" },
         { type: "divider" },
         { key: "3", label: "Báo cáo", danger: true },
     ];
-    const [showModalLoginRequire, setShowModalLoginRequire] = useState(false);
+    const authorActions: MenuProps["items"] = [
+        { key: "update", label: "Chỉnh sửa bài viết" },
+        { type: "divider" },
+        { key: "delete", label: "Xoá bài viết", danger: true, onClick: () =>  handleDeletePost(post.id)},
+    ];
     // Local state for optimistic UI
     const [localIsLiked, setLocalIsLiked] = useState(post.isLiked);
     const [localLikeCount, setLocalLikeCount] = useState(post.likeCount);
     const [isPending, startTransition] = useTransition();
     const [showComment, setShowComment] = useState(false);
 
-    const handleComment = () => {
-        if (!session?.user) {
-            setShowModalLoginRequire(true);
-            return;
-        }
-        toast.warning("Tính năng đang phát triển, vui lòng đợi");
-    };
+    const session = useSession();
+
     const handleShare = () => {
         if (!session?.user) {
-            setShowModalLoginRequire(true);
+            setShowModal(true);
             return;
         }
         toast.warning("Tính năng đang phát triển, vui lòng đợi");
     };
-    // Optimistic update handler
+    // Optimistic update handler  -> AI generated
     const handleOptimisticLike = useCallback(() => {
         if (!session?.user) {
-            setShowModalLoginRequire(true);
+            setShowModal(true);
             return;
         }
         // Immediate UI update
@@ -62,6 +81,7 @@ const PostCard = ({ session, post, handleLike, likeLoading }) => {
         });
     }, [localIsLiked, localLikeCount, post.id, handleLike]);
 
+    console.log("Parent render post card", post);
     return (
         <>
             <Card
@@ -91,7 +111,7 @@ const PostCard = ({ session, post, handleLike, likeLoading }) => {
                             src={post?.user?.image}
                             style={{
                                 backgroundColor: `${post.user.avatarColor}`,
-                                color: "#fff",
+                                color: "#222",
                                 fontWeight: "600",
                                 fontSize: "18px",
                                 border: "1px solid #f0f0f0",
@@ -123,7 +143,9 @@ const PostCard = ({ session, post, handleLike, likeLoading }) => {
                         </div>
                     </div>
                     <Dropdown
-                        menu={{ items: moreActions }}
+                        menu={{
+                            items: post.isAuthor ? authorActions : moreActions,
+                        }}
                         placement="bottomRight"
                     >
                         <Button
@@ -227,9 +249,9 @@ const PostCard = ({ session, post, handleLike, likeLoading }) => {
                     }}
                 >
                     <span>{post.commentCount || 0} bình luận</span>
-                    <span>
-                        {post.timeBefore} - {post.createdAt}
-                    </span>
+                    <Tooltip title={post.createdAt} placement="rightTop">
+                        <span>{post.timeBefore}</span>
+                    </Tooltip>
                 </div>
 
                 <Divider style={{ margin: "8px 0" }} />
@@ -245,7 +267,7 @@ const PostCard = ({ session, post, handleLike, likeLoading }) => {
                         icon={
                             localIsLiked ? <HeartFilled /> : <HeartOutlined />
                         }
-                        onClick={handleOptimisticLike}
+                        onClick={() => handleOptimisticLike()}
                         style={{
                             fontWeight: localIsLiked ? 600 : 400,
                             borderRadius: 8,
@@ -296,16 +318,13 @@ const PostCard = ({ session, post, handleLike, likeLoading }) => {
                     </Button>
                 </div>
                 <CommentPost
+                    handleCommentCountUpdate={handleCommentCountUpdate}
                     showComment={showComment}
                     commentCount={post.commentCount}
-                    session={session}
-                    postId = {post.id}
+                    postId={post.id}
+                    setShowModal={setShowModal}
                 />
             </Card>
-            <ModalLoginRequire
-                showModal={showModalLoginRequire}
-                setShowModal={setShowModalLoginRequire}
-            />
         </>
     );
 };

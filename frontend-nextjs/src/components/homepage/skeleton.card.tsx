@@ -1,3 +1,4 @@
+"use client";
 import { Card, Skeleton } from "antd";
 
 const SkeletonCard = () => (

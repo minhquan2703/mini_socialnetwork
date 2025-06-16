@@ -4,8 +4,9 @@ import { sendRequest, sendRequestFile } from "@/utils/api";
 const POST_BASE_URL = `/api/v1/posts`;
 
 const getAllPosts = async (data: IGetAllPosts): Promise<IBackendRes<any>> => {
+    const { current, pageSize } = data;
     const response = await sendRequest<IBackendRes<any>>({
-        url: `${POST_BASE_URL}?current=${data.current}&pageSize=${data.pageSize}`,
+        url: `${POST_BASE_URL}?current=${current}&pageSize=${pageSize}`,
         method: "GET",
         // KHÔNG cần headers, KHÔNG cần truyền access_token
     });
@@ -19,5 +20,12 @@ const postNewOne = async (formData: FormData): Promise<IBackendRes<any>> => {
     });
     return response;
 };
+const deleteOnePost = async (postId: string): Promise<IBackendRes<any>> => {
+    const response = await sendRequest<IBackendRes<any>>({
+        url: `${POST_BASE_URL}/${postId}`,
+        method: "DELETE",
+    });
+    return response;
+};
 
-export { getAllPosts, postNewOne };
+export { getAllPosts, postNewOne, deleteOnePost };

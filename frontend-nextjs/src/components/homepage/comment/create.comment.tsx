@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "@/library/session.context";
 import { postComment } from "@/services/comment.service";
 import { SmileOutlined } from "@ant-design/icons";
 import { Button, Card, Space, Spin } from "antd";
@@ -8,9 +9,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 const CreateComment = (props: any) => {
-    const { postId, session, handleCommentCreated } = props
+    const { postId, handleCommentCreated, handleCommentCountUpdate } = props
     const [uploading, setUploading] = useState(false);
     const [newComment, setNewComment] = useState("");
+    const session = useSession()
 
     const handleSubmit = async () => {
         setUploading(true);
@@ -19,19 +21,29 @@ const CreateComment = (props: any) => {
                 content: newComment,
                 postId: postId,
             });
+
             if (res?.data){
                 setNewComment("");
-                if (handleCommentCreated) {
-                    handleCommentCreated(res.data);
-                }                
+                handleCommentCreated(res.data);         
+                if (handleCommentCountUpdate){
+                    handleCommentCountUpdate(postId, 1);
+                }   
             }
-        } catch (error) {
-            console.log(error);
+            if (res.statusCode === 429){
+                toast.error('Bạn đang đăng bình luận quá nhanh, vui lòng đợi cho lần tiếp theo');
+            }
+            if (res?.error){
+                toast.error(res.message);
+            }
+        } catch {
             toast.error("Có lỗi xảy ra khi bình luận");
         } finally{
             setUploading(false)
+
         }
     };
+
+    if (!session?.user) return null;
 
     return (
         <>

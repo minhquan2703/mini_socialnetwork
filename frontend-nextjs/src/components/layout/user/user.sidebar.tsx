@@ -17,11 +17,12 @@ import React from "react";
 import type { MenuProps } from "antd";
 import Link from "next/link";
 import { Avatar, Badge, Card } from "antd";
+import { useSession } from "@/library/session.context";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
-const UserSideBar = (props: any) => {
-    const { session } = props;
+const UserSideBar = () => {
+    const session = useSession();
     const { Sider } = Layout;
 
     const items: MenuItem[] = [

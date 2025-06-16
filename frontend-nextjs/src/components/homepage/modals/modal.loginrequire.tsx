@@ -1,4 +1,4 @@
-// components/ModalLoginRequire.tsx
+"use client";
 import React from "react";
 import { Modal, Button, Typography } from "antd";
 import { UserOutlined } from "@ant-design/icons";
@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation";
 import { useHasMounted } from "@/utils/customHook";
 
 const ModalLoginRequire = (props: any) => {
+    const { showModal, setShowModal } = props;
     const router = useRouter();
     const { Title, Text } = Typography;
-    const { showModal, setShowModal } = props;
-    if (!useHasMounted) return <></>;
+    const hasMounted = useHasMounted();
+    if (!hasMounted) return <></>;
 
     return (
         <Modal
@@ -49,7 +50,7 @@ const ModalLoginRequire = (props: any) => {
                         fontSize: 16,
                         transition: "all .2s",
                     }}
-                    onClick={() => router.push("/auth")}
+                   href="/auth"
                 >
                     Đăng nhập ngay
                 </Button>

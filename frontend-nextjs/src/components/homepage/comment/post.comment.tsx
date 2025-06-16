@@ -5,15 +5,16 @@ import CreateComment from "./create.comment";
 import ListComment from "./list.comment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { postToggleLike } from "@/services/like.service";
+import { useSession } from "@/library/session.context";
 
 const LIMIT = 5;
 
-const CommentPost = ({ postId, session, showComment, commentCount }) => {
+const CommentPost = ({ handleCommentCountUpdate, postId, showComment, commentCount, setShowModal }) => {
     const [current, setCurrent] = useState(1);
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);    
     const [likeCommentLoading, setCommentLikeLoading] = useState({});    
-
+    const session= useSession();
     const likeRequestCache = useRef(new Map());
 
 
@@ -66,7 +67,7 @@ const CommentPost = ({ postId, session, showComment, commentCount }) => {
         return likePromise;
     }, []);
 
-    const handleCommentCreated = useCallback((newComment: string) => {
+    const handleCommentCreated = useCallback((newComment: any) => {
         setComments((currentComments) => [newComment, ...currentComments]);
     }, []);
     const fetchListComment = async () => {
@@ -79,44 +80,39 @@ const CommentPost = ({ postId, session, showComment, commentCount }) => {
         if (res?.data) {
             setComments(res.data.results);
         }
-        console.log("check res comment", res);
         setLoading(false)
     };
+    if (!showComment) return null
     return (
         <>
-            {!showComment ? (
-                <div></div>
+
+            <CreateComment
+                postId={postId}
+                handleCommentCreated={handleCommentCreated}
+                handleCommentCountUpdate={handleCommentCountUpdate}
+            />
+
+            {commentCount > 0 ? (
+                <ListComment
+                    postId={postId}
+                    comments={comments}
+                    handleLikeComment={handleLikeComment}
+                    loading={loading}
+                    likeCommentLoading={likeCommentLoading}
+                    setShowModal={setShowModal}
+                />
             ) : (
-                <>
-                    {commentCount > 0 ? (
-                        <div>
-                            <CreateComment postId={postId} handleCommentCreated={handleCommentCreated}/>
-                            <ListComment
-                                postId={postId}
-                                comments={comments}
-                                handleLikeComment={handleLikeComment}
-                                loading={loading}
-                                likeCommentLoading={likeCommentLoading}
-                                session={session}
-                            />
-                        </div>
-                    ) : (
-                        <>
-                            <CreateComment postId={postId} handleCommentCreated={handleCommentCreated}/>
-                            <div
-                                style={{
-                                    marginTop: "20px",
-                                    textAlign: "center",
-                                    fontSize: "18px",
-                                    fontWeight: "800px",
-                                    color: "gray",
-                                }}
-                            >
-                                Không có bình luận
-                            </div>
-                        </>
-                    )}
-                </>
+                <div
+                    style={{
+                        marginTop: "20px",
+                        textAlign: "center",
+                        fontSize: "18px",
+                        fontWeight: 600,
+                        color: "gray",
+                    }}
+                >
+                    Không có bình luận
+                </div>
             )}
         </>
     );

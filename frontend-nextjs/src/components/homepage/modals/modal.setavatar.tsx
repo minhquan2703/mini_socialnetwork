@@ -1,106 +1,55 @@
-import { Button, ConfigProvider, Modal, Space } from "antd";
-import { createStyles, useTheme } from "antd-style";
-import { useState } from "react";
+"use client";
+import { useSession } from "@/library/session.context";
+import { useHasMounted } from "@/utils/customHook";
+import { Avatar, Modal } from "antd";
 
-const ModalSetAvatar = () => {
-    const useStyle = createStyles(({ token }) => ({
-        "my-modal-body": {
-            background: token.blue1,
-            padding: token.paddingSM,
-        },
-        "my-modal-mask": {
-            boxShadow: `inset 0 0 15px #fff`,
-        },
-        "my-modal-header": {
-            borderBottom: `1px dotted ${token?.colorPrimary}`,
-        },
-        "my-modal-footer": {
-            color: token.colorPrimary,
-        },
-        "my-modal-content": {
-            border: "1px solid #333",
-        },
-    }));
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const { styles } = useStyle();
-    const token = useTheme();
-
-    const toggleModal = (idx: number, target: boolean) => {
-        setIsModalOpen((p) => {
-            p[idx] = target;
-            return [...p];
-        });
-    };
-    const modalStyles = {
-        header: {
-            borderLeft: `5px solid ${token.colorPrimary}`,
-            borderRadius: 0,
-            paddingInlineStart: 5,
-        },
-        body: {
-            boxShadow: "inset 0 0 5px #999",
-            borderRadius: 5,
-        },
-        mask: {
-            backdropFilter: "blur(10px)",
-        },
-        footer: {
-            borderTop: "1px solid #333",
-        },
-        content: {
-            boxShadow: "0 0 30px #999",
-        },
-    };
-
-    const classNames = {
-        body: styles["my-modal-body"],
-        mask: styles["my-modal-mask"],
-        header: styles["my-modal-header"],
-        footer: styles["my-modal-footer"],
-        content: styles["my-modal-content"],
-    };
+const ModalSetAvatar = (props: any) => {
+    const { isModalOpen, setIsModalOpen } = props;
+    const session = useSession();
+    const hasMounted = useHasMounted();
+    if (!hasMounted) return <></>;
 
     return (
         <>
-            <Space>
-                <Button type="primary" onClick={() => toggleModal(0, true)}>
-                    Open Modal
-                </Button>
-                <Button type="primary" onClick={() => toggleModal(1, true)}>
-                    ConfigProvider
-                </Button>
-            </Space>
             <Modal
-                title="Basic Modal"
-                open={isModalOpen[0]}
-                onOk={() => toggleModal(0, false)}
-                onCancel={() => toggleModal(0, false)}
-                footer="Footer"
-                classNames={classNames}
-                styles={modalStyles}
+                closable={{ "aria-label": "Custom Close Button" }}
+                open={isModalOpen}
+                onOk={() => setIsModalOpen(false)}
+                onCancel={() => setIsModalOpen(false)}
+                maskClosable={false}
+                width={500}
             >
+                <div style={{ margin: "auto", width: "100%" }}>
+                    <Avatar
+                        size={200}
+                        style={{
+                            display: "block",
+                            // width: "100px",
+                            // height: "100px",
+                            marginLeft: "auto",
+                            marginRight: "auto",
+                        }}
+                    ></Avatar>
+                    <Avatar
+                        size={44}
+                        src={session?.user?.image}
+                        style={{
+                            backgroundColor:
+                                `${session?.user?.avatarColor}` || "#fff",
+                            color: "#222",
+                            fontSize: "20px",
+                            fontWeight: "600",
+                        }}
+                    >
+                        {session?.user?.name?.charAt(0).toUpperCase() ||
+                            session?.user?.username?.charAt(0).toUpperCase()}
+                    </Avatar>
+                </div>
+
                 <p>Some contents...</p>
                 <p>Some contents...</p>
                 <p>Some contents...</p>
             </Modal>
-            <ConfigProvider
-                modal={{
-                    classNames,
-                    styles: modalStyles,
-                }}
-            >
-                <Modal
-                    title="Basic Modal"
-                    open={isModalOpen[1]}
-                    onOk={() => toggleModal(1, false)}
-                    onCancel={() => toggleModal(1, false)}
-                    footer="Footer"
-                >
-                    <p>Some contents...</p>
-                    <p>Some contents...</p>
-                    <p>Some contents...</p>
-                </Modal>
-            </ConfigProvider>
         </>
     );
 };

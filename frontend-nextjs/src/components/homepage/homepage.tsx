@@ -1,18 +1,25 @@
 "use client";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Button } from "antd";
-import { getAllPosts } from "@/services/post.service";
+import { deleteOnePost, getAllPosts } from "@/services/post.service";
 import { postToggleLike } from "@/services/like.service";
+
+import { toast } from "sonner";
 import CreatePostForm from "./create.post";
 import PostList from "./list.post";
 
-const LIMIT = 7;
 
-const HomePage = (props: any) => {
-    const { session } = props;
+// interface HomePageClientProps {
+//     initialPosts: any[];
+//     initialMaxPage: number;
+// }
+
+const LIMIT = 7; //số lượng bài viết mỗi trang
+
+const HomePage = () => {
     const [current, setCurrent] = useState(1);
     const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [likeLoading, setLikeLoading] = useState({});
     const [maxPage, setMaxPage] = useState(10);
 
@@ -26,11 +33,10 @@ const HomePage = (props: any) => {
         setLoading(true);
         const res = await getAllPosts({ current, pageSize: LIMIT });
         if (res && res?.data) {
-            console.log("check res getAllPost", res);
             setPosts(res.data.results);
             setMaxPage(res.data.totalPages);
-            setLoading(false);
         }
+        setLoading(false);
     };
 
     const handleLike = useCallback(async (postId: string) => {
@@ -60,10 +66,12 @@ const HomePage = (props: any) => {
                         })
                     );
                 }
+                else {
+                    toast.error(res.message)
+                }
                 return res;
             } catch (error) {
-                console.error("Like error:", error);
-                throw error;
+                throw error
             } finally {
                 //clear cache timout 500ms
                 setTimeout(() => {
@@ -76,24 +84,46 @@ const HomePage = (props: any) => {
         return likePromise;
     }, []);
 
-    const handlePostCreated = useCallback((newPost: string) => {
+    const handlePostCreated = useCallback((newPost: any) => {
         setPosts((currentPosts) => [newPost, ...currentPosts]);
     }, []);
-        console.log('check post', posts)
 
+    const handleCommentCountUpdate = (postId: string, increment: number) => {
+    console.log('Before update:', posts.find(p => p.id === postId)?.commentCount);
+    setPosts((currentPosts) =>
+        currentPosts.map((post) => {
+            if (post.id !== postId) return post;
+            return {
+                ...post,
+                commentCount: Math.max(0, (post.commentCount || 0) + increment),
+            };
+        })
+    );
+    }
+    const handleDeletePost = async(postIdDeleted: string) =>{
+        const res = await deleteOnePost(postIdDeleted);
+        console.log('check res delete', res)
+        if (res && res?.data){
+            setPosts((currentPost) => currentPost.filter((post) => post.id !== postIdDeleted))
+            toast.success('Xoá bài viết thành công');
+        }
+        if (res && res?.error){
+            toast.error(res.message);
+        }
+    }
     return (
         <div style={{ maxWidth: "680px", margin: "0 auto" }}>
             <CreatePostForm
-                session={session}
-                onPostCreated={handlePostCreated}
+                handlePostCreated={handlePostCreated}
             />
 
             <PostList
-                session={session}
                 posts={posts}
                 handleLike={handleLike}
                 loading={loading}
                 likeLoading={likeLoading}
+                handleCommentCountUpdate={handleCommentCountUpdate}
+                handleDeletePost={handleDeletePost}
             />
 
             <div style={{ textAlign: "center", padding: "24px 0 48px" }}>

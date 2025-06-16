@@ -107,9 +107,9 @@ const Verify = ({ id }: { id: string }) => {
                         </Link>
                     </div>
                     <div style={{ textAlign: "center", marginTop: 8 }}>
-                        Đã có tài khoản?{" "}
+                        Bạn đã xác thực?{" "}
                         <Link
-                            href="/auth/login"
+                            href="/auth"
                             style={{ color: "#111", fontWeight: 500 }}
                         >
                             Đăng nhập

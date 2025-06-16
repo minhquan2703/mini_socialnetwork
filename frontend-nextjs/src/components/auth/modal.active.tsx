@@ -14,7 +14,7 @@ import { postAuthVerifyAccount, postResendCode } from "@/services/auth.service";
 import { IResendCode, IVerifyAccount } from "@/types/auth.type";
 
 const ModalActive = (props: any) => {
-    const [current, setCurrent] = useState(2);
+    const [current, setCurrent] = useState(0);
     const [userId, setUserId] = useState("");
     const [form] = Form.useForm();
     const { isModalOpen, setIsModalOpen, userEmail, usernameModal } = props;
@@ -27,11 +27,14 @@ const ModalActive = (props: any) => {
 
     const onFinishStep0 = async (values: IResendCode) => {
         const res = await postResendCode(values)
+        console.log('check res', res);
         if (res?.data) {
             setUserId(res?.data?.id)
             setCurrent(1);
-        } else {
-            toast.error(res.message);
+        } else if(res?.statusCode === 429) {
+            toast.error("Thời gian chờ để gửi lại mail là 90 giây");
+        }else{
+            toast.error(res?.message)
         }
     };
     const onFinishStep1 = async (values: IVerifyAccount) => {
