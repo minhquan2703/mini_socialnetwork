@@ -10,10 +10,11 @@ import { Comment } from '../comments/entities/comment.entity';
 import { Photo } from '../photos/entities/photo.entity';
 import aqp from 'api-query-params';
 import dayjs from 'dayjs';
+import { validate as isUuid } from 'uuid';
 
 @Injectable()
 export class PostsService {
-  private readonly baseUrl = 'http://localhost:8081';
+  private readonly baseUrl = `${process.env.BACKEND_URL}`;
 
   constructor(
     @InjectRepository(Post)
@@ -45,8 +46,6 @@ export class PostsService {
       if (!user) {
         throw new BadRequestException('Người dùng không tồn tại');
       }
-      console.log('User found:', user.id);
-
       // VALIDATION FILES
       if (files?.video && files?.images) {
         throw new BadRequestException(
@@ -71,8 +70,6 @@ export class PostsService {
       } else if (files?.images && files.images.length > 0) {
         finalMediaType = MediaType.IMAGE;
       }
-
-      console.log('Final media type:', finalMediaType);
 
       // VALIDATE CONSISTENCY giữa DTO và files
       if (createPostDto.mediaType) {
@@ -130,19 +127,16 @@ export class PostsService {
       let photos: Array<{ id: string; url: string }> = [];
 
       if (finalMediaType === MediaType.IMAGE && files?.images) {
-
         try {
           for (const file of files.images) {
-
             const photo = this.photosRepository.create({
               url: this.createFileUrl(file.filename),
-              key: file.filename, // Thêm key từ filename
+              key: file.filename, //thêm key từ filename
               post: savedPost, // Dùng savedPost thay vì post
               user: user,
             });
 
             const savedPhoto = await this.photosRepository.save(photo);
-            console.log('Photo saved:', savedPhoto.id);
 
             photos.push({
               id: savedPhoto.id,
@@ -150,14 +144,12 @@ export class PostsService {
             });
           }
         } catch (photoError) {
-          console.error('Error saving photos:', photoError);
           throw new BadRequestException(
             'Lỗi khi lưu ảnh: ' + photoError.message,
           );
         }
       }
 
-      console.log('=== CREATE POST SUCCESS ===');
 
       // RESPONSE
       return {
@@ -190,8 +182,7 @@ export class PostsService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-
-      // Handle unknown errors
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new BadRequestException('Lỗi server: ' + error.message);
     }
   }
@@ -216,7 +207,7 @@ export class PostsService {
       take: pageSize,
       skip: skip,
       order: { createdAt: 'DESC', ...sort },
-      relations: [`user`, `likes`, `likes.user`, `photos`], // Loại bỏ comments relation
+      relations: [`user`, `likes`, `likes.user`, `photos`],
       select: {
         id: true,
         content: true,
@@ -244,13 +235,12 @@ export class PostsService {
       },
     });
 
-    // Lấy commentCount riêng cho từng post
     const results = await Promise.all(
       data.map(async (post) => {
-        // Tính tổng số likes
+        //đếm like của mỗi post
         const likeCount = post.likes?.length || 0;
 
-        // Đếm comments riêng (không load toàn bộ data)
+        //đếm comments riêng (không load toàn bộ data)
         const commentCount = await this.commentsRepository.count({
           where: { post: { id: post.id } },
         });
@@ -263,15 +253,17 @@ export class PostsService {
           'DD/MM/YYYY [lúc] HH[:]mm',
         );
 
-        // Kiểm tra user hiện tại đã like chưa (chỉ khi có userId)
+        //kiểm tra user hiện tại đã like chưa (chỉ khi có userId)
         const isLiked = userId
           ? post.likes?.some((like) => like.user.id === userId) || false
           : undefined;
 
-        // Loại bỏ mảng likes khỏi response để bảo mật
+        //lọại bỏ mảng likes khỏi response để bảo mật
         const { likes, ...postWithoutLikes } = post;
 
-        // Trả về post với thông tin đã transform
+        //kiểm tra xem có phải tác giả ko
+        const isAuthor = userId ? post.user.id === userId : undefined;
+
         return {
           ...postWithoutLikes,
           likeCount,
@@ -279,25 +271,44 @@ export class PostsService {
           timeBefore,
           createdAt: createdAtFormat,
           updatedAt: updatedAtFormat,
-          ...(userId && { isLiked }), // Chỉ thêm field isLiked khi có userId
+          ...(userId && { isLiked, isAuthor }), //chỉ thêm field isLiked & isAuthor khi có userId
         };
       }),
     );
 
-    return { results, totalPages };
+    return { results, totalPages, current };
   }
-  // async create(createPostDto: CreatePostDto, userId: string) {
-  //   const user = await this.userRepository.findOne({ where: { id: userId } });
-  //   if (!user) {
-  //     throw new BadRequestException('người dùng không tồn tại');
-  //   }
 
-  //   const post = this.postRepository.create({
-  //     content: createPostDto.content || '',
-  //     user: user,
-  //     mediaType: createPostDto.mediaType || MediaType.TEXT,
-  //   });
+  // xoá 1 bài viết
+  async remove(id: string, userId: string) {
+    if (!isUuid(id) || !isUuid(userId)) {
+      throw new BadRequestException('ID không đúng định dạng');
+    }
 
-  //   return await this.postRepository.save(post);
-  // }
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+    if (!post) {
+      throw new BadRequestException('Bài viết không tồn tại');
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('Người dùng không tồn tại');
+    }
+
+    const isAuthor = post.user.id === user.id;
+    const isAdmin = user.role === 'ADMIN';
+
+    if (!isAuthor && !isAdmin) {
+      throw new BadRequestException('Bạn không có quyền xoá bài viết này');
+    }
+
+    const result = await this.postRepository.delete(id);
+    if (result.affected === 0) {
+      throw new BadRequestException('có lỗi xảy ra trong quá trình xoá');
+    }
+    return { deleted: true };
+  }
 }

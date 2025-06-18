@@ -250,7 +250,7 @@ export class UsersService {
   }
 
   async updateImage(userId: string, imageUrl: string) {
-    const fullImageUrl = `http://localhost:8081${imageUrl}`;
+    const fullImageUrl = `${process.env.BACKEND_URL}${imageUrl}`;
     await this.userRepository.update(userId, {
       image: fullImageUrl,
       avatarColor: null,

@@ -11,6 +11,8 @@ import {
   UploadedFiles,
   UseInterceptors,
   UploadedFile,
+  Delete,
+  Param,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -27,7 +29,7 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import { Throttle } from '@nestjs/throttler';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -85,6 +87,7 @@ export class PostsController {
 
   @Get()
   @PublicOptional()
+  @SkipThrottle({ default: true })
   async findAll(
     @Query() query: string,
     @Query('current') current: number,
@@ -94,5 +97,12 @@ export class PostsController {
     const userId = req.user?.id || null;
 
     return await this.postsService.getAll(query, +current, +pageSize, userId);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  remove(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    const userId = req.user?.id;
+    return this.postsService.remove(id, userId);
   }
 }

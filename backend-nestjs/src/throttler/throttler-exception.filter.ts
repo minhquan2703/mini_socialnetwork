@@ -14,7 +14,7 @@ export class ThrottlerExceptionFilter implements ExceptionFilter {
 
     response.status(HttpStatus.TOO_MANY_REQUESTS).json({
       statusCode: 429,
-      message: 'Bạn thao tác quá nhanh. Vui lòng chờ một lát.',
+      message: 'Bạn thao tác quá nhanh. Vui lòng chờ một chút.',
     });
   }
 }

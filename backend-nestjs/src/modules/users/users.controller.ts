@@ -22,6 +22,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
 import { AuthsService } from '@/auths/auths.service';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('users')
 export class UsersController {
@@ -45,30 +46,31 @@ export class UsersController {
     return this.usersService.findAll(query, +current, +pageSize);
   }
 
-  @Post('upload-image')
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const name = Date.now() + extname(file.originalname);
-          callback(null, name);
-        },
-      }),
-    }),
-  )
-  async uploadImage(
-    @Req() req, // Lấy user từ JWT token
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    const userId = req.user.id; // User id từ JWT
-    const imageUrl = `/uploads/${file.filename}`;
-    return this.usersService.updateImage(userId, imageUrl);
-  }
+  // @Post('upload-image')
+  // @UseGuards(JwtAuthGuard)
+  // @UseInterceptors(
+  //   FileInterceptor('file', {
+  //     storage: diskStorage({
+  //       destination: './uploads',
+  //       filename: (req, file, callback) => {
+  //         const name = Date.now() + extname(file.originalname);
+  //         callback(null, name);
+  //       },
+  //     }),
+  //   }),
+  // )
+  // async uploadImage(
+  //   @Req() req, 
+  //   @UploadedFile() file: Express.Multer.File,
+  // ) {
+  //   const userId = req.user.id; 
+  //   const imageUrl = `/uploads/${file.filename}`;
+  //   return this.usersService.updateImage(userId, imageUrl);
+  // }
 
   @Post('upload-avatar')
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 1, ttl: 60000 } })
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -80,16 +82,14 @@ export class UsersController {
       }),
     }),
   )
-  async uploadAvatar(
-    @Req() req, // Lấy user từ JWT token
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    const userId = req.user.id; // User id từ JWT
+  async uploadAvatar(@Req() req, @UploadedFile() file: Express.Multer.File) {
+    const userId = req.user.id; 
     const imageUrl = `/uploads/${file.filename}`;
     return this.authService.uploadAvatar(userId, imageUrl);
   }
 
   @Get(':id')
+  @Throttle({ default: { limit: 10, ttl: 3000 } })
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }

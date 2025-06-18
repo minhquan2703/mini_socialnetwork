@@ -24,14 +24,16 @@ import { JwtAuthGuard } from './auths/passport/jwt-auth.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ChatModule } from './modules/chat/chat.module';
+import { Chat } from './modules/chat/entities/chat.entity';
 
 @Module({
   imports: [
     ThrottlerModule.forRoot({
       throttlers: [
         {
-          ttl: 60000,
-          limit: 10,
+          ttl: 10000,
+          limit: 5,
         },
       ],
     }),
@@ -49,7 +51,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
         database: configService.get<string>('DB_DATABASE'),
         autoLoadEntities: true,
         synchronize: true,
-        entities: [User, Photo, Message, Comment, Like, Post],
+        entities: [User, Photo, Message, Comment, Like, Post, Chat],
       }),
     }),
 
@@ -88,6 +90,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     MessagesModule,
     AuthsModule,
     TasksModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [

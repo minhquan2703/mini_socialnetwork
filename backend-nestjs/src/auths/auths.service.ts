@@ -33,6 +33,25 @@ export class AuthsService {
     return user;
   }
 
+  async updateSession(user: any) {
+    const payload = { username: user?.username, sub: user.id };
+    const currentUser = await this.userRepository.findOne({
+      where: { id: user.id },
+    });
+    if (!currentUser) {
+      throw new BadRequestException('đã có lỗi xảy ra');
+    }
+    return {
+      id: currentUser.id,
+      username: currentUser.username,
+      email: currentUser.email,
+      name: currentUser.name,
+      role: currentUser.role,
+      image: currentUser.image,
+      avatarColor: currentUser.avatarColor,
+    };
+  }
+
   async login(user: any) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const payload = { username: user.username, sub: user.id };
@@ -54,7 +73,7 @@ export class AuthsService {
     return await this.usersService.handleSendCode(data);
   };
   uploadAvatar = async (userId: string, imageUrl: string) => {
-    const fullImageUrl = `http://localhost:8081${imageUrl}`;
+    const fullImageUrl = `${process.env.BACKEND_URL}${imageUrl}`;
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new BadRequestException('Người dùng không tồn tại');

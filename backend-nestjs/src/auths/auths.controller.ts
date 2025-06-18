@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  Req,
 } from '@nestjs/common';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import {
@@ -20,6 +21,7 @@ import { AuthsService } from './auths.service';
 import { LocalAuthGuard } from './passport/local-auth.guard';
 import { UsersService } from '@/modules/users/users.service';
 import { Throttle } from '@nestjs/throttler';
+import { JwtAuthGuard } from './passport/jwt-auth.guard';
 
 @Controller('auths')
 export class AuthsController {
@@ -28,10 +30,15 @@ export class AuthsController {
     private readonly usersServices: UsersService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMe(@Req() req) {
+    return this.authsService.updateSession(req.user);
+  }
+
   @Public()
   @Post('register')
-  @ResponseMessage('otp sẽ hết hạn sau 10 phút')
-  @Throttle({ default: { limit: 1, ttl: 600000 } })
+  @Throttle({ default: { limit: 1, ttl: 120000 } })
   register(@Body() registerDto: CreateAuthDto) {
     return this.authsService.handleRegister(registerDto);
   }
@@ -39,6 +46,7 @@ export class AuthsController {
   @Post('login')
   @Public()
   @UseGuards(LocalAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 90000 } })
   @ResponseMessage('Fetch login')
   async handleLogin(@Request() req) {
     return this.authsService.login(req.user);
@@ -46,6 +54,7 @@ export class AuthsController {
 
   @Public()
   @Post('verify')
+  @Throttle({ default: { limit: 1, ttl: 90000 } })
   async Verify(@Body() verifyDto: VerifyAuthDto) {
     return await this.usersServices.handleVerify(verifyDto);
   }
