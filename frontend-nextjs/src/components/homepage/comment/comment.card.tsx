@@ -47,7 +47,6 @@ const CommentCard = (props) => {
         comment.id,
         handleLikeComment,
     ]);
-    console.log("Parent render comment");
     return (
         <>
             <div

@@ -11,6 +11,7 @@ interface SessionContextType {
     email?: string;
     image?: string;
     avatarColor?: string;
+    access_token?: string;
   };
 }
 

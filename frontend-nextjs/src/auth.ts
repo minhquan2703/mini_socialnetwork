@@ -5,6 +5,9 @@ import { sendRequest } from "./utils/api";
 import { IUser } from "./types/next-auth";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+    session: {
+        strategy: "jwt", // 👈 Cực kỳ quan trọng để cho phép refresh bằng signIn
+    },
     providers: [
         Credentials({
             credentials: {
@@ -38,7 +41,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 } else {
                     throw new Error("Internal server error");
                 }
+            },
+        }),
+        Credentials({
+            id: "refresh-token-provider",
+            credentials: {
+                access_token: {},
+            },
+            authorize: async (credentials) => {
 
+                const res = await sendRequest<IBackendRes<IUser>>({
+                    method: "GET",
+                    url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auths/me`,
+                    headers: {
+                        Authorization: `Bearer ${credentials.access_token}`,
+                    },
+                });
+
+
+                if (+res.statusCode === 200 && res.data) {
+                    return {
+                        id: res.data.id,
+                        email: res.data.email,
+                        username: res.data.username,
+                        name: res.data.name,
+                        role: res.data.role,
+                        image: res.data.image,
+                        avatarColor: res.data.avatarColor,
+                        access_token: credentials.access_token,
+                    };
+                }
+                return null;
             },
         }),
     ],

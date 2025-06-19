@@ -107,7 +107,6 @@ const Register2 = () => {
                 setError("username", { type: "server", message: res.message })
             }
         }
-        console.log('check res', res)
     }
 
     const validationRules = {

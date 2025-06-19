@@ -1,8 +1,9 @@
 import { IRegister, IResendCode, IVerifyAccount } from "@/types/auth.type";
-import { sendRequest } from "@/utils/api";
+import { sendRequest, sendRequestFile } from "@/utils/api";
 
 
 const AUTH_BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auths`
+const USER_BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users`
 
 const postAuthRegister = async (data: IRegister): Promise<IBackendRes<IRegister>> => {
     const { name, username, email, password } = data;
@@ -18,6 +19,15 @@ const postAuthRegister = async (data: IRegister): Promise<IBackendRes<IRegister>
     })
     return response
 }
+
+const postAvatarUser = async (formData: FormData): Promise<IBackendRes<any>> => {
+    const response = await sendRequestFile<IBackendRes<any>>({
+        url: `${USER_BASE_URL}/upload-avatar`,
+        method: "POST",
+        body: formData,
+    });
+    return response;
+};
 
 const postAuthVerifyAccount = async (data: IVerifyAccount): Promise<IBackendRes<IVerifyAccount>> => {
     const response = await  sendRequest<IBackendRes<IVerifyAccount>>({
@@ -42,4 +52,4 @@ const postResendCode = async (data: IResendCode): Promise<IBackendRes<IResendCod
     })
     return response
 } 
-export {postAuthRegister, postAuthVerifyAccount, postResendCode}
+export {postAuthRegister, postAuthVerifyAccount, postResendCode, postAvatarUser}

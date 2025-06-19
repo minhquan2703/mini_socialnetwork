@@ -29,7 +29,6 @@ const Verify = ({ id }: { id: string }) => {
             toast.error(res.message);
         }
 
-        console.log('check res', res)
     };
 
     return (

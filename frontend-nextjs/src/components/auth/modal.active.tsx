@@ -27,7 +27,6 @@ const ModalActive = (props: any) => {
 
     const onFinishStep0 = async (values: IResendCode) => {
         const res = await postResendCode(values)
-        console.log('check res', res);
         if (res?.data) {
             setUserId(res?.data?.id)
             setCurrent(1);

@@ -47,7 +47,6 @@ const ModalForgotPassword = (props: any) => {
                 confirmPassword: confirmPassword,
             },
         });
-        console.log("check res", res);
         if (res?.data) {
             setCurrent(2);
         } else {

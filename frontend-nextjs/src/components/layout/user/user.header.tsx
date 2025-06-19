@@ -57,9 +57,10 @@ const UserHeader = () => {
                         fontWeight: "700",
                         letterSpacing: "-0.5px",
                         color: "#000",
+                        fontFamily: "sans-serif",
                     }}
                 >
-                    Minh Quân
+                    Social Media Mini
                 </div>
 
                 {/* Search Bar */}
@@ -192,10 +193,10 @@ const UserHeader = () => {
                         </Dropdown>
                     </Space>
                 )}
-                <ModalSetAvatar
+                {isModalOpen && <ModalSetAvatar
                     isModalOpen={isModalOpen}
                     setIsModalOpen={setIsModalOpen}
-                />
+                />}
             </Header>
         </>
     );

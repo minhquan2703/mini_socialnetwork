@@ -20,16 +20,12 @@ import type { MenuProps } from "antd";
 import React, { useState, useCallback, useTransition } from "react";
 import { toast } from "sonner";
 import { useSession } from "@/library/session.context";
-import ModalLoginRequire from "./modals/modal.loginrequire";
 import CommentPost from "./comment/post.comment";
-import { deleteOnePost } from "@/services/post.service";
 const PostCard = (props: any) => {
     const {
         handleCommentCountUpdate,
         post,
         handleLike,
-        likeLoading,
-        key,
         setShowModal,
         handleDeletePost,
     } = props;
@@ -42,7 +38,12 @@ const PostCard = (props: any) => {
     const authorActions: MenuProps["items"] = [
         { key: "update", label: "Chỉnh sửa bài viết" },
         { type: "divider" },
-        { key: "delete", label: "Xoá bài viết", danger: true, onClick: () =>  handleDeletePost(post.id)},
+        {
+            key: "delete",
+            label: "Xoá bài viết",
+            danger: true,
+            onClick: () => handleDeletePost(post.id),
+        },
     ];
     // Local state for optimistic UI
     const [localIsLiked, setLocalIsLiked] = useState(post.isLiked);
@@ -81,7 +82,6 @@ const PostCard = (props: any) => {
         });
     }, [localIsLiked, localLikeCount, post.id, handleLike]);
 
-    console.log("Parent render post card", post);
     return (
         <>
             <Card
@@ -317,13 +317,15 @@ const PostCard = (props: any) => {
                         Chia sẻ
                     </Button>
                 </div>
-                <CommentPost
-                    handleCommentCountUpdate={handleCommentCountUpdate}
-                    showComment={showComment}
-                    commentCount={post.commentCount}
-                    postId={post.id}
-                    setShowModal={setShowModal}
-                />
+                {showComment && (
+                    <CommentPost
+                        handleCommentCountUpdate={handleCommentCountUpdate}
+                        showComment={showComment}
+                        commentCount={post.commentCount}
+                        postId={post.id}
+                        setShowModal={setShowModal}
+                    />
+                )}
             </Card>
         </>
     );

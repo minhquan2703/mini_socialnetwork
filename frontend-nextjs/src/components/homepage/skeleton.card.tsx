@@ -6,7 +6,7 @@ const SkeletonCard = () => (
         style={{
             marginBottom: "16px",
             borderRadius: "12px",
-            border: "1px solidrgb(183, 183, 183)",
+            border: "1px solid rgb(236, 236, 236)",
             boxShadow: "none",
             height: "220px",
         }}

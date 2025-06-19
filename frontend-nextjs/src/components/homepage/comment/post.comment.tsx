@@ -5,7 +5,6 @@ import CreateComment from "./create.comment";
 import ListComment from "./list.comment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { postToggleLike } from "@/services/like.service";
-import { useSession } from "@/library/session.context";
 
 const LIMIT = 5;
 
@@ -13,8 +12,6 @@ const CommentPost = ({ handleCommentCountUpdate, postId, showComment, commentCou
     const [current, setCurrent] = useState(1);
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);    
-    const [likeCommentLoading, setCommentLikeLoading] = useState({});    
-    const session= useSession();
     const likeRequestCache = useRef(new Map());
 
 
@@ -82,7 +79,6 @@ const CommentPost = ({ handleCommentCountUpdate, postId, showComment, commentCou
         }
         setLoading(false)
     };
-    if (!showComment) return null
     return (
         <>
 
@@ -98,7 +94,6 @@ const CommentPost = ({ handleCommentCountUpdate, postId, showComment, commentCou
                     comments={comments}
                     handleLikeComment={handleLikeComment}
                     loading={loading}
-                    likeCommentLoading={likeCommentLoading}
                     setShowModal={setShowModal}
                 />
             ) : (

@@ -5,11 +5,11 @@ import {
     PictureOutlined,
     SendOutlined,
     SmileOutlined,
-    PlusOutlined,
+    InboxOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Card, Divider, Input, Space, Spin } from "antd";
 import { useState } from "react";
-import type { GetProp, UploadFile, UploadProps } from "antd";
+import type { UploadFile, UploadProps } from "antd";
 import { Image, Upload } from "antd";
 import { toast } from "sonner";
 import { useSession } from "@/library/session.context";
@@ -90,13 +90,13 @@ const CreatePostForm = (props: any) => {
                 border: 0,
                 background: "none",
                 height: "60px",
-                fontSize: "15px",
-                fontWeight: "700",
             }}
             type="button"
         >
-            <PlusOutlined />
-            <div style={{ marginTop: 8 }}>tải lên hoặc kéo tệp vào khung</div>
+            <InboxOutlined style={{ fontSize: "30px" }} />
+            <div style={{ marginTop: 8, fontSize: "15px", color:"#bbb" }}>
+                Tối đa 50MB / 9 hình ảnh hoặc 1 video
+            </div>
         </button>
     );
 

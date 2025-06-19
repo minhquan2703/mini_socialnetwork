@@ -6,7 +6,6 @@ export default auth((req) => {
     const { pathname } = req.nextUrl;
     const isLoggedIn = !!req.auth;
 
-    // Nếu truy cập /dashboard
     if (pathname.startsWith("/dashboard")) {
         if (!isLoggedIn) {
             return NextResponse.redirect(new URL("/auth", req.url));
@@ -22,10 +21,6 @@ export default auth((req) => {
     if (isLoggedIn && pathname.startsWith("/verify")) {
         return NextResponse.redirect(new URL("/", req.url));
     }
-    //các route khác vẫn cần đăng nhập (trừ auth pages)
-    // if (!isLoggedIn && !pathname.startsWith("/auth") && pathname !== "/") {
-    //     return NextResponse.redirect(new URL("/auth", req.url));
-    // }
 });
 
 export const config = {

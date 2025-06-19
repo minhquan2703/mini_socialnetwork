@@ -22,7 +22,7 @@ const getAllCommentOfOnePost = async (data: any): Promise<IBackendRes<any>> => {
     const response = await sendRequest<IBackendRes<any>>({
         url: `${COMMENT_BASE_URL}/getallcomment-post/?current=${current}&pageSize=${pageSize}&postId=${postId}`,
         method: "GET",
-    });
+    })
     return response;
 };
 export { postComment, getAllCommentOfOnePost };

@@ -7,21 +7,6 @@ const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
 });
 
-// 2. Gắn interceptor tự động thêm access_token vào mọi request
-// api.interceptors.request.use(
-//     async (config) => {
-//         const session = await getSession();
-//         const token = session?.user?.access_token;
-//         if (token) {
-//             config.headers = {
-//                 ...config.headers,
-//                 Authorization: `Bearer ${token}`,
-//             };
-//         }
-//         return config;
-//     },
-//     (error) => Promise.reject(error)
-// );
 api.interceptors.request.use(
     async (config) => {
         if (typeof window !== "undefined") {
@@ -143,9 +128,8 @@ export const sendRequestFile = async <T>(props: IRequest): Promise<T> => {
         ...nextOption,
     };
 
-    // QUAN TRỌNG: Với FormData, phải gửi trực tiếp, không wrap trong object
     if (body instanceof FormData) {
-        config.data = body; // Gửi FormData trực tiếp
+        config.data = body; 
     } else {
         config.data = body;
     }

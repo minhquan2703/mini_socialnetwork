@@ -1,10 +1,9 @@
 "use client";
+import React from "react";
 import CommentCard from "./comment.card";
-import { useState } from "react";
-import ModalLoginRequire from "../modals/modal.loginrequire";
 
 const ListComment = (props: any) => {
-    const { comments, handleLikeComment, likeCommentLoading, setShowModal } =
+    const { comments, handleLikeComment, setShowModal } =
         props;
     return (
         <>
@@ -14,11 +13,9 @@ const ListComment = (props: any) => {
                     key={comment.id}
                     comment={comment}
                     handleLikeComment={handleLikeComment}
-                    likeCommentLoading={likeCommentLoading}
                 />
             ))}
-            {/* <ModalLoginRequire show={showModalLoginRequire} setShow={setShowModalLoginRequire}/> */}
         </>
     );
 };
-export default ListComment;
+export default React.memo(ListComment);

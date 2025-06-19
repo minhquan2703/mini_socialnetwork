@@ -33,9 +33,6 @@ const Login = () => {
                     try {
                         const response = await fetch("/api/auth/session");
                         const session = await response.json();
-
-                        console.log("Session after login:", session);
-
                         if (session?.user?.role === "ADMIN") {
                             window.location.href = "/dashboard";
                         } else {
