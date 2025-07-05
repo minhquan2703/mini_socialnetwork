@@ -1,11 +1,14 @@
+import { ChildComment } from '@/modules/child-comments/entities/child-comment.entity';
 import { Comment } from '@/modules/comments/entities/comment.entity';
 import { Like } from '@/modules/likes/entities/like.entity';
 import { Photo } from '@/modules/photos/entities/photo.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
+import { Room } from '@/modules/rooms/entities/room.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -58,11 +61,19 @@ export class User {
   @OneToMany(() => Comment, (comment) => comment.user, { onDelete: 'CASCADE' })
   comments: Comment[];
 
+  @OneToMany(() => ChildComment, (childComment) => childComment.user, {
+    onDelete: 'CASCADE',
+  })
+  childComments: ChildComment[];
+
   @OneToMany(() => Like, (like) => like.user, { onDelete: 'CASCADE' })
   likes: Like[];
 
   @OneToMany(() => Photo, (photo) => photo.user, { onDelete: 'CASCADE' })
   photos: Photo[];
+
+  @ManyToMany(() => Room, (room) => room.users)
+  rooms: Room[];
 
   @CreateDateColumn()
   createdAt: Date;

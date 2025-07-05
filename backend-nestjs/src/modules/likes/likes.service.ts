@@ -3,15 +3,23 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateLikeDto, LikeType } from './dto/create-like.dto';
-import { UpdateLikeDto } from './dto/update-like.dto';
-import { Like } from './entities/like.entity';
+import { CreateLikeDto } from './dto/create-like.dto';
+import { Like, LikeType } from './entities/like.entity';
 import { Post } from '../posts/entities/post.entity';
 import { Repository } from 'typeorm';
 import { Comment } from '../comments/entities/comment.entity';
 import { Photo } from '../photos/entities/photo.entity';
 import { User } from '../users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ChildComment } from '../child-comments/entities/child-comment.entity';
+
+type LikeWhereCondition = {
+  user: { id: string };
+  post?: { id: string };
+  comment?: { id: string };
+  childComment?: { id: string };
+  photo?: { id: string };
+};
 
 @Injectable()
 export class LikesService {
@@ -22,6 +30,8 @@ export class LikesService {
     private postsRepository: Repository<Post>,
     @InjectRepository(Comment)
     private commentsRepository: Repository<Comment>,
+    @InjectRepository(ChildComment)
+    private childCommentsRepository: Repository<ChildComment>,
     @InjectRepository(Photo)
     private photosRepository: Repository<Photo>,
     @InjectRepository(User)
@@ -29,6 +39,8 @@ export class LikesService {
   ) {}
 
   async toggleLike(createLikeDto: CreateLikeDto, userId: string) {
+    const { postId, commentId, photoId, childCommentId, type } = createLikeDto;
+
     const user = await this.usersRepository.findOne({
       where: { id: userId },
     });
@@ -37,25 +49,25 @@ export class LikesService {
       throw new NotFoundException('User not found');
     }
 
-    let whereCondition: any = { user: { id: userId } };
-    let entity: any = null;
+    const whereCondition: LikeWhereCondition = { user: { id: userId } };
+    let entity: Post | Comment | Photo | ChildComment | null = null;
     let entityType: string;
 
-    switch (createLikeDto.type) {
+    switch (type) {
       case LikeType.POST:
-        if (!createLikeDto.postId) {
+        if (!postId) {
           throw new BadRequestException('postId is required');
         }
 
         entity = await this.postsRepository.findOne({
-          where: { id: createLikeDto.postId },
+          where: { id: postId },
         });
 
         if (!entity) {
           throw new NotFoundException('Post not found');
         }
 
-        whereCondition.post = { id: createLikeDto.postId };
+        whereCondition.post = { id: postId };
         entityType = 'post';
         break;
 
@@ -65,31 +77,45 @@ export class LikesService {
         }
 
         entity = await this.commentsRepository.findOne({
-          where: { id: createLikeDto.commentId },
+          where: { id: commentId },
         });
 
         if (!entity) {
           throw new NotFoundException('Comment not found');
         }
 
-        whereCondition.comment = { id: createLikeDto.commentId };
+        whereCondition.comment = { id: commentId };
         entityType = 'comment';
         break;
 
+      case LikeType.CHILDCOMMENT:
+        if (!childCommentId) {
+          throw new BadRequestException('childCommentId is required');
+        }
+        entity = await this.childCommentsRepository.findOne({
+          where: { id: childCommentId },
+        });
+        if (!entity) {
+          throw new BadRequestException('ChildComment has not found');
+        }
+        whereCondition.childComment = { id: childCommentId };
+        entityType = 'child-comment';
+        break;
+
       case LikeType.PHOTO:
-        if (!createLikeDto.photoId) {
+        if (photoId) {
           throw new BadRequestException('photoId is required');
         }
 
         entity = await this.photosRepository.findOne({
-          where: { id: createLikeDto.photoId },
+          where: { id: photoId },
         });
 
         if (!entity) {
-          throw new NotFoundException('Photo not found');
+          throw new NotFoundException('Photo has not found');
         }
 
-        whereCondition.photo = { id: createLikeDto.photoId };
+        whereCondition.photo = { id: photoId };
         entityType = 'photo';
         break;
 
@@ -105,22 +131,24 @@ export class LikesService {
       await this.likesRepository.remove(existingLike);
       return {
         action: 'unliked',
-        message: `Successfully unliked ${entityType}`,
         isLiked: false,
       };
     } else {
       const like = new Like();
       like.user = user;
-
-      switch (createLikeDto.type) {
+      like.type = type;
+      switch (type) {
         case LikeType.POST:
-          like.post = entity;
+          like.post = entity as Post;
           break;
         case LikeType.COMMENT:
-          like.comment = entity;
+          like.comment = entity as Comment;
+          break;
+        case LikeType.CHILDCOMMENT:
+          like.childComment = entity as ChildComment;
           break;
         case LikeType.PHOTO:
-          like.photo = entity;
+          like.photo = entity as Photo;
           break;
       }
 
@@ -173,42 +201,6 @@ export class LikesService {
         name: user?.name,
         username: user?.username,
       },
-    };
-  }
-
-  async getEntityLikes(type: LikeType, entityId: string) {
-    let whereCondition: any = {};
-
-    switch (type) {
-      case LikeType.POST:
-        whereCondition.post = { id: entityId };
-        break;
-      case LikeType.COMMENT:
-        whereCondition.comment = { id: entityId };
-        break;
-      case LikeType.PHOTO:
-        whereCondition.photo = { id: entityId };
-        break;
-      default:
-        throw new BadRequestException('không thể xác định vật thể được like');
-    }
-
-    const likes = await this.likesRepository.find({
-      where: whereCondition,
-      relations: ['user'],
-    });
-
-    return {
-      count: likes.length,
-      likes: likes.map((like) => ({
-        id: like.id,
-        user: {
-          id: like.user.id,
-          username: like.user.username,
-          name: like.user.name,
-        },
-        createdAt: like.createdAt,
-      })),
     };
   }
 }

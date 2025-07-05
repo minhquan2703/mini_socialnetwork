@@ -9,10 +9,13 @@ import { User } from '../users/entities/user.entity';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import aqp from 'api-query-params';
+import { ChildComment } from '../child-comments/entities/child-comment.entity';
 
 @Injectable()
 export class CommentsService {
   constructor(
+    @InjectRepository(ChildComment)
+    private childCommentsRepository: Repository<ChildComment>,
     @InjectRepository(Comment)
     private commentsRepository: Repository<Comment>,
     @InjectRepository(Photo)
@@ -58,10 +61,10 @@ export class CommentsService {
     comment.content = createCommentDto.content || '';
     comment.user = user;
     if (post) {
-      comment.post = post;
+      comment.post = post as Post;
     }
     if (photo) {
-      comment.photo = photo;
+      comment.photo = photo as Photo;
     }
     await this.commentsRepository.save(comment);
     const timeBefore = dayjs(comment.createdAt).fromNow();
@@ -105,10 +108,10 @@ export class CommentsService {
     const { filter, sort } = aqp(query);
     if (filter.current) delete filter.current;
     if (filter.pageSize) delete filter.pageSize;
-    let filterPostId = postId; // Mặc định dùng postId từ parameter
+    let filterPostId = postId;
     if (filter.postId) {
-      filterPostId = filter.postId; // Có thể override bằng query string
-      delete filter.postId; // Xóa khỏi filter
+      filterPostId = filter.postId;
+      delete filter.postId;
     }
     if (!current) current = 1;
     if (!pageSize) pageSize = 5;
@@ -116,10 +119,9 @@ export class CommentsService {
 
     const whereCondition = {
       ...filter,
-      post: { id: filterPostId }, // Chỉ lấy comment của post này
+      post: { id: filterPostId },
     };
 
-    // Đếm tổng số comment
     const totalItems = await this.commentsRepository.count({
       where: whereCondition,
     });
@@ -184,5 +186,86 @@ export class CommentsService {
     );
 
     return { results, totalPages };
+  }
+  async getChildComment(
+    query: string,
+    current: number,
+    pageSize: number,
+    userId: string | null,
+    commentId: string,
+  ) {
+    const comment = await this.commentsRepository.findOne({
+      where: { id: commentId },
+    });
+    if (!comment) {
+      throw new BadRequestException('Invalid Comment');
+    }
+    const { filter, sort } = aqp(query);
+    if (filter.current) delete filter.current;
+    if (filter.pageSize) delete filter.pageSize;
+    let filterCommentId = commentId;
+    if (filter.commentId) {
+      filterCommentId = filter.commentId;
+      delete filter.commentId;
+    }
+    if (!current) current = 1;
+    if (!pageSize) pageSize = 5;
+    const skip = (current - 1) * pageSize;
+    const whereCondition = {
+      ...filter,
+      comment: { id: filterCommentId },
+    };
+    const totalItems = await this.childCommentsRepository.count({
+      where: whereCondition,
+    });
+    const totalPages = Math.ceil(totalItems / pageSize);
+
+    const data = await this.childCommentsRepository.find({
+      where: whereCondition,
+      take: pageSize,
+      skip: skip,
+      order: { createdAt: 'DESC', ...sort },
+      relations: [`user`, `likes`, `likes.user`],
+      select: {
+        id: true,
+        content: true,
+        likes: {
+          id: true,
+          user: {
+            id: true,
+          },
+        },
+        user: {
+          id: true,
+          name: true,
+          username: true,
+          image: true,
+          avatarColor: true,
+        },
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    const result = data.map((childComment) => {
+      const likeCount = childComment.likes.length;
+      const timeBefore = dayjs(childComment.createdAt).fromNow();
+      const createdAtFormat = dayjs(childComment.createdAt).format(
+        'DD/MM/YYYY [-] HH[:]mm',
+      );
+      const isLiked = userId
+        ? childComment.likes?.some((like) => like.user.id === userId) || false
+        : undefined;
+
+      const { likes, ...childCommentClone } = childComment;
+      return {
+        ...childCommentClone,
+        likeCount,
+        isLiked,
+        timeBefore,
+        createdAtFormat,
+        ...(userId && { isLiked }),
+      };
+    });
+    return { result, totalPages };
   }
 }

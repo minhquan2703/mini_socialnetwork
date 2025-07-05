@@ -17,6 +17,9 @@ export class Message {
   @Column()
   receiverId: string;
 
+  @Column({ default: false })
+  isUnsend: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

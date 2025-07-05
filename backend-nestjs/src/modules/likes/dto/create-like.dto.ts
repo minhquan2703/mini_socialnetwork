@@ -1,23 +1,19 @@
-import { IsEnum, IsOptional, IsUUID } from 'class-validator';
+import { IsEnum, IsOptional } from 'class-validator';
+import { LikeType } from '../entities/like.entity';
 
-export enum LikeType {
-  POST = 'post',
-  COMMENT = 'comment',
-  PHOTO = 'photo',
-}
 export class CreateLikeDto {
   @IsEnum(LikeType)
   type: LikeType;
 
   @IsOptional()
-  @IsUUID()
-  postId?: string;
+  postId: string;
 
   @IsOptional()
-  @IsUUID()
-  commentId?: string;
+  commentId: string;
 
   @IsOptional()
-  @IsUUID()
-  photoId?: string;
+  childCommentId: string;
+
+  @IsOptional()
+  photoId: string;
 }

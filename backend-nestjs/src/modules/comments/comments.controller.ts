@@ -3,9 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   UseGuards,
   Req,
   Query,
@@ -52,6 +49,25 @@ export class CommentsController {
       +pageSize,
       userId,
       postId,
+    );
+  }
+
+  @Get('childcomment')
+  @PublicOptional()
+  async getChildComment(
+    @Query() query: string,
+    @Query('current') current: number,
+    @Query('pageSize') pageSize: number,
+    @Query('commentId') commentId: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user?.id || null;
+    return await this.commentsService.getChildComment(
+      query,
+      +current,
+      +pageSize,
+      userId,
+      commentId,
     );
   }
 }

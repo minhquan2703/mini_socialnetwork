@@ -1,3 +1,4 @@
+import { ChildComment } from '@/modules/child-comments/entities/child-comment.entity';
 import { Like } from '@/modules/likes/entities/like.entity';
 import { Photo } from '@/modules/photos/entities/photo.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
@@ -25,6 +26,11 @@ export class Comment {
 
   @OneToMany(() => Like, (like) => like.comment, { onDelete: 'CASCADE' })
   likes: Like[];
+
+  @OneToMany(() => ChildComment, (childComment) => childComment.comment, {
+    onDelete: 'CASCADE',
+  })
+  childComments: ChildComment[];
 
   @ManyToOne(() => Photo, (photo) => photo.comment, { onDelete: 'CASCADE' })
   photo: Photo;

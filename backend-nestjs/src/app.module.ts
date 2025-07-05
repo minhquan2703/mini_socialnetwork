@@ -26,6 +26,10 @@ import { TasksModule } from './modules/tasks/tasks.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ChatModule } from './modules/chat/chat.module';
 import { Chat } from './modules/chat/entities/chat.entity';
+import { RoomsModule } from './modules/rooms/rooms.module';
+import { Room } from './modules/rooms/entities/room.entity';
+import { ChildComment } from './modules/child-comments/entities/child-comment.entity';
+import { ChildCommentsModule } from './modules/child-comments/child-comments.module';
 
 @Module({
   imports: [
@@ -51,7 +55,17 @@ import { Chat } from './modules/chat/entities/chat.entity';
         database: configService.get<string>('DB_DATABASE'),
         autoLoadEntities: true,
         synchronize: true,
-        entities: [User, Photo, Message, Comment, Like, Post, Chat],
+        entities: [
+          User,
+          Photo,
+          Message,
+          Comment,
+          Like,
+          Post,
+          Chat,
+          Room,
+          ChildComment,
+        ],
       }),
     }),
 
@@ -61,7 +75,6 @@ import { Chat } from './modules/chat/entities/chat.entity';
         transport: {
           host: 'smtp.gmail.com',
           port: 465,
-          // ignoreTLS: true,
           secure: true,
           auth: {
             user: configService.get<string>('MAIL_USER'),
@@ -71,10 +84,9 @@ import { Chat } from './modules/chat/entities/chat.entity';
         defaults: {
           from: '"No Reply" <no-reply@localhost>',
         },
-        // preview: true,
         template: {
           dir: process.cwd() + '/src/mail/templates/',
-          adapter: new HandlebarsAdapter(), // or new PugAdapter() or new EjsAdapter()
+          adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
           },
@@ -91,6 +103,8 @@ import { Chat } from './modules/chat/entities/chat.entity';
     AuthsModule,
     TasksModule,
     ChatModule,
+    RoomsModule,
+    ChildCommentsModule,
   ],
   controllers: [AppController],
   providers: [

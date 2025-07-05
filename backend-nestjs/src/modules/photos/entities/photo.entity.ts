@@ -1,6 +1,7 @@
 import { Comment } from '@/modules/comments/entities/comment.entity';
 import { Like } from '@/modules/likes/entities/like.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
+import { Room } from '@/modules/rooms/entities/room.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import {
   BaseEntity,
@@ -38,6 +39,9 @@ export class Photo extends BaseEntity {
 
   @ManyToOne(() => Post, (post) => post.photos, { onDelete: 'CASCADE' })
   post: Post;
+
+  @ManyToOne(() => Room, (room) => room.photos, { onDelete: 'CASCADE' })
+  room: Room;
 
   @CreateDateColumn()
   createdAt: Date;

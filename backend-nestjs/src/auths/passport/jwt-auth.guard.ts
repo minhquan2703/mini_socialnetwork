@@ -29,7 +29,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     if (isPublicOptional) {
-      // Cho phép truy cập nhưng vẫn cố gắng validate token
+      //Cho phép truy cập nhưng vẫn cố gắng validate token
       return this.validateOptional(context);
     }
 

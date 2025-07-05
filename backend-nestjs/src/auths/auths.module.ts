@@ -28,6 +28,6 @@ import { User } from '@/modules/users/entities/user.entity';
   ],
   providers: [AuthsService, JwtStrategy, LocalStrategy],
   controllers: [AuthsController],
-  exports: [AuthsService],
+  exports: [AuthsService, JwtModule],
 })
 export class AuthsModule {}

@@ -3,14 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   UseGuards,
   Request,
   Req,
 } from '@nestjs/common';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import {
   ActiveAuthDto,
   CreateAuthDto,
@@ -38,7 +34,7 @@ export class AuthsController {
 
   @Public()
   @Post('register')
-  @Throttle({ default: { limit: 1, ttl: 120000 } })
+  @Throttle({ default: { limit: 1, ttl: 2 * 60 * 1000 } })
   register(@Body() registerDto: CreateAuthDto) {
     return this.authsService.handleRegister(registerDto);
   }
@@ -46,7 +42,7 @@ export class AuthsController {
   @Post('login')
   @Public()
   @UseGuards(LocalAuthGuard)
-  @Throttle({ default: { limit: 3, ttl: 90000 } })
+  @Throttle({ default: { limit: 10, ttl: 60 * 60 * 1000 } })
   @ResponseMessage('Fetch login')
   async handleLogin(@Request() req) {
     return this.authsService.login(req.user);
@@ -54,13 +50,12 @@ export class AuthsController {
 
   @Public()
   @Post('verify')
-  @Throttle({ default: { limit: 1, ttl: 90000 } })
   async Verify(@Body() verifyDto: VerifyAuthDto) {
     return await this.usersServices.handleVerify(verifyDto);
   }
   @Public()
   @Post('resend-active-code')
-  @Throttle({ default: { limit: 1, ttl: 90000 } })
+  @Throttle({ default: { limit: 1, ttl: 1.5 * 60 * 1000 } })
   async ResendActiveCode(@Body() activeDto: ActiveAuthDto) {
     return await this.authsService.handleSendCode(activeDto);
   }

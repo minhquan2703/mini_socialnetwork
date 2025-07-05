@@ -17,11 +17,11 @@ export class Chat {
   roomId: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'sender_id' })
+  @JoinColumn({ name: 'senderId' })
   sender: User;
 
   @Column()
-  sender_id: string;
+  senderId: string;
 
   @Column()
   content: string;
