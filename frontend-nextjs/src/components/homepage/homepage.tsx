@@ -21,12 +21,12 @@ const HomePage = () => {
 
     useEffect(() => {
         getDataPosts();
+        window.scrollTo(0,0);
     }, []);
 
     const getDataPosts = async () => {
         setLoading(true);
         const res = await getAllPosts({ current: current, pageSize: LIMIT });
-        console.log("check res get data", res);
         if (res && res?.data) {
             setPosts(res.data.results);
         }
@@ -46,7 +46,6 @@ const HomePage = () => {
                 current: nextPage,
                 pageSize: LIMIT,
             });
-            console.log("check res has more", res);
             if (res && res?.data) {
                 const newPosts = res.data.results;
                 setPosts((prevPosts) => [...prevPosts, ...newPosts]);

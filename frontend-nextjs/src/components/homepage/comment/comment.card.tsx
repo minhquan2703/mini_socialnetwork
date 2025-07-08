@@ -1,12 +1,14 @@
 "use client";
 
-import { MoreOutlined, StarFilled } from "@ant-design/icons";
+import { CommentOutlined, MoreOutlined, StarFilled } from "@ant-design/icons";
 import { Avatar, Button, Dropdown, MenuProps } from "antd";
 import React, { useCallback, useState, useTransition } from "react";
 import { useSession } from "@/library/session.context";
 import { toast } from "sonner";
+import CreateChildComment from "./comment.child/create.child.comment";
+import ContainerChildComment from "./comment.child/container.child.comment";
 
-const CommentCard = (props) => {
+const CommentCard = (props: any) => {
     const moreActions: MenuProps["items"] = [
         { key: "1", label: "Báo cáo", danger: true },
         { key: "2", label: "Theo dõi" },
@@ -18,6 +20,7 @@ const CommentCard = (props) => {
     const [localCommentIsLiked, setCommentLocalIsLiked] = useState(
         comment.isLiked
     );
+    const [isShowChildComment, setIsShowChildComment] = useState(false);
     const [isPending, startTransition] = useTransition();
     const session = useSession();
     const handleOptimisticLike = useCallback(() => {
@@ -52,21 +55,17 @@ const CommentCard = (props) => {
             <div
                 style={{
                     marginBottom: "12px",
-                    position: "relative",
+                    display: "flex",
+                    gap: "10px",
                     transition: "all 0.3s ease",
                 }}
             >
                 {/* Gradient accent line */}
                 <div
                     style={{
-                        position: "absolute",
-                        left: "40px",
-                        top: "0",
-                        bottom: "0",
                         width: "2px",
                         background:
-                            "linear-gradient(180deg, #e0e0e0 0%, transparent 100%)",
-                        opacity: 0.6,
+                            "linear-gradient(180deg, #e0e0e0 70%, transparent 100%)",
                     }}
                 />
 
@@ -75,7 +74,7 @@ const CommentCard = (props) => {
                         display: "flex",
                         gap: "12px",
                         padding: "12px 0",
-                        position: "relative",
+                        width: "100%",
                     }}
                 >
                     {/* Avatar với hover effect */}
@@ -225,23 +224,30 @@ const CommentCard = (props) => {
                             </span>
 
                             {/*like button*/}
-                            <div style={{display: "flex", gap: "8px"}}>
+                            <div style={{ display: "flex", gap: "8px" }}>
                                 <Button
                                     icon={<StarFilled />}
                                     onClick={handleOptimisticLike}
                                     style={{
-                                        border: `1px solid ${localCommentIsLiked ? "red" : "gold"}`,
-                                        backgroundColor: localCommentIsLiked ? "red" : "white",
-                                        color: localCommentIsLiked ? "yellow" : "gold",
+                                        border: `1px solid ${
+                                            localCommentIsLiked ? "red" : "gold"
+                                        }`,
+                                        backgroundColor: localCommentIsLiked
+                                            ? "red"
+                                            : "white",
+                                        color: localCommentIsLiked
+                                            ? "yellow"
+                                            : "gold",
                                         fontSize: "13px",
                                         width: "35px",
                                         height: "22px",
                                         borderRadius: "2px",
                                         transition: "all 0.3s ease",
-                                        transform: localCommentIsLiked ? "scale(1.05)" : "scale(1)",
+                                        transform: localCommentIsLiked
+                                            ? "scale(1.05)"
+                                            : "scale(1)",
                                     }}
-                                >
-                                </Button>
+                                ></Button>
                                 <span
                                     style={{
                                         fontSize: "13px",
@@ -261,17 +267,24 @@ const CommentCard = (props) => {
                             <Button
                                 variant="text"
                                 color="default"
-                                size="small"
+                                size="middle"
                                 onClick={() =>
-                                    toast.error("Tính năng đang phát triển")
+                                    setIsShowChildComment(!isShowChildComment)
                                 }
                             >
-                                Trả lời
+                                <CommentOutlined />
+                                <span>{comment.childCommentsCount}</span>
                             </Button>
                         </div>
                     </div>
                 </div>
             </div>
+            {isShowChildComment && (
+                <ContainerChildComment
+                    isShowChildComment={isShowChildComment}
+                    commentId={comment.id}
+                />
+            )}
         </>
     );
 };

@@ -54,7 +54,6 @@ export const sendRequest = async <T>(props: IRequest): Promise<T> => {
 
     try {
         const res = await api.request<T>(config);
-        console.log("Request headers:", config.headers);
         return res.data;
     } catch (error: any) {
         return {

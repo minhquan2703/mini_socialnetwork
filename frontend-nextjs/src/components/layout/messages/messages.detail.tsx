@@ -21,7 +21,7 @@ import { useSession } from "@/library/session.context";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
-const UserSideBar = () => {
+const MessagesDetail = () => {
     const session = useSession();
     const { Sider } = Layout;
 
@@ -31,81 +31,20 @@ const UserSideBar = () => {
             type: "group",
             children: [
                 {
-                    key: "home",
-                    label: (
-                        <Link
-                            href={"/"}
-                            style={{ color: "inherit", textDecoration: "none" }}
-                        >
-                            Trang chủ
-                        </Link>
-                    ),
+                    key: "profile",
+                    label: "Xem hồ sơ",
                     icon: <HomeFilled />,
                     onClick: () => alert("Tính năng đang phát triển"),
                 },
                 {
-                    key: "messages",
-                    label: (
-                        <Link
-                            href={"/messages"}
-                            style={{ color: "inherit", textDecoration: "none" }}
-                        >
-                            <div
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                    width: "100%",
-                                }}
-                            >
-                                Tin nhắn
-                                <Badge
-                                    count={`99+`}
-                                    size="small"
-                                    color="#FF4D4F"
-                                    styles={{
-                                        indicator: {
-                                            fontSize: "11px",
-                                        },
-                                    }}
-                                />
-                            </div>
-                        </Link>
-                    ),
-                    icon: <MessageOutlined />,
-                },
-                {
-                    key: "friends",
-                    label: (
-                        <Link
-                            href={"/"}
-                            style={{ color: "inherit", textDecoration: "none" }}
-                        >
-                            Bạn bè
-                        </Link>
-                    ),
+                    key: "block",
+                    label: "Chặn người dùng",
                     icon: <TeamOutlined />,
                     onClick: () => alert("Tính năng đang phát triển"),
                 },
                 {
-                    key: "stories",
-                    label: "Bảng tin",
-                    icon: <AppstoreOutlined />,
-                    children: [
-                        { key: "5", label: "Tin của bạn" },
-                        { key: "6", label: "Kho lưu trữ" },
-                    ],
-                },
-                {
                     key: "settings",
-                    label: (
-                        <Link
-                            href={"/"}
-                            style={{ color: "inherit", textDecoration: "none" }}
-                        >
-                            Cài đặt
-                        </Link>
-                    ),
+                    label: "Cài đặt",
                     icon: <SettingOutlined />,
                     onClick: () => alert("Tính năng đang phát triển"),
                 },
@@ -114,97 +53,7 @@ const UserSideBar = () => {
                 },
                 {
                     key: "contact",
-                    label: "Liên hệ với tôi",
-                    icon: <WhatsAppOutlined />,
-                    children: [
-                        {
-                            key: "9",
-                            label: (
-                                <Link
-                                    href={"https://www.facebook.com/pmq0207/"}
-                                    style={{
-                                        color: "inherit",
-                                        textDecoration: "none",
-                                    }}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    Facebook
-                                </Link>
-                            ),
-                            icon: <FacebookFilled />,
-                        },
-                        {
-                            key: "10",
-                            label: (
-                                <Link
-                                    href={
-                                        "https://www.linkedin.com/in/minhquan02073/"
-                                    }
-                                    style={{
-                                        color: "inherit",
-                                        textDecoration: "none",
-                                    }}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    Linkedin
-                                </Link>
-                            ),
-                            icon: <LinkedinFilled />,
-                        },
-                        {
-                            key: "11",
-                            label: (
-                                <Link
-                                    href={"mailto:minhquan02073@gmail.com"}
-                                    style={{
-                                        color: "inherit",
-                                        textDecoration: "none",
-                                    }}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    Email
-                                </Link>
-                            ),
-                            icon: <GoogleCircleFilled />,
-                            onClick: () => alert("minhquan02073@gmail.com"),
-                        },
-                    ],
-                },
-            ],
-        },
-    ];
-    const itemsNotAuth: MenuItem[] = [
-        {
-            key: "grp",
-            type: "group",
-            children: [
-                {
-                    key: "home",
-                    label: (
-                        <Link
-                            href={"/"}
-                            style={{ color: "inherit", textDecoration: "none" }}
-                        >
-                            Trang chủ
-                        </Link>
-                    ),
-                    icon: <HomeFilled />,
-                },
-                {
-                    key: "stories",
-                    label: "Bảng tin",
-                    icon: <AppstoreOutlined />,
-                    onClick: () => alert("Tính năng đang phát triển"),
-                },
-                {
-                    type: "divider",
-                },
-                {
-                    key: "contact",
-                    label: "Liên hệ với tôi",
+                    label: "Hình ảnh/Video",
                     icon: <WhatsAppOutlined />,
                     children: [
                         {
@@ -269,15 +118,9 @@ const UserSideBar = () => {
 
     return (
         <Sider
-            width={220}
+            width={"100%"}
             style={{
                 background: "#fff",
-                borderRight: "1px solid #f0f0f0",
-                position: "fixed",
-                left: 0,
-                top: 0,
-                height: "100vh",
-                zIndex: 100,
             }}
         >
             {/* User Profile Section */}
@@ -404,4 +247,4 @@ const UserSideBar = () => {
     );
 };
 
-export default UserSideBar;
+export default MessagesDetail;

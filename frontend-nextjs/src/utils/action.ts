@@ -2,9 +2,10 @@
 import { signIn } from "@/auth"
 
 export async function authenticate(username: string, password: string) {
+    const email = "";
     try{
         const r = await signIn('credentials', {
-            username: username,
+            username: username, 
             password: password,
             // callbackUrl: '/',
             redirect: false,

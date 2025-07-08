@@ -30,6 +30,7 @@ import {
   FileInterceptor,
 } from '@nestjs/platform-express';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
+import { CommentsService } from '../comments/comments.service';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -40,7 +41,10 @@ interface AuthenticatedRequest extends Request {
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly commentsService: CommentsService,
+  ) {}
 
   @Post('create')
   @UseGuards(JwtAuthGuard)
@@ -82,6 +86,25 @@ export class PostsController {
       createPostDto,
       req.user.id,
       files,
+    );
+  }
+
+  @Get(':postId/comments')
+  @PublicOptional()
+  async getComments(
+    @Query() query: string,
+    @Param('postId') postId: string,
+    @Query('current') current: number,
+    @Query('pageSize') pageSize: number,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user?.id || null;
+    return await this.commentsService.getAllCommentOfOnePost(
+      query,
+      +current,
+      +pageSize,
+      userId,
+      postId,
     );
   }
 

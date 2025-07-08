@@ -7,10 +7,14 @@ import { User } from '../users/entities/user.entity';
 import { Like } from '../likes/entities/like.entity';
 import { Comment } from '../comments/entities/comment.entity';
 import { Photo } from '../photos/entities/photo.entity';
+import { CommentsService } from '../comments/comments.service';
+import { ChildComment } from '../child-comments/entities/child-comment.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post, User, Like, Comment, Photo])],
+  imports: [
+    TypeOrmModule.forFeature([Post, User, Like, Comment, Photo, ChildComment]),
+  ],
   controllers: [PostsController],
-  providers: [PostsService],
+  providers: [PostsService, CommentsService],
 })
 export class PostsModule {}

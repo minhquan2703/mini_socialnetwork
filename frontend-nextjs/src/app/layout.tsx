@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import "@/app/globals.css";

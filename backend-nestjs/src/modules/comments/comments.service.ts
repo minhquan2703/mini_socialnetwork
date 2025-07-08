@@ -158,7 +158,9 @@ export class CommentsService {
       data.map(async (comment) => {
         // Tính tổng số likes
         const likeCount = comment.likes?.length || 0;
-
+        const childCommentsCount = await this.childCommentsRepository.count({
+          where: { comment: { id: comment.id } },
+        });
         const timeBefore = dayjs(comment.createdAt).fromNow();
         const createdAtFormat = dayjs(comment.createdAt).format(
           'DD/MM/YYYY [lúc] HH[:]mm',
@@ -176,6 +178,7 @@ export class CommentsService {
 
         return {
           ...commentWithoutLikes,
+          childCommentsCount,
           likeCount,
           timeBefore,
           createdAt: createdAtFormat,
@@ -248,6 +251,7 @@ export class CommentsService {
     });
     const result = data.map((childComment) => {
       const likeCount = childComment.likes.length;
+
       const timeBefore = dayjs(childComment.createdAt).fromNow();
       const createdAtFormat = dayjs(childComment.createdAt).format(
         'DD/MM/YYYY [-] HH[:]mm',
@@ -256,13 +260,14 @@ export class CommentsService {
         ? childComment.likes?.some((like) => like.user.id === userId) || false
         : undefined;
 
-      const { likes, ...childCommentClone } = childComment;
+      const { likes, createdAt, updatedAt, ...childCommentClone } =
+        childComment;
       return {
         ...childCommentClone,
         likeCount,
+        createdAtFormat,
         isLiked,
         timeBefore,
-        createdAtFormat,
         ...(userId && { isLiked }),
       };
     });

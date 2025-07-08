@@ -8,7 +8,7 @@ import { postToggleLike } from "@/services/like.service";
 
 const LIMIT = 5;
 
-const CommentPost = ({ handleCommentCountUpdate, postId, showComment, commentCount, setShowModal }) => {
+const CommentPost = ({ handleCommentCountUpdate, postId, showComment, commentCount, setShowModal }: any) => {
     const [current, setCurrent] = useState(1);
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);    

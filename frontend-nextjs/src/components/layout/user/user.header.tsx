@@ -117,7 +117,7 @@ const UserHeader = () => {
                 ) : (
                     <Space size={12}>
                         {/* Notifications */}
-                        <Button
+                        {/* <Button
                             type="text"
                             shape="circle"
                             size="large"
@@ -140,7 +140,7 @@ const UserHeader = () => {
                                     />
                                 </Badge>
                             }
-                        />
+                        /> */}
 
                         {/* User Dropdown */}
                         <Dropdown

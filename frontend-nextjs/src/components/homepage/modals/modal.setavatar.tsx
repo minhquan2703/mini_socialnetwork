@@ -43,7 +43,6 @@ const ModalSetAvatar = (props: any) => {
                 redirect: false,
                 access_token: session?.user?.access_token,
             });
-            console.log('check relogin', resRelogin)
             if(resRelogin.error && resRelogin.status !== 200){
                 toast.error('Đã có lỗi xảy ra trong quá trình cập nhật, vui lòng đăng nhập lại');
                 signOut();
@@ -67,10 +66,9 @@ const ModalSetAvatar = (props: any) => {
     //     setSelectedFile(null);
     // };
     
-    // const handleCancel = () => {
-    //     resetModal();
-    //     setIsModalOpen(false);
-    // };
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
 
     const hasMounted = useHasMounted();
     if (!hasMounted) return <></>;
