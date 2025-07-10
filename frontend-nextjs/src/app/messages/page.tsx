@@ -1,9 +1,6 @@
 const MessageHome = () =>{
     return(
         <>
-            <div>
-                Home mess
-            </div>
         </>
     )
 }

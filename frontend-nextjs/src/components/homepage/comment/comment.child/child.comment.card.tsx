@@ -5,7 +5,6 @@ import { Avatar, Button } from "antd";
 import React, { useCallback, useState, useTransition } from "react";
 import { useSession } from "@/library/session.context";
 import { IChildComment } from "@/types/comment.type";
-import { ListChildCommentProps } from "./list.child.comment";
 import { AxiosResponse } from "axios";
 import { ToggleLikeResponse } from "@/types/like.type";
 

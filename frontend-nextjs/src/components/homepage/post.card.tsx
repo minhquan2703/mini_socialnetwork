@@ -21,6 +21,7 @@ import React, { useState, useCallback, useTransition } from "react";
 import { toast } from "sonner";
 import { useSession } from "@/library/session.context";
 import CommentPost from "./comment/post.comment";
+import Profile from "./modals/profile";
 const PostCard = (props: any) => {
     const {
         handleCommentCountUpdate,
@@ -106,20 +107,36 @@ const PostCard = (props: any) => {
                     }}
                 >
                     <div style={{ display: "flex", gap: "12px" }}>
-                        <Avatar
-                            size={42}
-                            src={post?.user?.image}
-                            style={{
-                                backgroundColor: `${post.user.avatarColor}`,
-                                color: "#222",
-                                fontWeight: "600",
-                                fontSize: "18px",
-                                border: "1px solid #f0f0f0",
-                            }}
+                        <Tooltip
+                            title={
+                                <Profile
+                                    image={post.user.image}
+                                    avatarColor={post.user.avatarColor}
+                                    name={post.user.name}
+                                    username={post.user.username}
+                                    id={post.user.id}
+                                />
+                            }
+                            placement="left"
+                            color="#F0FFF0"
                         >
-                            {post.user.name.charAt(0) ||
-                                post.user.username.charAt(0)}
-                        </Avatar>
+                            <Avatar
+                                size={42}
+                                src={post?.user?.image}
+                                style={{
+                                    backgroundColor: `${post.user.avatarColor}`,
+                                    color: "#222",
+                                    fontWeight: "600",
+                                    fontSize: "18px",
+                                    border: "1px solid #f0f0f0",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                {post.user.name.charAt(0) ||
+                                    post.user.username.charAt(0)}
+                            </Avatar>
+                        </Tooltip>
+
                         <div>
                             <div
                                 style={{

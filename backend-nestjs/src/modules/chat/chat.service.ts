@@ -1,27 +1,57 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Chat } from './entities/chat.entity';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
+import { Room } from '../rooms/entities/room.entity';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class ChatService {
   constructor(
     @InjectRepository(Chat)
     private readonly chatRepository: Repository<Chat>,
+    @InjectRepository(Room)
+    private readonly roomRepository: Repository<Room>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
 
   async saveMessage(dto: CreateChatDto) {
-    const message = this.chatRepository.create(dto);
+    const { roomId, content, senderId } = dto;
+    if (!isUUID(roomId) || !isUUID(senderId)) {
+      throw new BadRequestException('Invalid ID ');
+    }
+    const room = await this.roomRepository.findOne({ where: { id: roomId } });
+    if (!room) {
+      throw new BadRequestException('Invalid Room');
+    }
     const sender = await this.userRepository.findOne({
-      where: { id: dto.senderId },
+      where: { id: senderId },
     });
+    if (!sender) {
+      throw new BadRequestException('Invalid sender');
+    }
+    const message = new Chat();
+    message.sender = sender;
+    message.content = content;
+    message.room = room;
     await this.chatRepository.save(message);
     return {
-      message,
+      message: {
+        id: message.id,
+        content: message.content,
+        createdAt: message.createdAt,
+      },
+      room: {
+        id: message.room.id,
+      },
       sender: {
         id: sender?.id,
         name: sender?.name,
@@ -33,11 +63,26 @@ export class ChatService {
     };
   }
 
-  async getMessagesByRoom(roomId: string) {
-    return this.chatRepository.find({
-      where: { roomId },
+  async getMessagesByRoom(roomId: string, userId: string) {
+    if (!isUUID(roomId)) {
+      throw new BadRequestException('Invalid roomId');
+    }
+    const room = await this.roomRepository.findOne({
+      where: { id: roomId },
+      relations: ['users', 'messages'],
+    });
+    if (!room) {
+      throw new NotFoundException('Room was not found');
+    }
+    const userInRoom = room.users.some((user) => user.id === userId);
+    if (!userInRoom) {
+      throw new ForbiddenException('Not permission');
+    }
+    const messages = await this.chatRepository.find({
+      where: { room: { id: roomId } },
       order: { createdAt: 'ASC' },
       relations: ['sender'],
     });
+    return messages;
   }
 }

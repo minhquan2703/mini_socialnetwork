@@ -11,6 +11,7 @@ import { Photo } from '../photos/entities/photo.entity';
 import aqp from 'api-query-params';
 import dayjs from 'dayjs';
 import { validate as isUuid } from 'uuid';
+import _ from 'lodash';
 
 @Injectable()
 export class PostsService {
@@ -150,7 +151,6 @@ export class PostsService {
         }
       }
 
-
       // RESPONSE
       return {
         id: savedPost.id,
@@ -277,6 +277,65 @@ export class PostsService {
     );
 
     return { results, totalPages, current };
+  }
+
+  async getAllUpdated(
+    query: string,
+    current: number,
+    pageSize: number,
+    userId: string | null,
+  ) {
+    const { filter, sort } = aqp(query);
+    if (filter.current) delete filter.current;
+    if (filter.pageSize) delete filter.pageSize;
+    if (!current) current = 1;
+    if (!pageSize) pageSize = 10;
+    const skip = (current - 1) * pageSize;
+
+    const allPosts = await this.postRepository.find({
+      where: filter,
+      relations: [`user`, `likes`, `likes.user`, `photos`],
+      select: {
+        id: true,
+        content: true,
+        mediaType: true,
+        mediaURL: true,
+        photos: {
+          url: true,
+          id: true,
+        },
+        likes: {
+          id: true,
+          user: {
+            id: true,
+          },
+        },
+        user: {
+          id: true,
+          name: true,
+          username: true,
+          image: true,
+          avatarColor: true,
+        },
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    //tách mảng các bài post nhiều like nhất
+    const sortedByLiked = [...allPosts].sort(
+      (a, b) => (b.likes.length || 0) - (a.likes.length || 0),
+    );
+    const topLikedPosts = sortedByLiked.slice(0, 10);
+
+    //tạo mảng không trùng lặp
+    const topLikedPostsId = new Set(topLikedPosts.map((post) => post.id));
+    const remainingPosts = allPosts.filter((p) => !topLikedPostsId.has(p.id));
+
+    //random 2 mảng
+    const randomTopLikedPosts = _.shuffle(topLikedPosts);
+    const randomRemainingPosts = _.shuffle(remainingPosts.filter);
+    const finalList = [...randomTopLikedPosts, ...randomRemainingPosts];
   }
 
   // xoá 1 bài viết

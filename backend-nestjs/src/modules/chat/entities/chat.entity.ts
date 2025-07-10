@@ -1,3 +1,4 @@
+import { Room } from '@/modules/rooms/entities/room.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import {
   Entity,
@@ -13,19 +14,17 @@ export class Chat {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  roomId: string;
-
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User)
   @JoinColumn({ name: 'senderId' })
   sender: User;
 
-  @Column()
-  senderId: string;
+  @ManyToOne(() => Room, { onDelete: 'CASCADE' })
+  room: Room;
 
   @Column()
   content: string;
 
   @CreateDateColumn()
   createdAt: Date;
+  message: Room[];
 }

@@ -13,15 +13,14 @@ const MessagesLayout = async ({
     children: React.ReactNode;
 }>) => {
     const session = await auth();
-
     return (
         <SessionProvider session={session}>
             <SocketProvider>
                 <MessagesContextProvider>
-                    <div style={{ display: "flex", gap: "5px" }}>
+                    <div style={{ display: "flex", width: "100%", overflow: "hidden" }}>
                         <div
                             className="left"
-                            style={{ width: "23%", height: "calc(100vh-30px)" }}
+                            style={{ width: "25%", height: "100vh" }}
                         >
                             <MessagesSideBar />
                         </div>
@@ -29,35 +28,23 @@ const MessagesLayout = async ({
                             className="right-side"
                             style={{
                                 width: "75%",
-                                height: "calc(100vh-30px)",
+                                height: "100vh"
                             }}
                         >
                             <div style={{ height: "55px" }}>
                                 <MessagesHeader />
                             </div>
                             <div
-                                className="chatbox"
                                 style={{
-                                    display: "flex",
-                                    marginTop: "20px",
+                                    height: "calc(100vh-55px)",
+                                    width: "100%",
                                 }}
                             >
-                                <div
-                                    style={{
-                                        width: "65%",
-                                    }}
-                                >
-                                    <MessagesContent>
-                                        {children}
-                                    </MessagesContent>
-                                </div>
-                                <div
-                                    style={{
-                                        width: "35%",
-                                    }}
-                                >
+                                <MessagesContent>{children}</MessagesContent>
+
+                                {/* <div style={{width: "35%"}}>
                                     <MessagesDetail />
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>

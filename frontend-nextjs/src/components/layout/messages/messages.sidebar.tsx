@@ -1,60 +1,37 @@
-'use client'
+"use client";
 import Layout from "antd/es/layout";
 import Menu from "antd/es/menu";
 import {
-    MailOutlined,
-    SettingOutlined,
-    TeamOutlined,
     ArrowLeftOutlined,
     MessageOutlined,
-    UserOutlined,
-    ClockCircleOutlined,
-    SearchOutlined,
     PlusOutlined,
-} from '@ant-design/icons';
-import React, { useContext, useState } from 'react';
-import type { MenuProps } from 'antd';
-import Link from 'next/link'
-import { MessagesContext } from "@/library/user.messages.context";
-import { Button, Input, Avatar, Badge, Space } from "antd";
+} from "@ant-design/icons";
+import React, { useEffect, useState } from "react";
+import type { MenuProps } from "antd";
+import Link from "next/link";
+import { Button, Avatar } from "antd";
+import { getListRooms } from "@/services/chat.service";
+import { toast } from "sonner";
+import { IRoom } from "@/types/room.type";
 
-type MenuItem = Required<MenuProps>['items'][number];
+type MenuItem = Required<MenuProps>["items"][number];
+
 
 const MessagesSideBar = () => {
     const { Sider } = Layout;
-    const { collapseMenu } = useContext(MessagesContext)!;
-    const [searchValue, setSearchValue] = useState('');
+    const [rooms, setRooms] = useState<IRoom[]>([]);
 
-    // Recent chats data với avatar và status
-    const recentChats = [
-        {
-            key: "chat-1",
-            name: "Nguyễn Văn A",
-            avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=1",
-            lastMessage: "Ok bạn nhé",
-            time: "2 phút",
-            unread: 3,
-            online: true,
-        },
-        {
-            key: "chat-2",
-            name: "Trần Thị B",
-            avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=2",
-            lastMessage: "Hẹn gặp lại",
-            time: "1 giờ",
-            unread: 0,
-            online: false,
-        },
-        {
-            key: "chat-3",
-            name: "Nhóm Dự án X",
-            avatar: "https://api.dicebear.com/7.x/initials/svg?seed=DX",
-            lastMessage: "File đã được cập nhật",
-            time: "3 giờ",
-            unread: 12,
-            isGroup: true,
-        },
-    ];
+    useEffect(() => {
+        fetchListRooms();
+    }, []);
+    const fetchListRooms = async () => {
+        const res = await getListRooms();
+        if (res.data) {
+            setRooms(res.data);
+        } else {
+            toast.error("Có lỗi xảy ra, vui lòng đăng nhập lại");
+        }
+    };
 
     const menuItems: MenuItem[] = [
         {
@@ -62,255 +39,226 @@ const MessagesSideBar = () => {
             label: <Link href="/messages">Tất cả</Link>,
             icon: <MessageOutlined />,
         },
-        {
-            key: "contacts",
-            label: <Link href="/messages/contacts">Danh bạ</Link>,
-            icon: <UserOutlined />,
-        },
-        {
-            key: "groups",
-            label: <Link href="/messages/groups">Nhóm</Link>,
-            icon: <TeamOutlined />,
-        },
-        {
-            key: "archived",
-            label: <Link href="/messages/archived">Lưu trữ</Link>,
-            icon: <MailOutlined />,
-        },
+        // {
+        //     key: "groups",
+        //     label: <Link href="/messages/groups">Nhóm</Link>,
+        //     icon: <TeamOutlined />,
+        // },
     ];
 
     return (
         <Sider
-            collapsed={collapseMenu}
             style={{
-                background: '#fff',
-                borderRight: '1px solid #f0f0f0',
-                height: '100vh',
-                position: 'sticky',
+                background: "#fff",
+                borderRight: "1px solid #f0f0f0",
+                height: "100vh",
+                position: "sticky",
                 top: 0,
                 left: 0,
             }}
-            width={320}
-            collapsedWidth={80}
+            width="100%"
         >
             {/* Header */}
-            <div style={{ 
-                padding: collapseMenu ? '20px 16px' : '20px',
-                borderBottom: '1px solid #f0f0f0',
-            }}>
-                <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'space-between',
-                    marginBottom: collapseMenu ? 0 : 16,
-                }}>
+            <div
+                style={{
+                    padding: "20px",
+                    borderBottom: "1px solid #f0f0f0",
+                }}
+            >
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: 16,
+                    }}
+                >
                     <Link href="/">
-                        <Button 
-                            type="text" 
+                        <Button
+                            type="text"
                             icon={<ArrowLeftOutlined />}
-                            style={{ padding: '4px 8px' }}
+                            style={{ padding: "4px 8px" }}
                         />
                     </Link>
-                    
-                    {!collapseMenu && (
-                        <>
-                            <h2 style={{ 
-                                margin: 0, 
-                                fontSize: '20px',
-                                fontWeight: 600,
-                                flex: 1,
-                                textAlign: 'center',
-                            }}>
-                                Tin nhắn
-                            </h2>
-                            
-                            <Button
-                                type="primary"
-                                icon={<PlusOutlined />}
-                                shape="circle"
-                                size="small"
-                            />
-                        </>
-                    )}
+                    <h2
+                        style={{
+                            margin: 0,
+                            fontSize: "20px",
+                            fontWeight: 600,
+                            flex: 1,
+                            textAlign: "center",
+                        }}
+                    >
+                        Tin nhắn
+                    </h2>
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        shape="circle"
+                        size="small"
+                    />{" "}
                 </div>
 
                 {/* Search Bar */}
-                {!collapseMenu && (
-                    <Input
-                        placeholder="Tìm kiếm tin nhắn..."
-                        prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
-                        value={searchValue}
-                        onChange={(e) => setSearchValue(e.target.value)}
-                        style={{
-                            borderRadius: '20px',
-                            backgroundColor: '#f5f5f5',
-                            border: 'none',
-                        }}
-                    />
-                )}
+                {/* <Input
+                    placeholder="Tìm kiếm tin nhắn..."
+                    prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    style={{
+                        borderRadius: "20px",
+                        backgroundColor: "#f5f5f5",
+                        border: "none",
+                    }}
+                /> */}
             </div>
 
             {/* Navigation Menu */}
-            <div style={{ 
-                padding: collapseMenu ? '8px 0' : '12px 0',
-                borderBottom: '1px solid #f0f0f0',
-            }}>
+            <div
+                style={{
+                    padding: "12px 0",
+                    borderBottom: "1px solid #f0f0f0",
+                }}
+            >
                 <Menu
                     mode="horizontal"
-                    defaultSelectedKeys={['all-messages']}
+                    defaultSelectedKeys={["all-messages"]}
                     items={menuItems}
-                    style={{ 
-                        border: 'none',
-                        justifyContent: collapseMenu ? 'center' : 'space-around',
-                        minHeight: 'auto',
+                    style={{
+                        border: "none",
+                        justifyContent: "space-around",
+                        minHeight: "auto",
                     }}
                 />
             </div>
 
             {/* Recent Chats */}
-            <div style={{ 
-                flex: 1,
-                overflowY: 'auto',
-                padding: collapseMenu ? '8px' : '12px',
-            }}>
-                {!collapseMenu && (
-                    <div style={{ 
-                        fontSize: '13px',
-                        color: '#8c8c8c',
-                        marginBottom: '12px',
-                        paddingLeft: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                    }}>
-                        <ClockCircleOutlined />
-                        Gần đây
-                    </div>
-                )}
-
-                {recentChats.map((chat) => (
-                    <Link 
-                        key={chat.key} 
-                        href={`/messages/${chat.key}`}
-                        style={{ textDecoration: 'none' }}
+            <div
+                style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "12px",
+                }}
+            >
+                {rooms.map((room) => (
+                    <Link
+                        key={room.id}
+                        href={`/messages/${room.id}`}
+                        style={{ textDecoration: "none" }}
                     >
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: collapseMenu ? '12px 8px' : '12px',
-                            borderRadius: '12px',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            marginBottom: '4px',
-                            backgroundColor: chat.unread > 0 ? '#f6f8fa' : 'transparent',
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#f0f2f5';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = chat.unread > 0 ? '#f6f8fa' : 'transparent';
-                        }}>
-                            <Badge 
-                                dot={chat.online && !chat.isGroup}
-                                status="success"
-                                offset={[-4, 36]}
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                padding: "12px",
+                                borderRadius: "12px",
+                                cursor: "pointer",
+                                transition: "all 0.2s",
+                                marginBottom: "4px",
+                                backgroundColor: "#f6f8fa",
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor =
+                                    "#f0f2f5";
+                            }}
+                        >
+                            <Avatar
+                                src={room.receiver?.image}
+                                size={48}
+                                style={{
+                                    backgroundColor:
+                                        room.receiver?.avatarColor && "#fff",
+                                }}
                             >
-                                <Avatar 
-                                    src={chat.avatar}
-                                    size={collapseMenu ? 36 : 48}
-                                    style={{ 
-                                        backgroundColor: chat.isGroup ? '#722ed1' : '#1890ff',
+                                {(room.receiver?.username &&
+                                    room.lastestMessage?.sender?.name?.charAt(
+                                        0
+                                    )) ||
+                                    room.lastestMessage?.sender?.username?.charAt(
+                                        0
+                                    )}
+                            </Avatar>
+
+                            <div
+                                style={{
+                                    flex: 1,
+                                    marginLeft: "12px",
+                                    minWidth: 0,
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        marginBottom: "4px",
                                     }}
                                 >
-                                    {chat.name.charAt(0)}
-                                </Avatar>
-                            </Badge>
-
-                            {!collapseMenu && (
-                                <div style={{ 
-                                    flex: 1,
-                                    marginLeft: '12px',
-                                    minWidth: 0,
-                                }}>
-                                    <div style={{ 
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        marginBottom: '4px',
-                                    }}>
-                                        <span style={{ 
-                                            fontWeight: chat.unread > 0 ? 600 : 400,
-                                            fontSize: '15px',
-                                            color: '#262626',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                        }}>
-                                            {chat.name}
-                                        </span>
-                                        <span style={{ 
-                                            fontSize: '12px',
-                                            color: chat.unread > 0 ? '#1890ff' : '#8c8c8c',
+                                    <span
+                                        style={{
+                                            fontSize: "15px",
+                                            color: "#262626",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            whiteSpace: "nowrap",
+                                        }}
+                                    >
+                                        {room.receiver.name ||
+                                            room.receiver.username}
+                                    </span>
+                                    <span
+                                        style={{
+                                            fontSize: "12px",
+                                            color: "#1890ff",
                                             flexShrink: 0,
-                                        }}>
-                                            {chat.time}
-                                        </span>
-                                    </div>
-                                    <div style={{ 
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                    }}>
-                                        <span style={{ 
-                                            fontSize: '14px',
-                                            color: chat.unread > 0 ? '#262626' : '#8c8c8c',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                            fontWeight: chat.unread > 0 ? 500 : 400,
-                                        }}>
-                                            {chat.lastMessage}
-                                        </span>
-                                        {chat.unread > 0 && (
+                                        }}
+                                    >
+                                        {room.lastestMessage?.timeBefore}
+                                    </span>
+                                </div>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    <span
+                                        style={{
+                                            fontSize: "12px",
+                                            color: "#8c8c8c",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            whiteSpace: "nowrap",
+                                        }}
+                                    >
+                                        {room.lastestMessage?.sender.name}:{" "}
+                                        {room.lastestMessage?.content}
+                                    </span>
+                                    {/* {chat.unread > 0 && (
                                             <Badge 
                                                 count={chat.unread}
                                                 style={{ 
                                                     backgroundColor: '#1890ff',
                                                 }}
                                             />
-                                        )}
-                                    </div>
+                                        )} */}
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </Link>
                 ))}
             </div>
 
             {/* Settings */}
-            <div style={{ 
-                borderTop: '1px solid #f0f0f0',
-                padding: collapseMenu ? '12px' : '16px',
-            }}>
-                <Link href="/messages/settings">
-                    <Button
-                        type="text"
-                        icon={<SettingOutlined />}
-                        block
-                        style={{
-                            textAlign: 'left',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            justifyContent: collapseMenu ? 'center' : 'flex-start',
-                        }}
-                    >
-                        {!collapseMenu && "Cài đặt"}
-                    </Button>
-                </Link>
-            </div>
+            <div
+                style={{
+                    borderTop: "1px solid #f0f0f0",
+                    padding: "16px",
+                }}
+            ></div>
         </Sider>
-    )
-}
+    );
+};
 
 export default MessagesSideBar;

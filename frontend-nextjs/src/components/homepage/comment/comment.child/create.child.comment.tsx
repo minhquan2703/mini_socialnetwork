@@ -23,6 +23,7 @@ const CreateChildComment = ({commentId, setDataChildComments}: CreateChildCommen
         const res = await postChildComment({content: content, commentId: commentId})
         if (res && res.data){
             handleChildCommentsUpdate(res.data)
+            setContent("");
         }
         else{
             toast.error(res.message)

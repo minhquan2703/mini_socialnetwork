@@ -1,3 +1,4 @@
+"use client"
 import { toast } from "sonner";
 import CreateChildComment from "./create.child.comment";
 import ListChildComment from "./list.child.comment";
@@ -71,7 +72,7 @@ const ContainerChildComment = ({
                 } finally {
                     //clear cache timout 500ms
                     setTimeout(() => {
-                        likeRequestCache.current.delete(commentId);
+                        likeRequestCache.current.delete(childCommentId);
                     }, 500);
                 }
             })();

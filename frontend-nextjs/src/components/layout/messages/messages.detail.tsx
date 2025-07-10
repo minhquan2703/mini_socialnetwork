@@ -3,20 +3,18 @@ import Layout from "antd/es/layout";
 import Menu from "antd/es/menu";
 import {
     HomeFilled,
-    MessageOutlined,
     TeamOutlined,
     SettingOutlined,
     WhatsAppOutlined,
     FacebookFilled,
     LinkedinFilled,
     GoogleCircleFilled,
-    AppstoreOutlined,
     BugFilled,
 } from "@ant-design/icons";
 import React from "react";
 import type { MenuProps } from "antd";
 import Link from "next/link";
-import { Avatar, Badge, Card } from "antd";
+import { Avatar, Card } from "antd";
 import { useSession } from "@/library/session.context";
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -118,10 +116,10 @@ const MessagesDetail = () => {
 
     return (
         <Sider
-            width={"100%"}
             style={{
                 background: "#fff",
             }}
+            width="100%"
         >
             {/* User Profile Section */}
             <Card
@@ -204,7 +202,7 @@ const MessagesDetail = () => {
             <Menu
                 mode="inline"
                 defaultSelectedKeys={["home"]}
-                items={!session?.user?.id ? itemsNotAuth : items}
+                items={items}
                 style={{
                     borderRight: "none",
                     marginTop: "8px",

@@ -17,13 +17,11 @@ export const initializeSocket = (accessToken: string) => {
         autoConnect: true,
     });
 
-    // Setup handlers ngay sau khi tạo socket
     setupSocketHandlers(socket);
 
     return socket;
 };
 
-// Export một getter function thay vì socket trực tiếp
 export const getSocket = () => {
     if (!socket) {
         console.warn("Socket not initialized. Call initializeSocket first.");

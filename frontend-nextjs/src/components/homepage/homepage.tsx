@@ -119,7 +119,7 @@ const HomePage = () => {
                         0,
                         (post.commentCount || 0) + increment
                     ),
-                };xqf
+                };
             })
         );
     };

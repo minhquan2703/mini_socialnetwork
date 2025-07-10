@@ -12,7 +12,6 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { JwtService } from '@nestjs/jwt';
 import { RoomsService } from '../rooms/rooms.service';
-import { CreateRoomDto } from '../rooms/dto/create-room.dto';
 import { User } from '../users/entities/user.entity';
 @WebSocketGateway({
   cors: {
@@ -26,7 +25,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     private readonly chatService: ChatService,
-    private readonly jwtService: JwtService, // Inject JWT service
+    private readonly jwtService: JwtService,
     private readonly roomService: RoomsService,
   ) {}
 
@@ -75,11 +74,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinRoom')
-  handleJoinRoom(
+  async handleJoinRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() roomId: string,
   ) {
-    client.join(roomId);
+    await client.join(roomId);
     console.log(`User ${client.data.user?.id} joined room: ${roomId}`);
 
     // Thông báo cho client đã join thành công
@@ -97,7 +96,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!sender) {
       throw new BadRequestException('Error Authenticated');
     }
-    let room = await this.roomService.findById(roomId);
+    const room = await this.roomService.findById(roomId);
     if (!room) {
       throw new BadRequestException('Invalid Room');
     }
@@ -107,16 +106,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Lưu tin nhắn vào database
     const saved = await this.chatService.saveMessage({
-      roomId: room.id,
+      roomId: roomId,
       content: content,
       senderId: sender.id,
     });
 
     this.server.to(room.id).emit('receiveMessage', {
       id: saved.message.id,
-      roomId: saved.message.roomId,
+      roomId: saved.room.id,
       senderId: saved.sender?.id,
       sender: {
+        id: saved.sender.id,
         name: saved.sender?.name,
         username: saved.sender?.username,
         image: saved.sender?.image,

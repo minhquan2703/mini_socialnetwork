@@ -12,27 +12,25 @@ const MessagesContent = ({
     return (
         <Content
             style={{
-                height: "calc(100vh - 78px)", // Điều chỉnh theo header height thực tế
+                height: "calc(100vh - 55px)", //diều chỉnh theo header height thực tế
+                width: "100%",
                 overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",                
             }}
         >
             <div
                 style={{
-                    padding: 10,
-                    height: "100%",
                     display: "flex",
                     flexDirection: "column",
+                    borderRadius: "8px",
+                    background: "#ffffff",
+                    height: "100%",
+                    width: "100%",
+                    overflow: "hidden",
                 }}
             >
-                <div
-                    style={{
-                        borderRadius: "8px",
-                        overflow: "hidden",
-                        background: "#ffffff",
-                    }}
-                >
-                    {children}
-                </div>
+                {children}
             </div>
         </Content>
     );

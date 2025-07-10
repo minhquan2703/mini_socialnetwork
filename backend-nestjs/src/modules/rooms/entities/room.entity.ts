@@ -1,3 +1,4 @@
+import { Chat } from '@/modules/chat/entities/chat.entity';
 import { Photo } from '@/modules/photos/entities/photo.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import {
@@ -8,6 +9,8 @@ import {
   ManyToMany,
   OneToMany,
   JoinTable,
+  UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 
 export enum RoomType {
@@ -29,6 +32,12 @@ export class Room {
   @Column({ nullable: true })
   adminId: string;
 
+  @Column({ nullable: true })
+  avatar: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  admin: User;
+
   @Column({ type: 'enum', enum: RoomType })
   type: RoomType;
 
@@ -38,10 +47,16 @@ export class Room {
   @OneToMany(() => Photo, (photo) => photo.room, { onDelete: 'CASCADE' })
   photos: Photo[];
 
+  @OneToMany(() => Chat, (chat) => chat.room, { onDelete: 'CASCADE' })
+  messages: Chat[];
+
   @ManyToMany(() => User, (user) => user.rooms)
   @JoinTable()
   users: User[];
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
