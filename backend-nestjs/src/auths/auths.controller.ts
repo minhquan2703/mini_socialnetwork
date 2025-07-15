@@ -19,6 +19,12 @@ import { UsersService } from '@/modules/users/users.service';
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from './passport/jwt-auth.guard';
 
+export interface AuthenticatedRequest extends Request {
+  user: {
+    id: string;
+    username: string;
+  };
+}
 @Controller('auths')
 export class AuthsController {
   constructor(
@@ -42,7 +48,6 @@ export class AuthsController {
   @Post('login')
   @Public()
   @UseGuards(LocalAuthGuard)
-  @Throttle({ default: { limit: 10, ttl: 60 * 60 * 1000 } })
   @ResponseMessage('Fetch login')
   async handleLogin(@Request() req) {
     return this.authsService.login(req.user);

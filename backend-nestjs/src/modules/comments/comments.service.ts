@@ -3,7 +3,6 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from './entities/comment.entity';
-import { Photo } from '../photos/entities/photo.entity';
 import { Post } from '../posts/entities/post.entity';
 import { User } from '../users/entities/user.entity';
 import dayjs from 'dayjs';
@@ -18,8 +17,6 @@ export class CommentsService {
     private childCommentsRepository: Repository<ChildComment>,
     @InjectRepository(Comment)
     private commentsRepository: Repository<Comment>,
-    @InjectRepository(Photo)
-    private photoRepository: Repository<Photo>,
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
     @InjectRepository(User)
@@ -27,45 +24,20 @@ export class CommentsService {
   ) {}
 
   async create(createCommentDto: CreateCommentDto, userId: string) {
+    const { content, postId } = createCommentDto;
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new BadRequestException('người dùng không tồn tại');
     }
-    if (!createCommentDto.photoId && !createCommentDto.postId) {
-      throw new BadRequestException('Phải cung cấp postId hoặc photoId');
-    }
-    if (createCommentDto.postId && createCommentDto.photoId) {
-      throw new BadRequestException(
-        'Không thể bình luận cho cả bài viết và ảnh cùng lúc',
-      );
-    }
-    let post;
-    if (createCommentDto.postId) {
-      post = await this.postRepository.findOne({
-        where: { id: createCommentDto.postId },
-      });
-      if (!post) {
-        throw new BadRequestException('Bài viết không tồn tại');
-      }
-    }
-    let photo;
-    if (createCommentDto.photoId) {
-      photo = await this.photoRepository.findOne({
-        where: { id: createCommentDto.photoId },
-      });
-      if (!photo) {
-        throw new BadRequestException('Ảnh không tồn tại');
-      }
+
+    const post = await this.postRepository.findOne({ where: { id: postId } });
+    if (!post) {
+      throw new BadRequestException('Post was not found');
     }
     const comment = new Comment();
-    comment.content = createCommentDto.content || '';
+    comment.content = content;
     comment.user = user;
-    if (post) {
-      comment.post = post as Post;
-    }
-    if (photo) {
-      comment.photo = photo as Photo;
-    }
+    comment.post = post;
     await this.commentsRepository.save(comment);
     const timeBefore = dayjs(comment.createdAt).fromNow();
     const createdAtFormat = dayjs(comment.createdAt).format(

@@ -1,9 +1,9 @@
 import { ChildComment } from '@/modules/child-comments/entities/child-comment.entity';
 import { Comment } from '@/modules/comments/entities/comment.entity';
 import { Like } from '@/modules/likes/entities/like.entity';
-import { Photo } from '@/modules/photos/entities/photo.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
 import { Room } from '@/modules/rooms/entities/room.entity';
+import { Upload } from '@/modules/uploads/entities/upload.entity';
 import {
   Column,
   CreateDateColumn,
@@ -58,6 +58,9 @@ export class User {
   @OneToMany(() => Post, (post) => post.user, { onDelete: 'CASCADE' })
   posts: Post[];
 
+  @OneToMany(() => Upload, (upload) => upload.user, { onDelete: 'CASCADE' })
+  uploads: Upload[];
+
   @OneToMany(() => Comment, (comment) => comment.user, { onDelete: 'CASCADE' })
   comments: Comment[];
 
@@ -68,9 +71,6 @@ export class User {
 
   @OneToMany(() => Like, (like) => like.user, { onDelete: 'CASCADE' })
   likes: Like[];
-
-  @OneToMany(() => Photo, (photo) => photo.user, { onDelete: 'CASCADE' })
-  photos: Photo[];
 
   @ManyToMany(() => Room, (room) => room.users)
   rooms: Room[];

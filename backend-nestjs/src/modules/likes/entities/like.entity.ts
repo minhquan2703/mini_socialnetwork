@@ -1,5 +1,4 @@
 import { Comment } from '@/modules/comments/entities/comment.entity';
-import { Photo } from '@/modules/photos/entities/photo.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import {
@@ -14,7 +13,6 @@ import { ChildComment } from '@/modules/child-comments/entities/child-comment.en
 export enum LikeType {
   POST = 'post',
   COMMENT = 'comment',
-  PHOTO = 'photo',
   CHILDCOMMENT = 'child-comment',
 }
 @Entity()
@@ -38,9 +36,6 @@ export class Like {
 
   @ManyToOne(() => User, (user) => user.likes, { onDelete: 'CASCADE' })
   user: User;
-
-  @ManyToOne(() => Photo, (photo) => photo.likes, { onDelete: 'CASCADE' })
-  photo: Photo;
 
   @CreateDateColumn()
   createdAt: Date;

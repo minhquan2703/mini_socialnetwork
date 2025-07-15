@@ -1,14 +1,16 @@
-import { Controller, Get, Param, UseGuards, Req, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  UseGuards,
+  Req,
+  Post,
+  Body,
+} from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
 import { CreateRoomDto } from './dto/create-room.dto';
-
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: string;
-    username: string;
-  };
-}
+import { AuthenticatedRequest } from '@/auths/auths.controller';
 
 @Controller('rooms')
 export class RoomsController {
@@ -23,7 +25,15 @@ export class RoomsController {
     const senderId = req.user.id;
     return await this.roomsService.privatedChat(createRoomDto, senderId);
   }
-
+  @Get('/detail/:roomId')
+  @UseGuards(JwtAuthGuard)
+  async getDetailRoom(
+    @Param('roomId') roomId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user.id;
+    return await this.roomsService.getDetailRoom(userId, roomId);
+  }
   @Get('all')
   @UseGuards(JwtAuthGuard)
   async getAllRooms(@Req() req: AuthenticatedRequest) {

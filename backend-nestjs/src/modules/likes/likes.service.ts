@@ -8,7 +8,6 @@ import { Like, LikeType } from './entities/like.entity';
 import { Post } from '../posts/entities/post.entity';
 import { Repository } from 'typeorm';
 import { Comment } from '../comments/entities/comment.entity';
-import { Photo } from '../photos/entities/photo.entity';
 import { User } from '../users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChildComment } from '../child-comments/entities/child-comment.entity';
@@ -18,7 +17,6 @@ type LikeWhereCondition = {
   post?: { id: string };
   comment?: { id: string };
   childComment?: { id: string };
-  photo?: { id: string };
 };
 
 @Injectable()
@@ -32,14 +30,12 @@ export class LikesService {
     private commentsRepository: Repository<Comment>,
     @InjectRepository(ChildComment)
     private childCommentsRepository: Repository<ChildComment>,
-    @InjectRepository(Photo)
-    private photosRepository: Repository<Photo>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
 
   async toggleLike(createLikeDto: CreateLikeDto, userId: string) {
-    const { postId, commentId, photoId, childCommentId, type } = createLikeDto;
+    const { postId, commentId, childCommentId, type } = createLikeDto;
 
     const user = await this.usersRepository.findOne({
       where: { id: userId },
@@ -50,7 +46,7 @@ export class LikesService {
     }
 
     const whereCondition: LikeWhereCondition = { user: { id: userId } };
-    let entity: Post | Comment | Photo | ChildComment | null = null;
+    let entity: Post | Comment | ChildComment | null = null;
     let entityType: string;
 
     switch (type) {
@@ -102,23 +98,6 @@ export class LikesService {
         entityType = 'child-comment';
         break;
 
-      case LikeType.PHOTO:
-        if (photoId) {
-          throw new BadRequestException('photoId is required');
-        }
-
-        entity = await this.photosRepository.findOne({
-          where: { id: photoId },
-        });
-
-        if (!entity) {
-          throw new NotFoundException('Photo has not found');
-        }
-
-        whereCondition.photo = { id: photoId };
-        entityType = 'photo';
-        break;
-
       default:
         throw new BadRequestException('Invalid like type');
     }
@@ -146,9 +125,6 @@ export class LikesService {
           break;
         case LikeType.CHILDCOMMENT:
           like.childComment = entity as ChildComment;
-          break;
-        case LikeType.PHOTO:
-          like.photo = entity as Photo;
           break;
       }
 
@@ -184,8 +160,8 @@ export class LikesService {
       case LikeType.COMMENT:
         whereCondition.comment = { id: entityId };
         break;
-      case LikeType.PHOTO:
-        whereCondition.photo = { id: entityId };
+      case LikeType.CHILDCOMMENT:
+        whereCondition.childComment = { id: entityId };
         break;
     }
 

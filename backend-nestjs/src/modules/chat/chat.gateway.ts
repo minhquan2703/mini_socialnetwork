@@ -13,6 +13,7 @@ import { ChatService } from './chat.service';
 import { JwtService } from '@nestjs/jwt';
 import { RoomsService } from '../rooms/rooms.service';
 import { User } from '../users/entities/user.entity';
+import dayjs from 'dayjs';
 @WebSocketGateway({
   cors: {
     origin: process.env.FRONTEND_URL,
@@ -100,6 +101,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!room) {
       throw new BadRequestException('Invalid Room');
     }
+    console.log('check message', roomId, content);
     if (room?.isBlocked) {
       throw new BadRequestException('isBlocked');
     }
@@ -110,7 +112,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       content: content,
       senderId: sender.id,
     });
-
+    const createdAtFormat = dayjs(saved.message.createdAt).format(
+      'DD/MM/YYYY [-] HH[:]mm',
+    );
     this.server.to(room.id).emit('receiveMessage', {
       id: saved.message.id,
       roomId: saved.room.id,
@@ -123,7 +127,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         avatarColor: saved.sender?.avatarColor,
       },
       content: saved.message.content,
-      createdAt: saved.message.createdAt,
+      createdAtFormat: createdAtFormat,
     });
   }
 

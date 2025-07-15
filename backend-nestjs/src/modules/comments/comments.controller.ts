@@ -12,23 +12,22 @@ import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
 import { PublicOptional } from '@/auths/decorator/customize';
-import { Throttle } from '@nestjs/throttler';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
+import { AuthenticatedRequest } from '@/auths/auths.controller';
 
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: string;
-    username: string;
-  };
-}
-
+@SkipThrottle()
 @Controller('comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @SkipThrottle({ default: false })
   @Throttle({ default: { limit: 1, ttl: 5000 } })
-  create(@Body() createCommentDto: CreateCommentDto, @Req() req) {
+  create(
+    @Body() createCommentDto: CreateCommentDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
     const userId = req.user.id;
     return this.commentsService.create(createCommentDto, userId);
   }

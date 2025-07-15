@@ -1,10 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import {
-  ActiveAuthDto,
-  CreateAuthDto,
-  VerifyAuthDto,
-} from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { ActiveAuthDto, CreateAuthDto } from './dto/create-auth.dto';
 import { UsersService } from '@/modules/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { comparePasswordHelper } from '@/helper/util';

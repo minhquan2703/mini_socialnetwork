@@ -1,6 +1,6 @@
 import { Comment } from '@/modules/comments/entities/comment.entity';
 import { Like } from '@/modules/likes/entities/like.entity';
-import { Photo } from '@/modules/photos/entities/photo.entity';
+import { Upload } from '@/modules/uploads/entities/upload.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import {
   Entity,
@@ -11,12 +11,6 @@ import {
   OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
-
-export enum MediaType {
-  TEXT = 'text',
-  IMAGE = 'image',
-  VIDEO = 'video',
-}
 
 @Entity()
 export class Post {
@@ -29,11 +23,8 @@ export class Post {
   @Column({ type: 'text' })
   content: string;
 
-  @Column({ type: 'enum', enum: MediaType, default: MediaType.TEXT })
-  mediaType: MediaType;
-
-  @Column({ nullable: true })
-  mediaURL: string;
+  @Column({ default: false })
+  isReported: boolean;
 
   @OneToMany(() => Comment, (comment) => comment.post, { onDelete: 'CASCADE' })
   comments: Comment[];
@@ -41,8 +32,8 @@ export class Post {
   @OneToMany(() => Like, (like) => like.post, { onDelete: 'CASCADE' })
   likes: Like[];
 
-  @OneToMany(() => Photo, (photo) => photo.post, { onDelete: 'CASCADE' })
-  photos: Photo[];
+  @OneToMany(() => Upload, (upload) => upload.post, { onDelete: 'CASCADE' })
+  uploads: Upload[];
 
   @CreateDateColumn()
   createdAt: Date;

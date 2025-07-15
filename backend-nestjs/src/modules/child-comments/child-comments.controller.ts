@@ -2,13 +2,8 @@ import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { ChildCommentsService } from './child-comments.service';
 import { CreateChildCommentDto } from './dto/create-child-comment.dto';
 import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
+import { AuthenticatedRequest } from '@/auths/auths.controller';
 
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: string;
-    username: string;
-  };
-}
 @Controller('child-comments')
 export class ChildCommentsController {
   constructor(private readonly childCommentsService: ChildCommentsService) {}

@@ -7,11 +7,9 @@ import { UsersModule } from './modules/users/users.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { LikesModule } from './modules/likes/likes.module';
-import { PhotosModule } from './modules/photos/photos.module';
 import { MessagesModule } from './modules/messages/messages.module';
 import { AuthsModule } from './auths/auths.module';
 import { User } from './modules/users/entities/user.entity';
-import { Photo } from './modules/photos/entities/photo.entity';
 import { Message } from './modules/messages/entities/message.entity';
 import { Comment } from './modules/comments/entities/comment.entity';
 import { Like } from './modules/likes/entities/like.entity';
@@ -30,17 +28,19 @@ import { RoomsModule } from './modules/rooms/rooms.module';
 import { Room } from './modules/rooms/entities/room.entity';
 import { ChildComment } from './modules/child-comments/entities/child-comment.entity';
 import { ChildCommentsModule } from './modules/child-comments/child-comments.module';
+import { Upload } from './modules/uploads/entities/upload.entity';
+import { UploadsModule } from './modules/uploads/uploads.module';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot({
-      throttlers: [
-        {
-          ttl: 10000,
-          limit: 5,
-        },
-      ],
-    }),
+    // ThrottlerModule.forRoot({
+    //   throttlers: [
+    //     {
+    //       ttl: 10000,
+    //       limit: 5,
+    //     },
+    //   ],
+    // }),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
@@ -57,7 +57,6 @@ import { ChildCommentsModule } from './modules/child-comments/child-comments.mod
         synchronize: true,
         entities: [
           User,
-          Photo,
           Message,
           Comment,
           Like,
@@ -65,6 +64,7 @@ import { ChildCommentsModule } from './modules/child-comments/child-comments.mod
           Chat,
           Room,
           ChildComment,
+          Upload,
         ],
       }),
     }),
@@ -98,13 +98,13 @@ import { ChildCommentsModule } from './modules/child-comments/child-comments.mod
     PostsModule,
     CommentsModule,
     LikesModule,
-    PhotosModule,
     MessagesModule,
     AuthsModule,
     TasksModule,
     ChatModule,
     RoomsModule,
     ChildCommentsModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -117,10 +117,10 @@ import { ChildCommentsModule } from './modules/child-comments/child-comments.mod
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
     },
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: ThrottlerGuard,
+    // },
   ],
 })
 export class AppModule {}

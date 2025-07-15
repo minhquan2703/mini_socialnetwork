@@ -1,10 +1,9 @@
+
 export interface PostResponse {
   id: string;
   content: string;
-  mediaType: string;
-  mediaURL?: string;
-  photos?: PhotoResponse[];
   user: UserResponse;
+  uploads?: UploadResponse[];
   createdAt: string;
   createdAtFormatted: string;
   likeCount?: number;
@@ -12,7 +11,7 @@ export interface PostResponse {
   isLiked?: boolean;
 }
 
-export interface PhotoResponse {
+export interface UploadResponse {
   id: string;
   url: string;
 }

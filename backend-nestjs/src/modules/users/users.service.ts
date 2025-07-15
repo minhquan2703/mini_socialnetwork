@@ -170,13 +170,20 @@ export class UsersService {
       take: pageSize,
       skip: skip,
       order: sort,
+      select: {
+        password: false,
+      },
     });
 
-    const resultsWithoutPassword = results.map(
-      ({ password, ...results }) => results,
-    );
-
-    return { results: resultsWithoutPassword, totalPages };
+    return {
+      meta: {
+        current: current,
+        pageSize: pageSize,
+        pages: totalPages,
+        total: totalItems,
+      },
+      results,
+    };
   }
 
   async findOne(id: string) {
@@ -198,7 +205,9 @@ export class UsersService {
     if (!user) throw new NotFoundException('id không tồn tại');
 
     await this.userRepository.update(id, data);
-    return await this.userRepository.findOne({ where: { id } });
+    return await this.userRepository.findOne({
+      where: { id },
+    });
   }
 
   async remove(id: string) {

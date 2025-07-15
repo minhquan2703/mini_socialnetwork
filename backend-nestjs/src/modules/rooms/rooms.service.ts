@@ -134,6 +134,38 @@ export class RoomsService {
     return results.filter((i) => i !== null);
   }
 
+  async getDetailRoom(userId: string, roomId: string) {
+    const room = await this.roomRepository.findOne({
+      where: { id: roomId },
+      relations: ['users'],
+      select: {
+        id: true,
+        theme: true,
+        avatar: true,
+        type: true,
+        name: true,
+        admin: {
+          id: true,
+          name: true,
+          username: true,
+          avatarColor: true,
+          image: true,
+        },
+        users: {
+          id: true,
+          name: true,
+          username: true,
+          avatarColor: true,
+          image: true,
+        },
+      },
+    });
+    if (!room) {
+      throw new BadRequestException('Room was not found');
+    }
+    return room;
+  }
+
   async findById(roomId: string) {
     return await this.roomRepository.findOne({ where: { id: roomId } });
   }

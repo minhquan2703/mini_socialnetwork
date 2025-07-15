@@ -13,7 +13,4 @@ export class CreateLikeDto {
 
   @IsOptional()
   childCommentId: string;
-
-  @IsOptional()
-  photoId: string;
 }

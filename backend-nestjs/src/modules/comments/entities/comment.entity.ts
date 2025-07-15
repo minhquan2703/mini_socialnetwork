@@ -1,7 +1,7 @@
 import { ChildComment } from '@/modules/child-comments/entities/child-comment.entity';
 import { Like } from '@/modules/likes/entities/like.entity';
-import { Photo } from '@/modules/photos/entities/photo.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
+import { Upload } from '@/modules/uploads/entities/upload.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import {
   Entity,
@@ -32,8 +32,8 @@ export class Comment {
   })
   childComments: ChildComment[];
 
-  @ManyToOne(() => Photo, (photo) => photo.comment, { onDelete: 'CASCADE' })
-  photo: Photo;
+  @OneToMany(() => Upload, (upload) => upload.comment, { onDelete: 'CASCADE' })
+  upload: Upload[];
 
   @Column({ type: 'text' })
   content: string;

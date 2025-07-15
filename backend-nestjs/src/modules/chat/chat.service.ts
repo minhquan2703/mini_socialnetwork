@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Room } from '../rooms/entities/room.entity';
 import { isUUID } from 'class-validator';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class ChatService {
@@ -83,6 +84,16 @@ export class ChatService {
       order: { createdAt: 'ASC' },
       relations: ['sender'],
     });
-    return messages;
+    const results = messages.map((m) => {
+      const createdAtFormat = dayjs(m.createdAt).format(
+        'DD/MM/YYYY [-] HH[:]mm',
+      );
+      const { createdAt, ...messageClone } = m;
+      return {
+        createdAtFormat,
+        ...messageClone,
+      };
+    });
+    return results;
   }
 }

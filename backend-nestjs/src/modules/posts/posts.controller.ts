@@ -1,43 +1,25 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   UseGuards,
-  Req,
   Query,
   Request,
-  BadRequestException,
-  UploadedFiles,
-  UseInterceptors,
-  UploadedFile,
   Delete,
   Param,
+  Post,
+  UseInterceptors,
+  UploadedFiles,
+  Req,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
 import { PublicOptional } from '@/auths/decorator/customize';
-import { diskStorage } from 'multer';
-import { v4 as uuidv4 } from 'uuid';
-import { extname } from 'path';
-import {
-  FileValidationService,
-  MulterConfigService,
-} from './config/multer.config';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
-import { SkipThrottle, Throttle } from '@nestjs/throttler';
+import { SkipThrottle } from '@nestjs/throttler';
 import { CommentsService } from '../comments/comments.service';
-
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: string;
-    username: string;
-  };
-}
+import { AuthenticatedRequest } from '@/auths/auths.controller';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('posts')
 export class PostsController {
@@ -46,47 +28,24 @@ export class PostsController {
     private readonly commentsService: CommentsService,
   ) {}
 
-  @Post('create')
+  @Post()
   @UseGuards(JwtAuthGuard)
-  // @Throttle({ default: { limit: 1, ttl: 90000 } })
-  @UseInterceptors(
-    FileFieldsInterceptor(
-      [
-        { name: 'images', maxCount: 9 },
-        { name: 'video', maxCount: 1 },
-      ],
-      MulterConfigService.getConfig(),
-    ),
-  )
+  @UseInterceptors(FilesInterceptor('files', 9))
   async create(
-    @Body('content') content: string,
-    @Request() req: AuthenticatedRequest,
-    @UploadedFiles()
-    files: {
-      images?: Express.Multer.File[];
-      video?: Express.Multer.File[];
-    },
+    @Body() createPostDto: CreatePostDto,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Req() req: AuthenticatedRequest,
   ) {
-    if (!content || content.trim() === '') {
-      throw new BadRequestException('Nội dung không được để trống');
-    }
-
-    if (files?.images) {
-      FileValidationService.validateImages(files.images);
-    }
-    if (files?.video && files.video.length > 0) {
-      FileValidationService.validateVideo(files.video[0]);
-    }
-
-    const createPostDto: CreatePostDto = {
-      content: content.trim(),
-    };
-
-    return await this.postsService.createPost(
+    const post = await this.postsService.createPost(
       createPostDto,
-      req.user.id,
       files,
+      req.user.id,
     );
+
+    return {
+      message: 'Post created successfully',
+      data: post,
+    };
   }
 
   @Get(':postId/comments')
@@ -128,4 +87,11 @@ export class PostsController {
     const userId = req.user?.id;
     return this.postsService.remove(id, userId);
   }
+
+  // @Patch('')
+  // @UseGuards(JwtAuthGuard)
+  // @SkipThrottle({ default: true })
+  // async edit() {
+  //   return await this.postsService.editPost()
+  // }
 }
