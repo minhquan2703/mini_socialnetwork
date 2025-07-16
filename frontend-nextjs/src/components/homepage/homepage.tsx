@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Button, Typography, Divider } from "antd";
 import { deleteOnePost, getAllPosts } from "@/services/post.service";
 import { postToggleLike } from "@/services/like.service";
+import PostList from "@/components/homepage/list.post";
+import SkeletonCard from "@/components/homepage/skeleton.card";
+import CreatePostForm from "@/components/homepage/create.post";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { toast } from "sonner";
-import CreatePostForm from "./create.post";
-import PostList from "./list.post";
-import SkeletonCard from "./skeleton.card";
+import { Button, Typography, Divider } from "antd";
 
 const HomePage = () => {
     const [posts, setPosts] = useState([]);
@@ -21,12 +21,13 @@ const HomePage = () => {
 
     useEffect(() => {
         getDataPosts();
-        window.scrollTo(0,0);
+        window.scrollTo(0, 0);
     }, []);
 
     const getDataPosts = async () => {
         setLoading(true);
         const res = await getAllPosts({ current: current, pageSize: LIMIT });
+        console.log("check res get all post", res);
         if (res && res?.data) {
             setPosts(res.data.results);
         }
@@ -88,7 +89,7 @@ const HomePage = () => {
                         })
                     );
                 } else {
-                    toast.error(res.message);
+                    toast.error(res?.message ?? "Đã có lỗi xảy ra");
                 }
                 return res;
             } catch (error) {
@@ -131,7 +132,7 @@ const HomePage = () => {
             );
             toast.success("Xoá bài viết thành công");
         }
-        if (res && res?.error) {
+        if (res.error && res.message) {
             toast.error(res.message);
         }
     };
@@ -166,7 +167,13 @@ const HomePage = () => {
                             }}
                         >
                             <div style={{ margin: "50px 0" }}>
-                                <Typography.Text mark style={{fontSize: "15px", fontWeight: "600"}}>
+                                <Typography.Text
+                                    mark
+                                    style={{
+                                        fontSize: "15px",
+                                        fontWeight: "600",
+                                    }}
+                                >
                                     Bạn đã xem hết bài viết
                                 </Typography.Text>
                             </div>

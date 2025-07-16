@@ -55,7 +55,7 @@ const CreateChildComment = ({commentId, setDataChildComments}: CreateChildCommen
                     <Spin spinning={uploading} tip="Đang đăng bình luận...">
                         <div style={{ display: "flex", gap: "10px" }}>
                                 <TextArea
-                                    placeholder="Bình luận bài viết?"
+                                    placeholder="Bình luận..."
                                     value={content}
                                     onChange={(e) =>
                                         setContent(e.target.value)

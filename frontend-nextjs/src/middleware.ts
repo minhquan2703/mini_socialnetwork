@@ -1,6 +1,7 @@
 // middleware.ts - THAY THẾ TOÀN BỘ FILE NÀY
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import { toast } from "sonner";
 
 export default auth((req) => {
     const { pathname } = req.nextUrl;
@@ -11,7 +12,7 @@ export default auth((req) => {
             return NextResponse.redirect(new URL("/auth", req.url));
         }
 
-        if (isLoggedIn && req.auth.user?.role !== "ADMIN") {
+        if (isLoggedIn && req?.auth?.user?.role !== "ADMIN") {
             return NextResponse.redirect(new URL("/", req.url));
         }
     }
@@ -20,6 +21,9 @@ export default auth((req) => {
     }
     if (isLoggedIn && pathname.startsWith("/verify")) {
         return NextResponse.redirect(new URL("/", req.url));
+    }
+    if (!isLoggedIn && pathname.startsWith("/messages")) {
+        return NextResponse.redirect(new URL("/auth", req.url));
     }
 });
 

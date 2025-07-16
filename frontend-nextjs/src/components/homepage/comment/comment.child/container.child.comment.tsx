@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { toast } from "sonner";
 import CreateChildComment from "./create.child.comment";
 import ListChildComment from "./list.child.comment";
@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { IChildComment } from "@/types/comment.type";
 import { getChildComment } from "@/services/comment.service";
 import { postToggleLike } from "@/services/like.service";
+import { useSession } from "@/library/session.context";
 
 interface ContainerChildCommentProps {
     commentId: string;
@@ -19,6 +20,7 @@ const ContainerChildComment = ({
     const [dataChildComments, setDataChildComments] = useState<IChildComment[]>(
         []
     );
+    const session = useSession();
     const likeRequestCache = useRef(new Map());
 
     const LIMIT = 5;
@@ -84,11 +86,14 @@ const ContainerChildComment = ({
     );
     return (
         <>
-            <CreateChildComment
-                commentId={commentId}
-                dataChildComments={dataChildComments}
-                setDataChildComments={setDataChildComments}
-            />
+            {session?.user && (
+                <CreateChildComment
+                    commentId={commentId}
+                    dataChildComments={dataChildComments}
+                    setDataChildComments={setDataChildComments}
+                />
+            )}
+
             <ListChildComment
                 dataChildComments={dataChildComments}
                 handleLikeChildComment={handleLikeChildComment}

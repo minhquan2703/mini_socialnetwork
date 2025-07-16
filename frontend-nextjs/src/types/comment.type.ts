@@ -5,12 +5,16 @@ export interface ICreateCommentRequest {
 }
 
 
-export interface IPostCommentResponse {
+export interface IComment {
     id: string;
     content: string;
     createdAt: string;
     updatedAt: string;
     timeBefore: string;
+    childCommentsCount: number;
+    likeCount: number;
+    isLiked: boolean;
+    isAuthor: boolean;
     user: {
         id: string;
         name: string;
@@ -20,7 +24,6 @@ export interface IPostCommentResponse {
         avatarColor: string;
     };
 }
-
 export interface IGetCommentPagination {
     current?: number;
     pageSize?: number;

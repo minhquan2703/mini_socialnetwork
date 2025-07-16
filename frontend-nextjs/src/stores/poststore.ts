@@ -32,7 +32,7 @@ interface PostStore {
     fetchPosts: (page: number) => Promise<void>;
     loadMore: () => Promise<void>;
 
-    // Like handling with optimistic update
+    //like handling with optimistic update
     handleLike: (postId: string) => Promise<void>;
 }
 

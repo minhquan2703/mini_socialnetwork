@@ -31,14 +31,14 @@ const PostCard = (props: any) => {
         handleDeletePost,
     } = props;
     const moreActions: MenuProps["items"] = [
-        { key: "1", label: "Lưu bài viết" },
-        { key: "2", label: "Sao chép liên kết" },
-        { type: "divider" },
+        // { key: "1", label: "Lưu bài viết" },
+        // { key: "2", label: "Sao chép liên kết" },
+        // { type: "divider" },
         { key: "3", label: "Báo cáo", danger: true },
     ];
     const authorActions: MenuProps["items"] = [
-        { key: "update", label: "Chỉnh sửa bài viết" },
-        { type: "divider" },
+        // { key: "update", label: "Chỉnh sửa bài viết" },
+        // { type: "divider" },
         {
             key: "delete",
             label: "Xoá bài viết",
@@ -46,7 +46,6 @@ const PostCard = (props: any) => {
             onClick: () => handleDeletePost(post.id),
         },
     ];
-    // Local state for optimistic UI
     const [localIsLiked, setLocalIsLiked] = useState(post.isLiked);
     const [localLikeCount, setLocalLikeCount] = useState(post.likeCount);
     const [isPending, startTransition] = useTransition();
@@ -67,16 +66,14 @@ const PostCard = (props: any) => {
             setShowModal(true);
             return;
         }
-        // Immediate UI update
         setLocalIsLiked(!localIsLiked);
         setLocalLikeCount(
             localIsLiked ? localLikeCount - 1 : localLikeCount + 1
         );
 
-        // API call in background with transition
+        //API call in background with transition
         startTransition(() => {
             handleLike(post.id).catch(() => {
-                // Revert on error
                 setLocalIsLiked(localIsLiked);
                 setLocalLikeCount(localLikeCount);
             });
@@ -320,7 +317,7 @@ const PostCard = (props: any) => {
                     >
                         Bình luận
                     </Button>
-                    <Button
+                    {/* <Button
                         type="text"
                         icon={<ShareAltOutlined />}
                         style={{
@@ -332,7 +329,7 @@ const PostCard = (props: any) => {
                         onClick={() => handleShare()}
                     >
                         Chia sẻ
-                    </Button>
+                    </Button> */}
                 </div>
                 {showComment && (
                     <CommentPost

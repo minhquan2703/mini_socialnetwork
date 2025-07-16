@@ -2,7 +2,6 @@
 
 import { useSession } from "@/library/session.context";
 import { postComment } from "@/services/comment.service";
-import { SmileOutlined } from "@ant-design/icons";
 import { Button, Card, Space, Spin } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { useState } from "react";
@@ -98,23 +97,22 @@ const CreateComment = (props: any) => {
                                 <div
                                     style={{
                                         display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
                                         marginTop: "10px",
+                                        justifyContent: "flex-end"
                                     }}
                                 >
-                                    <Space size={20}>
+                                    {/* <Space size={20}>
                                         <Button
                                             type="text"
                                             icon={<SmileOutlined />}
                                             style={{ color: "#666" }}
                                         ></Button>
-                                    </Space>
+                                    </Space> */}
                                     <Button
                                         color="default"
                                         variant="solid"
                                         style={{
-                                            fontWeight: "600",
+                                            fontWeight: "600"
                                         }}
                                         disabled={!newComment.trim()}
                                         onClick={handleSubmit}

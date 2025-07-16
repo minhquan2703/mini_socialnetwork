@@ -1,19 +1,20 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useSocket } from "@/library/socket.context";
 import { useSession } from "@/library/session.context";
-import { Input, Button, Spin, Empty, Avatar } from "antd";
+import { Input, Button, Spin, Empty, Avatar, Form, Tooltip } from "antd";
 import { SendOutlined } from "@ant-design/icons";
-import { getMessages } from "@/services/chat.service";
+import { getDetailRoom, getMessages } from "@/services/chat.service";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import DetailRoom from "./room.detail";
+import { IDetailRoom } from "@/types/room.type";
 
 interface Message {
     id: string;
     senderId: string;
     content: string;
-    createdAt: string;
+    createdAtFormat: string;
     sender?: {
         id: string;
         name: string;
@@ -32,11 +33,10 @@ const ChatBox = (props: props) => {
     const { socket, isConnected } = useSocket();
     const userId = session?.user?.id || "";
     const [messages, setMessages] = useState<Message[]>([]);
-    const [text, setText] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
-
+    const [form] = Form.useForm();
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
@@ -51,6 +51,7 @@ const ChatBox = (props: props) => {
             setIsLoading(true);
             const res = await getMessages(roomId);
             if (res.data) {
+
                 setMessages(res.data);
             } else if (res.statusCode === 404 || res.statusCode === 400) {
                 router.replace("/messages/notfound");
@@ -64,33 +65,34 @@ const ChatBox = (props: props) => {
         };
 
         loadMessages();
-    }, [roomId, session]);
+    }, [roomId, router, session]);
 
+    const handleReceive = useCallback((msg: Message) => {
+        setMessages((prev) => [...prev, msg]);
+    }, []);
     //socket events
     useEffect(() => {
         if (!socket) return;
 
         socket.emit("joinRoom", roomId);
-        socket.on("receiveMessage", (msg: Message) => {
-            setMessages((prev) => [...prev, msg]);
-        });
+        socket.on("receiveMessage", handleReceive);
 
         return () => {
             socket.emit("leaveRoom", roomId);
             socket.off("receiveMessage");
         };
-    }, [roomId, socket, isConnected]);
+    }, [socket, isConnected]);
 
-    const sendMessage = () => {
-        if (!text.trim() || !isConnected) return;
+    const sendMessage = (value: any) => {
+        const { messageText } = value;
+        if (!messageText || !isConnected) return;
         if (socket?.active) {
             socket.emit("sendMessage", {
                 roomId,
-                content: text.trim(),
+                content: messageText.trim(),
             });
         }
-
-        setText("");
+        form.resetFields();
     };
 
     if (!roomId || !session) {
@@ -102,7 +104,9 @@ const ChatBox = (props: props) => {
                     padding: "50px",
                 }}
             >
-                <Spin tip="Đang tải..." size="large">Not found Session</Spin>
+                <Spin tip="Đang tải..." size="large">
+                    <></>
+                </Spin>
             </div>
         );
     }
@@ -147,7 +151,9 @@ const ChatBox = (props: props) => {
                                     display: "block",
                                     margin: "50px auto",
                                 }}
-                            >Hello</Spin>
+                            >
+                                <></>
+                            </Spin>
                         ) : messages.length === 0 ? (
                             <Empty description="Chưa có tin nhắn" />
                         ) : (
@@ -159,51 +165,90 @@ const ChatBox = (props: props) => {
                                     "Unknown";
 
                                 return (
-                                    <div
-                                        key={msg.id}
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: isOwn
-                                                ? "flex-end"
-                                                : "flex-start",
-                                            marginBottom: "15px",
-                                            gap: "10px",
-                                        }}
-                                    >
-                                        {/* Other's message: Avatar + Name + Content */}
-                                        {!isOwn && (
-                                            <>
-                                                <Avatar
-                                                    src={msg?.sender?.image}
-                                                    style={{
-                                                        backgroundColor:
-                                                            msg?.sender
-                                                                ?.avatarColor ||
-                                                            "#1890ff",
-                                                        flexShrink: 0,
-                                                    }}
-                                                >
-                                                    {name
-                                                        .charAt(0)
-                                                        .toUpperCase()}
-                                                </Avatar>
-                                                <div
-                                                    style={{ maxWidth: "70%" }}
-                                                >
-                                                    <div
+                                    <>
+                                        <div
+                                            key={msg.id}
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: isOwn
+                                                    ? "flex-end"
+                                                    : "flex-start",
+                                                marginBottom: "15px",
+                                                gap: "10px",
+                                            }}
+                                        >
+                                            {/* Other's message: Avatar + Name + Content */}
+                                            {!isOwn && (
+                                                <>
+                                                    <Avatar
+                                                        src={msg?.sender?.image}
                                                         style={{
-                                                            fontSize: "12px",
-                                                            color: "#666",
-                                                            marginBottom: "2px",
+                                                            backgroundColor:
+                                                                msg?.sender
+                                                                    ?.avatarColor ||
+                                                                "#1890ff",
+                                                            flexShrink: 0,
                                                         }}
                                                     >
-                                                        {name}
-                                                    </div>
+                                                        {name
+                                                            .charAt(0)
+                                                            .toUpperCase()}
+                                                    </Avatar>
                                                     <div
                                                         style={{
+                                                            maxWidth: "70%",
+                                                        }}
+                                                    >
+                                                        <div
+                                                            style={{
+                                                                fontSize:
+                                                                    "12px",
+                                                                color: "#666",
+                                                                marginBottom:
+                                                                    "2px",
+                                                            }}
+                                                        >
+                                                            {name}
+                                                        </div>
+                                                        <Tooltip
+                                                            title={
+                                                                msg.createdAtFormat
+                                                            }
+                                                            placement="left"
+                                                        >
+                                                            {" "}
+                                                            <div
+                                                                style={{
+                                                                    padding:
+                                                                        "8px 12px",
+                                                                    backgroundColor:
+                                                                        "#f2f2f2",
+                                                                    borderRadius:
+                                                                        "8px",
+                                                                    wordBreak:
+                                                                        "break-word",
+                                                                }}
+                                                            >
+                                                                {msg.content}
+                                                            </div>
+                                                        </Tooltip>
+                                                    </div>
+                                                </>
+                                            )}
+
+                                            {/* Own message: Content only */}
+                                            {isOwn && (
+                                                <Tooltip
+                                                    title={msg.createdAtFormat}
+                                                    placement="right"
+                                                >
+                                                    <div
+                                                        style={{
+                                                            maxWidth: "70%",
                                                             padding: "8px 12px",
                                                             backgroundColor:
-                                                                "#f2f2f2",
+                                                                "#1890ff",
+                                                            color: "#fff",
                                                             borderRadius: "8px",
                                                             wordBreak:
                                                                 "break-word",
@@ -211,26 +256,10 @@ const ChatBox = (props: props) => {
                                                     >
                                                         {msg.content}
                                                     </div>
-                                                </div>
-                                            </>
-                                        )}
-
-                                        {/* Own message: Content only */}
-                                        {isOwn && (
-                                            <div
-                                                style={{
-                                                    maxWidth: "70%",
-                                                    padding: "8px 12px",
-                                                    backgroundColor: "#1890ff",
-                                                    color: "#fff",
-                                                    borderRadius: "8px",
-                                                    wordBreak: "break-word",
-                                                }}
-                                            >
-                                                {msg.content}
-                                            </div>
-                                        )}
-                                    </div>
+                                                </Tooltip>
+                                            )}
+                                        </div>
+                                    </>
                                 );
                             })
                         )}
@@ -247,35 +276,45 @@ const ChatBox = (props: props) => {
                             flexShrink: 0,
                         }}
                     >
-                        <div style={{ display: "flex", gap: "10px" }}>
-                            <Input
-                                value={text}
-                                onChange={(e) => setText(e.target.value)}
-                                onPressEnter={sendMessage}
-                                placeholder={
-                                    isConnected
-                                        ? "Nhập tin nhắn..."
-                                        : "Đang kết nối..."
-                                }
-                                disabled={!isConnected}
-                                size="large"
-                            />
-                            <Button
-                                type="primary"
-                                icon={<SendOutlined />}
-                                onClick={sendMessage}
-                                disabled={!isConnected || !text.trim()}
-                                size="large"
+                        <Form
+                            form={form}
+                            size="middle"
+                            onFinish={sendMessage}
+                            autoComplete="off"
+                            style={{ display: "flex", gap: "10px" }}
+                        >
+                            <Form.Item
+                                label=""
+                                name="messageText"
+                                style={{ width: "90%" }}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "",
+                                    },
+                                ]}
                             >
-                                Gửi
-                            </Button>
-                        </div>
+                                <Input placeholder="Nhập tin nhắn..." />
+                            </Form.Item>
+                            <Form.Item>
+                                <Button
+                                    color="default"
+                                    icon={<SendOutlined />}
+                                    variant="solid"
+                                    htmlType="submit"
+                                    size="middle"
+                                    disabled={!isConnected}
+                                >
+                                    Gửi
+                                </Button>
+                            </Form.Item>
+                        </Form>
                     </div>
                 </div>
                 <div
                     style={{ width: "35%", height: "100%", overflow: "hidden" }}
                 >
-                    <DetailRoom />
+                    <DetailRoom roomId={roomId}/>
                 </div>
             </div>
         </>

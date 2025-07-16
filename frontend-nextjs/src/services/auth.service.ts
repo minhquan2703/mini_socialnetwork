@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { IRegister, IResendCode, IVerifyAccount } from "@/types/auth.type";
 import { sendRequest, sendRequestFile } from "@/utils/api";
 
@@ -52,4 +53,25 @@ const postResendCode = async (data: IResendCode): Promise<IBackendRes<IResendCod
     })
     return response
 } 
-export {postAuthRegister, postAuthVerifyAccount, postResendCode, postAvatarUser}
+
+const getUserPagination = async (data: any): Promise<IBackendRes<any>> =>{
+    const session = await auth()
+    const { current, pageSize } = data
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${USER_BASE_URL}`,
+        method: "GET",
+        queryParams: {
+            current,
+            pageSize,
+        },
+        headers: {
+            Authorization: `Bearer ${session?.user.access_token}`
+        },
+        nextOption: {
+            next: { tags: ['list-users'] }
+        }
+    })
+    return res
+}
+
+export {postAuthRegister, postAuthVerifyAccount, postResendCode, postAvatarUser, getUserPagination}

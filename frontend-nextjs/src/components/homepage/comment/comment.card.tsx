@@ -4,10 +4,12 @@ import { CommentOutlined, MoreOutlined, StarFilled } from "@ant-design/icons";
 import { Avatar, Button, Dropdown, MenuProps } from "antd";
 import React, { useCallback, useState, useTransition } from "react";
 import { useSession } from "@/library/session.context";
-import { toast } from "sonner";
-import CreateChildComment from "./comment.child/create.child.comment";
 import ContainerChildComment from "./comment.child/container.child.comment";
+import { IComment } from "@/types/comment.type";
 
+interface CommentCardProps {
+    comment: IComment;
+}
 const CommentCard = (props: any) => {
     const moreActions: MenuProps["items"] = [
         { key: "1", label: "Báo cáo", danger: true },

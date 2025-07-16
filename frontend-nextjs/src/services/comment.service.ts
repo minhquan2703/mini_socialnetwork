@@ -1,11 +1,11 @@
 import {
     IChildComment,
+    IComment,
     ICreateCommentRequest,
     IGetChildCommentPaginationRequest,
     IGetChildCommentPaginationResponse,
     IGetCommentPagination,
     IPostChildCommentRequest,
-    IPostCommentResponse,
 } from "@/types/comment.type";
 import { sendRequest } from "@/utils/api";
 
@@ -14,9 +14,9 @@ const CHILDCOMMENT_BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/chi
 
 const postComment = async (
     data: ICreateCommentRequest
-): Promise<IBackendRes<IPostCommentResponse>> => {
+): Promise<IBackendRes<IComment>> => {
     const { content, postId, photoId } = data;
-    const response = await sendRequest<IBackendRes<IPostCommentResponse>>({
+    const response = await sendRequest<IBackendRes<IComment>>({
         url: `${COMMENT_BASE_URL}/`,
         method: "POST",
         body: {
@@ -29,9 +29,9 @@ const postComment = async (
 };
 const getAllCommentOfOnePost = async (
     data: IGetCommentPagination
-): Promise<IBackendRes<any>> => {
+): Promise<IBackendRes<IComment[]>> => {
     const { current, pageSize, postId } = data;
-    const response = await sendRequest<IBackendRes<IGetCommentPagination>>({
+    const response = await sendRequest<IBackendRes<IComment[]>>({
         url: `${COMMENT_BASE_URL}/getallcomment-post/?current=${current}&pageSize=${pageSize}&postId=${postId}`,
         method: "GET",
     });

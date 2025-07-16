@@ -59,59 +59,49 @@ const UserSideBar = () => {
                                 }}
                             >
                                 Tin nhắn
-                                <Badge
-                                    count={`99+`}
-                                    size="small"
-                                    color="#FF4D4F"
-                                    styles={{
-                                        indicator: {
-                                            fontSize: "11px",
-                                        },
-                                    }}
-                                />
                             </div>
                         </Link>
                     ),
                     icon: <MessageOutlined />,
                 },
-                {
-                    key: "friends",
-                    label: (
-                        <Link
-                            href={"/"}
-                            style={{ color: "inherit", textDecoration: "none" }}
-                        >
-                            Bạn bè
-                        </Link>
-                    ),
-                    icon: <TeamOutlined />,
-                    onClick: () => alert("Tính năng đang phát triển"),
-                },
-                {
-                    key: "stories",
-                    label: "Bảng tin",
-                    icon: <AppstoreOutlined />,
-                    children: [
-                        { key: "5", label: "Tin của bạn" },
-                        { key: "6", label: "Kho lưu trữ" },
-                    ],
-                },
-                {
-                    key: "settings",
-                    label: (
-                        <Link
-                            href={"/"}
-                            style={{ color: "inherit", textDecoration: "none" }}
-                        >
-                            Cài đặt
-                        </Link>
-                    ),
-                    icon: <SettingOutlined />,
-                    onClick: () => alert("Tính năng đang phát triển"),
-                },
-                {
-                    type: "divider",
-                },
+                // {
+                //     key: "friends",
+                //     label: (
+                //         <Link
+                //             href={"/"}
+                //             style={{ color: "inherit", textDecoration: "none" }}
+                //         >
+                //             Bạn bè
+                //         </Link>
+                //     ),
+                //     icon: <TeamOutlined />,
+                //     onClick: () => alert("Tính năng đang phát triển"),
+                // },
+                // {
+                //     key: "stories",
+                //     label: "Bảng tin",
+                //     icon: <AppstoreOutlined />,
+                //     children: [
+                //         { key: "5", label: "Tin của bạn" },
+                //         { key: "6", label: "Kho lưu trữ" },
+                //     ],
+                // },
+                // {
+                //     key: "settings",
+                //     label: (
+                //         <Link
+                //             href={"/"}
+                //             style={{ color: "inherit", textDecoration: "none" }}
+                //         >
+                //             Cài đặt
+                //         </Link>
+                //     ),
+                //     icon: <SettingOutlined />,
+                //     onClick: () => alert("Tính năng đang phát triển"),
+                // },
+                // {
+                //     type: "divider",
+                // },
                 {
                     key: "contact",
                     label: "Liên hệ với tôi",

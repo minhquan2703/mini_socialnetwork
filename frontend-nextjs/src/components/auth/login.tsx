@@ -8,13 +8,18 @@ import ModalForgotPassword from "./modal.forgotpass";
 import { toast } from "sonner";
 import ModalActive from "./modal.active";
 
+interface modalLogin {
+    username: string;
+    password: string
+}
+
 const Login = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalForgotPasswordOpen, setIsModalForgotPasswordOpen] =
         useState(false);
     const [userEmail, setUserEmail] = useState("");
     const [usernameModal, setUsernameModal] = useState("");
-    const onFinish = async (values: any) => {
+    const onFinish = async (values: modalLogin) => {
         const { username, password } = values;
         setUserEmail("");
         setUsernameModal("");
@@ -52,6 +57,7 @@ const Login = () => {
             }
         );
     };
+
 
     return (
         <>

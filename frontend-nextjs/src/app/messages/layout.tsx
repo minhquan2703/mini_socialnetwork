@@ -5,7 +5,6 @@ import MessagesSideBar from "@/components/layout/messages/messages.sidebar";
 import { MessagesContextProvider } from "@/library/user.messages.context";
 import { SessionProvider } from "@/library/session.context";
 import { SocketProvider } from "@/library/socket.context";
-import MessagesDetail from "@/components/layout/messages/messages.detail";
 
 const MessagesLayout = async ({
     children,

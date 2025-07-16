@@ -3,7 +3,7 @@ import HomePage from "@/components/homepage/homepage";
 const Home = async () => {
     return (
         <div>
-            <HomePage/>
+            <HomePage />
         </div>
     );
 };

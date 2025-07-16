@@ -1,10 +1,9 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button, Form, Input, Modal, Steps } from "antd";
 import { useHasMounted } from "@/utils/customHook";
 import {
     CheckCircleFilled,
-    LoadingOutlined,
     SmileOutlined,
     SolutionOutlined,
     UserOutlined,
@@ -12,16 +11,19 @@ import {
 import { sendRequest } from "@/utils/api";
 import { toast } from "sonner";
 
-const ModalForgotPassword = (props: any) => {
-    const [current, setCurrent] = useState(0);
-    const [emailResend, setEmailResend] = useState("");
-    const [userId, setUserId] = useState("");
+interface ModalProps{
+    isModalOpen: boolean;
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+const ModalForgotPassword = (props: ModalProps) => {
+    const [current, setCurrent] = useState<number>(0);
+    const [userId, setUserId] = useState<string>("");
     const [form] = Form.useForm();
     const { isModalOpen, setIsModalOpen } = props;
     const hasMounted = useHasMounted();
-    const onFinishStep0 = async (values: any) => {
+    const onFinishStep0 = async (values: {email: string;}) => {
         const { email } = values;
-        const res = await sendRequest<IBackendRes<any>>({
+        const res = await sendRequest<IBackendRes<unknown>>({
             url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/resend-recover-password`,
             method: "POST",
             body: {
@@ -29,7 +31,7 @@ const ModalForgotPassword = (props: any) => {
             },
         });
         if (res?.data) {
-            setUserId(res?.data?._id);
+            setUserId(res?.data?.id);
             setCurrent(1);
         } else {
             toast.error(res.message);
@@ -37,7 +39,7 @@ const ModalForgotPassword = (props: any) => {
     };
     const onFinishStep1 = async (values: any) => {
         const { codeId, password, confirmPassword } = values;
-        const res = await sendRequest<IBackendRes<any>>({
+        const res = await sendRequest<IBackendRes<unknown>>({
             url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/forgot-password`,
             method: "POST",
             body: {

@@ -192,7 +192,7 @@ const CreatePostForm = (props: any) => {
                                 >
                                     Ảnh/Video
                                 </Button>
-                                <Button
+                                {/* <Button
                                     type="text"
                                     icon={<SmileOutlined />}
                                     style={{ color: "#666" }}
@@ -205,7 +205,7 @@ const CreatePostForm = (props: any) => {
                                     style={{ color: "#666" }}
                                 >
                                     Vị trí
-                                </Button>
+                                </Button> */}
                             </Space>
                             <Button
                                 color="default"

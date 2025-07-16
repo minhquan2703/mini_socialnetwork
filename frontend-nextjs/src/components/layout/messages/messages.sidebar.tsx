@@ -16,7 +16,6 @@ import { IRoom } from "@/types/room.type";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
-
 const MessagesSideBar = () => {
     const { Sider } = Layout;
     const [rooms, setRooms] = useState<IRoom[]>([]);
@@ -232,8 +231,8 @@ const MessagesSideBar = () => {
                                             whiteSpace: "nowrap",
                                         }}
                                     >
-                                        {room.lastestMessage?.sender.name}:{" "}
-                                        {room.lastestMessage?.content}
+                                        {room.lastestMessage?.sender &&
+                                            `${room.lastestMessage?.sender.name}: ${room.lastestMessage?.content}`}
                                     </span>
                                     {/* {chat.unread > 0 && (
                                             <Badge 
