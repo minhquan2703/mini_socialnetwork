@@ -6,8 +6,20 @@ import { toast } from "sonner";
 interface IProps {
     isUpdateModalOpen: boolean;
     setIsUpdateModalOpen: (v: boolean) => void;
-    dataUpdate: unknown;
-    setDataUpdate: React.Dispatch<React.SetStateAction<unknown>>;
+    dataUpdate: IUserData | null;
+    setDataUpdate: React.Dispatch<React.SetStateAction<IUserData | null>>;
+}
+interface IUserData {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+}
+
+interface IUpdateUserFormValues {
+    name: string;
+    email: string;
+    phone?: string;
 }
 
 const UserUpdate = (props: IProps) => {
@@ -18,7 +30,7 @@ const UserUpdate = (props: IProps) => {
         setDataUpdate,
     } = props;
 
-    const [form] = Form.useForm();
+    const [form] = Form.useForm<IUpdateUserFormValues>();
 
     useEffect(() => {
         if (dataUpdate) {
@@ -26,10 +38,10 @@ const UserUpdate = (props: IProps) => {
             form.setFieldsValue({
                 name: dataUpdate.name,
                 email: dataUpdate.email,
-                phone: dataUpdate.phone,
+                phone: dataUpdate.phone || "",
             });
         }
-    }, [dataUpdate]);
+    }, [dataUpdate, form]);
 
     const handleCloseUpdateModal = () => {
         form.resetFields();
@@ -37,17 +49,18 @@ const UserUpdate = (props: IProps) => {
         setDataUpdate(null);
     };
 
-    const onFinish = async (values: any) => {
+    const onFinish = async (values: IUpdateUserFormValues) => {
         if (dataUpdate) {
             const { name, phone } = values;
-            if (phone.length > 11) {
+            if (phone && phone.length > 11) {
                 toast.error('Số điện thoại không được dài quá 11 số')
+                return;
             }
             startTransition(async () => {
                 const res = await handleUpdateUserAction({
                     id: dataUpdate.id,
                     name,
-                    phone,
+                    phone: phone || "",
                 });
                 console.log('check res upate', res)
                 if (res?.data) {

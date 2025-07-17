@@ -4,11 +4,10 @@ import { useSocket } from "@/library/socket.context";
 import { useSession } from "@/library/session.context";
 import { Input, Button, Spin, Empty, Avatar, Form, Tooltip } from "antd";
 import { SendOutlined } from "@ant-design/icons";
-import { getDetailRoom, getMessages } from "@/services/chat.service";
+import { getMessages } from "@/services/chat.service";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import DetailRoom from "./room.detail";
-import { IDetailRoom } from "@/types/room.type";
 
 interface Message {
     id: string;
@@ -83,7 +82,7 @@ const ChatBox = (props: props) => {
         };
     }, [socket, isConnected]);
 
-    const sendMessage = (value: any) => {
+    const sendMessage = (value: {messageText: string}) => {
         const { messageText } = value;
         if (!messageText || !isConnected) return;
         if (socket?.active) {
@@ -294,7 +293,7 @@ const ChatBox = (props: props) => {
                                     },
                                 ]}
                             >
-                                <Input placeholder="Nhập tin nhắn..." />
+                                <Input placeholder="Nhập tin nhắn..." autoFocus/>
                             </Form.Item>
                             <Form.Item>
                                 <Button

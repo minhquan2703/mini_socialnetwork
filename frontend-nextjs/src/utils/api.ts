@@ -1,6 +1,17 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { getSession } from "next-auth/react";
 import queryString from "query-string";
+
+// 👉 Định nghĩa type cho IRequest nếu bạn chưa có
+export interface IRequest {
+    url: string;
+    method: AxiosRequestConfig["method"];
+    body?: unknown;
+    queryParams?: Record<string, unknown>;
+    useCredentials?: boolean;
+    headers?: Record<string, string>;
+    nextOption?: Partial<AxiosRequestConfig>;
+}
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
@@ -9,7 +20,6 @@ const api = axios.create({
 api.interceptors.request.use(
     async (config) => {
         if (typeof window !== "undefined") {
-            //client: có thể dùng getSession
             const session = await getSession();
             const token = session?.user?.access_token;
             if (token) {
@@ -19,16 +29,14 @@ api.interceptors.request.use(
                 };
             }
         }
-        //server: phải tự truyền token qua config.headers từ chỗ gọi
         return config;
     },
     (error) => Promise.reject(error)
 );
 
-// 3.Hàm gửi request (gửi JSON)
 export const sendRequest = async <T>(props: IRequest): Promise<T> => {
-    let {
-        url,
+    const {
+        url: originalUrl,
         method,
         body,
         queryParams = {},
@@ -37,11 +45,12 @@ export const sendRequest = async <T>(props: IRequest): Promise<T> => {
         nextOption = {},
     } = props;
 
-    if (queryParams && Object.keys(queryParams).length > 0) {
-        url = `${url}?${queryString.stringify(queryParams)}`;
-    }
+    const url =
+        queryParams && Object.keys(queryParams).length > 0
+            ? `${originalUrl}?${queryString.stringify(queryParams)}`
+            : originalUrl;
 
-    const config: any = {
+    const config: AxiosRequestConfig = {
         url,
         method,
         headers: { "Content-Type": "application/json", ...headers },
@@ -52,20 +61,21 @@ export const sendRequest = async <T>(props: IRequest): Promise<T> => {
     if (useCredentials) config.withCredentials = true;
 
     try {
-        const res = await api.request<T>(config);
+        const res: AxiosResponse<T> = await api.request<T>(config);
         return res.data;
-    } catch (error: any) {
+    } catch (error) {
+        const err = error as any;
         return {
-            statusCode: error.response?.status,
-            message: error.response?.data?.message ?? error.message ?? "",
-            error: error.response?.data?.error ?? "",
+            statusCode: err.response?.status,
+            message: err.response?.data?.message ?? err.message ?? "",
+            error: err.response?.data?.error ?? "",
         } as T;
     }
 };
 
 export const sendRequestFile = async <T>(props: IRequest): Promise<T> => {
-    let {
-        url,
+    const {
+        url: originalUrl,
         method,
         body,
         queryParams = {},
@@ -74,37 +84,34 @@ export const sendRequestFile = async <T>(props: IRequest): Promise<T> => {
         nextOption = {},
     } = props;
 
-    if (queryParams && Object.keys(queryParams).length > 0) {
-        url = `${url}?${queryString.stringify(queryParams)}`;
-    }
+    const url =
+        queryParams && Object.keys(queryParams).length > 0
+            ? `${originalUrl}?${queryString.stringify(queryParams)}`
+            : originalUrl;
 
-    const config: any = {
+    const config: AxiosRequestConfig = {
         url,
         method,
         headers: {
             ...headers,
-            //QUAN TRỌNG: Không set Content-Type khi gửi FormData
-            //axios sẽ tự động set với boundary đúng
+            // Không set Content-Type khi gửi FormData (axios sẽ tự set)
         },
         ...nextOption,
     };
 
-    if (body instanceof FormData) {
-        config.data = body; 
-    } else {
-        config.data = body;
-    }
+    config.data = body;
 
     if (useCredentials) config.withCredentials = true;
 
     try {
-        const res = await api.request<T>(config);
+        const res: AxiosResponse<T> = await api.request<T>(config);
         return res.data;
-    } catch (error: any) {
+    } catch (error) {
+        const err = error as any;
         return {
-            statusCode: error.response?.status,
-            message: error.response?.data?.message ?? error.message ?? "",
-            error: error.response?.data?.error ?? "",
+            statusCode: err.response?.status,
+            message: err.response?.data?.message ?? err.message ?? "",
+            error: err.response?.data?.error ?? "",
         } as T;
     }
 };

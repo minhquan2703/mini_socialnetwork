@@ -9,8 +9,23 @@ import UserUpdate from "./user.update";
 import { IUserPagination } from "@/types/next-auth";
 
 interface UserTableProps {
-    meta: unknown;
+    meta: IMetaData;
     users: IUserPagination[];
+}
+
+interface IMetaData {
+    current: number;
+    pageSize: number;
+    pages: number;
+    total: number;
+}
+
+// Define proper types for user data used in update
+interface IUserData {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
 }
 
 const UserTable = (props: UserTableProps) => {
@@ -21,12 +36,12 @@ const UserTable = (props: UserTableProps) => {
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState<boolean>(false);
-    const [dataUpdate, setDataUpdate] = useState<unknown>(null);
+    const [dataUpdate, setDataUpdate] = useState<IUserData | null>(null);
 
     const columns = [
         {
             title: "STT",
-            render: (_: unknown, record: unknown, index: unknown) => {
+            render: (_: unknown, record: IUserPagination, index: number) => {
                 return <>{index + 1 + (meta.current - 1) * meta.pageSize}</>;
             },
         },
@@ -41,7 +56,7 @@ const UserTable = (props: UserTableProps) => {
         {
             title: "Actions",
 
-            render: (text: unknown, record: unknown) => {
+            render: (text: unknown, record: IUserPagination) => {
                 return (
                     <>
                         <EditTwoTone
@@ -49,7 +64,7 @@ const UserTable = (props: UserTableProps) => {
                             style={{ cursor: "pointer", margin: "0 20px" }}
                             onClick={() => {
                                 setIsUpdateModalOpen(true);
-                                setDataUpdate(record);
+                                setDataUpdate(record as unknown as IUserData);
                             }}
                         />
 
@@ -74,11 +89,11 @@ const UserTable = (props: UserTableProps) => {
     ];
 
     const onChange = (
-        pagination: unknown /*, filters: unknown, sorter: unknown, extra: unknown*/
+        pagination: { current?: number; pageSize?: number } /*, filters: unknown, sorter: unknown, extra: unknown*/
     ) => {
         if (pagination && pagination?.current) {
             const params = new URLSearchParams(searchParams);
-            params.set("current", pagination.current);
+            params.set("current", pagination.current.toString());
             replace(`${pathname}?${params.toString()}`);
         }
     };
