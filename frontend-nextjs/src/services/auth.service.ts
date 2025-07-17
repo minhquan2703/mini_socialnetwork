@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { GetUserPagination, IRegister, IResendCode, IVerifyAccount, UserListResponseData } from "@/types/auth.type";
-import { sendRequest, sendRequestFile } from "@/utils/api";
+import { sendRequest, sendRequestFile } from "@/utils/apiAxios";
 
 
 const AUTH_BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auths`
@@ -54,24 +54,4 @@ const postResendCode = async (data: IResendCode): Promise<IBackendRes<IResendCod
     return response
 } 
 
-const getUserPagination = async (data: GetUserPagination): Promise<IBackendRes<UserListResponseData>> =>{
-    const session = await auth()
-    const { current, pageSize } = data
-    const res = await sendRequest<IBackendRes<UserListResponseData>>({
-        url: `${USER_BASE_URL}`,
-        method: "GET",
-        queryParams: {
-            current,
-            pageSize,
-        },
-        headers: {
-            Authorization: `Bearer ${session?.user.access_token}`
-        },
-        nextOption: {
-            next: { tags: ['list-users'] }
-        }
-    })
-    return res
-}
-
-export {postAuthRegister, postAuthVerifyAccount, postResendCode, postAvatarUser, getUserPagination}
+export {postAuthRegister, postAuthVerifyAccount, postResendCode, postAvatarUser}

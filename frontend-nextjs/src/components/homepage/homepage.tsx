@@ -66,7 +66,6 @@ const HomePage = () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
     };
 
-    // Handle function
 
     const handleLike = useCallback(async (postId: string) => {
         if (likeRequestCache.current.has(postId)) {
@@ -108,7 +107,6 @@ const HomePage = () => {
         })();
 
         likeRequestCache.current.set(postId, likePromise);
-        console.log('check like promise', likePromise)
         return likePromise;
     }, []);
 
@@ -149,11 +147,17 @@ const HomePage = () => {
             // id="scrollableDiv"
         >
             <CreatePostForm handlePostCreated={handlePostCreated} />
-            {posts.length === 0 ? (
-                <div style={{ padding: "20px 0" }}>
-                    {[...Array(4)].map((_, index) => (
-                        <SkeletonCard key={index} />
-                    ))}
+            {posts.length === 0 && !loading ? (
+                <div style={{ textAlign: "center", margin: "50px 0" }}>
+                    <Typography.Text
+                        style={{
+                        fontSize: "16px",
+                        fontWeight: "500",
+                        color: "#666",
+                        }}
+                    >
+                        Chưa có bài viết nào. Hãy tạo bài viết đầu tiên!
+                    </Typography.Text>
                 </div>
             ) : (
                 <InfiniteScroll

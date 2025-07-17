@@ -40,11 +40,11 @@ export const handleCreateUserAction = async (data: any) => {
         headers: {
             Authorization: `Bearer ${session?.user?.access_token}`,
         },
-        body: { ...data },
-    });
-    revalidateTag("list-users");
+        body: { ...data }
+    })
+    revalidateTag("list-users")
     return res;
-};
+}
 
 export const handleUpdateUserAction = async (data: any) => {
     const session = await auth();
@@ -54,11 +54,11 @@ export const handleUpdateUserAction = async (data: any) => {
         headers: {
             Authorization: `Bearer ${session?.user?.access_token}`,
         },
-        body: { ...data },
-    });
-    revalidateTag("list-users");
+        body: { ...data }
+    })
+    revalidateTag("list-users")
     return res;
-};
+}
 
 export const handleDeleteUserAction = async (id: any) => {
     const session = await auth();
@@ -73,4 +73,3 @@ export const handleDeleteUserAction = async (id: any) => {
     revalidateTag("list-users")
     return res;
 }
-

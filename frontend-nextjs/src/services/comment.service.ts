@@ -8,7 +8,7 @@ import {
     IGetCommentPagination,
     IPostChildCommentRequest,
 } from "@/types/comment.type";
-import { sendRequest } from "@/utils/api";
+import { sendRequest } from "@/utils/apiAxios";
 
 const COMMENT_BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/comments`;
 const CHILDCOMMENT_BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/child-comments`;

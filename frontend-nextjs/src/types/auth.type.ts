@@ -2,6 +2,7 @@ import { SetStateAction } from "react";
 
 // Authentication related types
 export interface IRegister {
+    id: string;
     name: string;
     email: string;
     username: string;

@@ -1,6 +1,8 @@
 import ChatBox from "@/components/messages/chat.box";
-
-const MessagePage = async ({ params }: { params: { id: string } }) => {
+interface IProps {
+    params: Promise<{ id: string }>;
+}
+const MessagePage = async ({ params }: IProps) => {
     const { id } = await params;
 
     return (

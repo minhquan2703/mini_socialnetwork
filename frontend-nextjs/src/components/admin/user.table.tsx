@@ -9,13 +9,13 @@ import UserUpdate from "./user.update";
 import { IUserPagination } from "@/types/next-auth";
 
 interface UserTableProps {
-    meta: IMetaData;
+    meta?: IMetaData;
     users: IUserPagination[];
 }
 
 interface IMetaData {
-    current: number;
-    pageSize: number;
+    current?: number;
+    pageSize?: number;
     pages: number;
     total: number;
 }
@@ -42,7 +42,7 @@ const UserTable = (props: UserTableProps) => {
         {
             title: "STT",
             render: (_: unknown, record: IUserPagination, index: number) => {
-                return <>{index + 1 + (meta.current - 1) * meta.pageSize}</>;
+                return <>{meta?.current && meta.pageSize && index + 1 + (meta.current - 1) * meta.pageSize}</>;
             },
         },
         {
@@ -119,10 +119,10 @@ const UserTable = (props: UserTableProps) => {
                 columns={columns}
                 rowKey={"id"}
                 pagination={{
-                    current: meta.current,
-                    pageSize: meta.pageSize,
+                    current: meta?.current,
+                    pageSize: meta?.pageSize,
                     showSizeChanger: true,
-                    total: meta.total,
+                    total: meta?.total,
                     showTotal: (total, range) => {
                         return (
                             <div>

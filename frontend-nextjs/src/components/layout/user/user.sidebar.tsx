@@ -16,7 +16,7 @@ import {
 import React from "react";
 import type { MenuProps } from "antd";
 import Link from "next/link";
-import { Avatar, Badge, Card } from "antd";
+import { Avatar, Card } from "antd";
 import { useSession } from "@/library/session.context";
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -355,39 +355,6 @@ const UserSideBar = () => {
                 style={{
                     borderRight: "none",
                     marginTop: "8px",
-                }}
-                styles={{
-                    item: {
-                        marginBlock: 4,
-                        marginInline: 8,
-                        borderRadius: 8,
-                        fontSize: "14px",
-                        height: 42,
-                    },
-                    subMenuItem: {
-                        marginBlock: 4,
-                        marginInline: 8,
-                        borderRadius: 8,
-                        fontSize: "14px",
-                    },
-                    icon: {
-                        fontSize: "16px",
-                    },
-                    itemIcon: {
-                        color: "#666",
-                    },
-                    itemText: {
-                        color: "#333",
-                    },
-                    itemSelectedBg: "#f5f5f5",
-                    itemSelectedColor: "#000",
-                    itemHoverBg: "#fafafa",
-                    itemHoverColor: "#000",
-                    itemActiveBg: "#f0f0f0",
-                    subMenuItemBg: "transparent",
-                    horizontalItemHoverBg: "#fafafa",
-                    horizontalItemSelectedBg: "#f5f5f5",
-                    horizontalItemSelectedColor: "#000",
                 }}
             />
         </Sider>

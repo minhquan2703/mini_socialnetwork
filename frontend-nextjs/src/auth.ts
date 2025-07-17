@@ -1,12 +1,15 @@
+export const runtime = 'nodejs';
+
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { ActiveAccountError, InvalidEmailPasswordError } from "./utils/errors";
-import { sendRequest } from "./utils/api";
+
 import { IUser } from "./types/next-auth";
+import { sendRequest } from "./utils/apiAxios";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     session: {
-        strategy: "jwt", // 👈 Cực kỳ quan trọng để cho phép refresh bằng signIn
+        strategy: "jwt",
     },
     providers: [
         Credentials({
@@ -97,6 +100,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 image: token?.user?.image,
                 avatarColor: token?.user?.avatarColor,
                 access_token: token?.user?.access_token,
+                emailVerified: null,
             };
             return session;
         },

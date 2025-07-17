@@ -1,6 +1,10 @@
 import Verify from "@/components/auth/verify";
 
-const VerifyPage = async({ params }: { params: { id: string } }) => {
+interface IProps {
+    params: Promise<{ id: string }>;
+}
+
+const VerifyPage = async({ params }: IProps) => {
     const { id } = await params; 
     return (
         <>
@@ -8,4 +12,5 @@ const VerifyPage = async({ params }: { params: { id: string } }) => {
         </>
     );
 };
+
 export default VerifyPage;

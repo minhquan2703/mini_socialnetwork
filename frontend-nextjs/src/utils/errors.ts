@@ -3,7 +3,7 @@ import { AuthError } from "next-auth";
 export class CustomAuthError extends AuthError {
   static type: string;
 
-  constructor(message?: unknown) {
+  constructor(message?: any) {
     super();
 
     this.type = message;

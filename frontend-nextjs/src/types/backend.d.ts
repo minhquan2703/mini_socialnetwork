@@ -11,6 +11,16 @@ declare global {
         headers?: Record<string, string>;
         nextOption?: Partial<import("axios").AxiosRequestConfig>;
     }
+    interface IRequestFetch {
+        url: string;
+        method: string;
+        body?: { [key: string]: any };
+        queryParams?: any;
+        useCredentials?: boolean;
+        headers?: any;
+        nextOption?: any;
+    }
+
 
     interface IBackendRes<T> {
         error?: string | string[];

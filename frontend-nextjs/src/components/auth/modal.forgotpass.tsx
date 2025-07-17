@@ -23,7 +23,7 @@ const ModalForgotPassword = (props: ModalProps) => {
     const hasMounted = useHasMounted();
     const onFinishStep0 = async (values: { email: string }) => {
         const { email } = values;
-        const res = await sendRequest<IBackendRes<unknown>>({
+        const res = await sendRequest<IBackendRes<any>>({
             url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/resend-recover-password`,
             method: "POST",
             body: {
@@ -43,12 +43,12 @@ const ModalForgotPassword = (props: ModalProps) => {
         confirmPassword: string;
     }) => {
         const { codeId, password, confirmPassword } = values;
-        const res = await sendRequest<IBackendRes<unknown>>({
+        const res = await sendRequest<IBackendRes<any>>({
             url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/forgot-password`,
             method: "POST",
             body: {
                 codeId: codeId,
-                _id: userId,
+                id: userId,
                 password: password,
                 confirmPassword: confirmPassword,
             },

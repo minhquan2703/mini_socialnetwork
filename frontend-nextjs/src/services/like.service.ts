@@ -1,5 +1,5 @@
 import { ToggleLikeRequest, ToggleLikeResponse } from "@/types/like.type";
-import { sendRequest } from "@/utils/api";
+import { sendRequest } from "@/utils/apiAxios";
 
 const LIKE_BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/likes`;
 

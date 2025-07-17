@@ -1,5 +1,5 @@
 import { DeletePostResponse, GetAllPostsPagination, IGetAllPosts, IPost } from "@/types/post.type";
-import { sendRequest, sendRequestFile } from "@/utils/api";
+import { sendRequest, sendRequestFile } from "@/utils/apiAxios";
 
 const POST_BASE_URL = `/api/v1/posts`;
 

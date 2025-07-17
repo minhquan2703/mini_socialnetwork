@@ -4,8 +4,8 @@ import { IUserPagination } from "@/types/next-auth";
 import { sendRequest } from "@/utils/api";
 
 interface IProps {
-    params: { id: string };
-    searchParams: { [key: string]: string | string[] | undefined };
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 export interface IGetAllUsersPagination {
     results: IUserPagination[];
@@ -17,25 +17,26 @@ export interface IGetAllUsersPagination {
     };
 }
 const ManageUserPage = async ({ searchParams }: IProps) => {
-    const resolvedSearchParams = await searchParams;
-    const current = Number(resolvedSearchParams?.current ?? 1);
-    const pageSize = Number(resolvedSearchParams?.pageSize ?? 10);
+    const search = await searchParams;
+    const current = search?.current ?? 1;
+    const pageSize = search?.pageSize ?? 10;
     const session = await auth();
 
-    const res = await sendRequest<IBackendRes<IGetAllUsersPagination>>({
+    const res = await sendRequest<IBackendRes<any>>({
         url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users`,
         method: "GET",
         queryParams: {
             current,
-            pageSize,
+            pageSize
         },
         headers: {
             Authorization: `Bearer ${session?.user?.access_token}`,
         },
         nextOption: {
-            next: { tags: ["list-users"] },
-        },
-    });
+            next: { tags: ['list-users'] }
+        }
+    })
+
 
     return (
         <div>

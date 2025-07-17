@@ -1,7 +1,6 @@
 // middleware.ts - THAY THẾ TOÀN BỘ FILE NÀY
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { toast } from "sonner";
 
 export default auth((req) => {
     const { pathname } = req.nextUrl;
