@@ -5,9 +5,9 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 // import { v4 as uuidv4 } from 'uuid';
 import { hashPasswordHelper } from '@/helper/util';
 import aqp from 'api-query-params';
@@ -26,6 +26,7 @@ export class UsersService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private readonly mailerService: MailerService,
+    @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
   isEmailExist = async (email: string) => {
@@ -222,7 +223,12 @@ export class UsersService {
     //check id hợp lệ:
     if (!isUuid(id))
       throw new BadRequestException('id không đúng định dạng UUID');
-
+    await this.dataSource
+      .createQueryBuilder()
+      .delete()
+      .from('room_users_user')
+      .where('userId = :id', { id })
+      .execute();
     const result = await this.userRepository.delete(id);
     if (result.affected === 0) {
       throw new BadRequestException('id không tồn tại');

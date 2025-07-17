@@ -80,4 +80,5 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+    roomUsers: any;
 }

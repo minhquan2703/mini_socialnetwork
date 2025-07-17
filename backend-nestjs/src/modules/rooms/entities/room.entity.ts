@@ -50,7 +50,7 @@ export class Room {
   @OneToMany(() => Chat, (chat) => chat.room, { onDelete: 'CASCADE' })
   messages: Chat[];
 
-  @ManyToMany(() => User, (user) => user.rooms)
+  @ManyToMany(() => User, (user) => user.rooms, { onDelete: 'CASCADE' })
   @JoinTable()
   users: User[];
 
