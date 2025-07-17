@@ -1,9 +1,7 @@
 export interface ICreateCommentRequest {
     content: string;
     postId?: string;
-    photoId?: string;
 }
-
 
 export interface IComment {
     id: string;
@@ -38,7 +36,7 @@ export interface IChildComment {
         name: string;
         image?: string;
         avatarColor?: string;
-    },
+    };
     content: string;
     likeCount: number;
     isLiked: boolean;
@@ -46,7 +44,7 @@ export interface IChildComment {
     createdAtFormat: string;
 }
 export interface IGetChildCommentPaginationResponse {
-    result: IChildComment[],
+    result: IChildComment[];
     totalPages: number;
 }
 export interface IGetChildCommentPaginationRequest {
@@ -58,4 +56,9 @@ export interface IGetChildCommentPaginationRequest {
 export interface IPostChildCommentRequest {
     content: string;
     commentId: string;
+}
+export interface GetAllCommentsPagination {
+    current: number;
+    totalPages: number;
+    results: IComment[];
 }

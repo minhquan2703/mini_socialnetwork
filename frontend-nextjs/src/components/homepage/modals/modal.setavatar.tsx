@@ -4,19 +4,25 @@ import { postAvatarUser } from "@/services/auth.service";
 import { useHasMounted } from "@/utils/customHook";
 import { UploadOutlined, CameraOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Button, Modal, Upload } from "antd";
+import { UploadChangeParam, UploadFile } from "antd/es/upload";
 import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 
-const ModalSetAvatar = (props: any) => {
+interface ModalSetAvatarProps {
+    isModalOpen: boolean;
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const ModalSetAvatar = (props: ModalSetAvatarProps) => {
     const { isModalOpen, setIsModalOpen } = props;
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const session = useSession();
     const router = useRouter()
     
-    const handleChange = (info: any) => {
+    const handleChange = (info: UploadChangeParam<UploadFile>) => {
         const fileList = info.fileList;
         const file = fileList[fileList.length - 1].originFileObj;
         if (file) {

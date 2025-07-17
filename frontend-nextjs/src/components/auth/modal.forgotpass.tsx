@@ -11,7 +11,7 @@ import {
 import { sendRequest } from "@/utils/api";
 import { toast } from "sonner";
 
-interface ModalProps{
+interface ModalProps {
     isModalOpen: boolean;
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -21,7 +21,7 @@ const ModalForgotPassword = (props: ModalProps) => {
     const [form] = Form.useForm();
     const { isModalOpen, setIsModalOpen } = props;
     const hasMounted = useHasMounted();
-    const onFinishStep0 = async (values: {email: string;}) => {
+    const onFinishStep0 = async (values: { email: string }) => {
         const { email } = values;
         const res = await sendRequest<IBackendRes<unknown>>({
             url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/resend-recover-password`,
@@ -37,7 +37,11 @@ const ModalForgotPassword = (props: ModalProps) => {
             toast.error(res.message);
         }
     };
-    const onFinishStep1 = async (values: any) => {
+    const onFinishStep1 = async (values: {
+        codeId: string;
+        password: string;
+        confirmPassword: string;
+    }) => {
         const { codeId, password, confirmPassword } = values;
         const res = await sendRequest<IBackendRes<unknown>>({
             url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/forgot-password`,

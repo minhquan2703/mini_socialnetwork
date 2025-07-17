@@ -8,7 +8,7 @@ interface IProps {
     searchParams: { [key: string]: string | string[] | undefined };
 }
 export interface IGetAllUsersPagination {
-    users: IUserPagination[];
+    results: IUserPagination[];
     meta: {
         current: number;
         pageSize: number;

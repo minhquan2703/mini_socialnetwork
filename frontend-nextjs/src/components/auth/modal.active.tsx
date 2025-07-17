@@ -12,8 +12,14 @@ import {
 import { toast } from "sonner";
 import { postAuthVerifyAccount, postResendCode } from "@/services/auth.service";
 import { IResendCode, IVerifyAccount } from "@/types/auth.type";
+interface PropsModalActive {
+    isModalOpen: boolean;
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    userEmail: string;
+    usernameModal: string;
+}
 
-const ModalActive = (props: any) => {
+const ModalActive = (props: PropsModalActive) => {
     const [current, setCurrent] = useState(0);
     const [userId, setUserId] = useState("");
     const [form] = Form.useForm();
@@ -23,7 +29,7 @@ const ModalActive = (props: any) => {
         if (userEmail) {
             form.setFieldValue("username", usernameModal);
         }
-    }, [usernameModal]);
+    }, [usernameModal, userEmail, form]);
 
     const onFinishStep0 = async (values: IResendCode) => {
         const res = await postResendCode(values)

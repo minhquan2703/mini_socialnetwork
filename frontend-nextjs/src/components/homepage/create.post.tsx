@@ -1,10 +1,7 @@
 "use client";
-import { postNewOne } from "@/services/post.service";
 import {
-    GlobalOutlined,
     PictureOutlined,
     SendOutlined,
-    SmileOutlined,
     InboxOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Card, Divider, Input, Space, Spin } from "antd";
@@ -13,7 +10,9 @@ import type { UploadFile, UploadProps } from "antd";
 import { Image, Upload } from "antd";
 import { toast } from "sonner";
 import { useSession } from "@/library/session.context";
-const CreatePostForm = (props: any) => {
+import { HomePageProps } from "./homepage";
+import { postNewPost } from "@/services/post.service";
+const CreatePostForm = (props: HomePageProps) => {
     const { handlePostCreated } = props;
     const { TextArea } = Input;
     const [newPost, setNewPost] = useState("");
@@ -54,34 +53,23 @@ const CreatePostForm = (props: any) => {
         setIsLoading(true);
         const data = new FormData();
         data.append("content", newPost.trim());
-        const images: File[] = [];
-        let video: File | null = null;
         fileList.forEach((file) => {
             if (file.originFileObj) {
-                const fileType = file.type || file.originFileObj.type;
-                if (fileType.startsWith("image/")) {
-                    images.push(file.originFileObj);
-                } else if (fileType.startsWith("video/")) {
-                    video = file.originFileObj;
-                }
+                data.append("files", file.originFileObj);
             }
         });
-        images.forEach((image) => {
-            data.append(`images`, image);
-        });
-        if (video) {
-            data.append("video", video);
-        }
-        const res = await postNewOne(data);
-        if (res?.error && res?.message) {
-            setIsLoading(false);
-            toast.error(res.message);
-        } else {
+        const res = await postNewPost(data);
+        console.log('check res', res)
+        if (handlePostCreated && res?.data) {
             setNewPost("");
             setFileList([]);
             handlePostCreated(res.data);
+
             setIsLoading(false);
             toast.success("Đăng bài viết thành công");
+        } else {
+            setIsLoading(false);
+            toast.error(res.message);
         }
     };
     const uploadButton = (
@@ -94,7 +82,7 @@ const CreatePostForm = (props: any) => {
             type="button"
         >
             <InboxOutlined style={{ fontSize: "30px" }} />
-            <div style={{ marginTop: 8, fontSize: "15px", color:"#bbb" }}>
+            <div style={{ marginTop: 8, fontSize: "15px", color: "#bbb" }}>
                 Tối đa 50MB / 9 hình ảnh hoặc 1 video
             </div>
         </button>

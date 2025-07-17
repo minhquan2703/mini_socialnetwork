@@ -1,40 +1,37 @@
-import { handleCreateUserAction } from '@/utils/action';
-import {
-    Modal, Input, Form, Row, Col, message,
-    notification
-} from 'antd';
+import { handleCreateUserAction } from "@/utils/action";
+import { Modal, Input, Form, Row, Col, message, notification } from "antd";
 
 interface IProps {
     isCreateModalOpen: boolean;
     setIsCreateModalOpen: (v: boolean) => void;
 }
-
+interface formCreateUser {
+    username: string;
+    email: string;
+    name: string;
+    password: string;
+}
 const UserCreate = (props: IProps) => {
-
-    const {
-        isCreateModalOpen, setIsCreateModalOpen
-    } = props;
+    const { isCreateModalOpen, setIsCreateModalOpen } = props;
 
     const [form] = Form.useForm();
 
     const handleCloseCreateModal = () => {
-        form.resetFields()
+        form.resetFields();
         setIsCreateModalOpen(false);
+    };
 
-    }
-
-    const onFinish = async (values: any) => {
+    const onFinish = async (values: formCreateUser) => {
         const res = await handleCreateUserAction(values);
         if (res?.data) {
             handleCloseCreateModal();
-            message.success("Create succeed!")
+            message.success("Create succeed!");
         } else {
             notification.error({
                 message: "Create User error",
-                description: res?.message
-            })
+                description: res?.message,
+            });
         }
-
     };
 
     return (
@@ -52,38 +49,66 @@ const UserCreate = (props: IProps) => {
                 form={form}
             >
                 <Row gutter={[15, 15]}>
-                    <Col span={24} >
+                    <Col span={24}>
                         <Form.Item
                             label="Email"
                             name="email"
-                            rules={[{ required: true, message: 'Please input your email!' }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please input your email!",
+                                },
+                            ]}
                         >
-                            <Input type='email' />
+                            <Input type="email" />
+                        </Form.Item>
+                    </Col>
+                    <Col span={24}>
+                        <Form.Item
+                            label="Username"
+                            name="username"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please input your username!",
+                                },
+                            ]}
+                        >
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={24}>
                         <Form.Item
                             label="Password"
                             name="password"
-                            rules={[{ required: true, message: 'Please input your password!' }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please input your password!",
+                                },
+                            ]}
                         >
                             <Input.Password />
                         </Form.Item>
                     </Col>
-                    <Col span={24} >
+                    <Col span={24}>
                         <Form.Item
                             label="Name"
                             name="name"
-                            rules={[{ required: true, message: 'Please input your name!' }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please input your name!",
+                                },
+                            ]}
                         >
                             <Input />
                         </Form.Item>
                     </Col>
-
                 </Row>
             </Form>
         </Modal>
-    )
-}
+    );
+};
 
 export default UserCreate;

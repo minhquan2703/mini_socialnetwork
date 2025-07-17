@@ -8,9 +8,18 @@ import CreatePostForm from "@/components/homepage/create.post";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { toast } from "sonner";
 import { Button, Typography, Divider } from "antd";
+import { IPost } from "@/types/post.type";
+import { ToggleLikeResponse } from "@/types/like.type";
+
+export interface HomePageProps{
+    handleCommentCountUpdate?: (postId: string, increment: number) => void
+    handleLike?: (postId: string) => Promise<ToggleLikeResponse>;
+    handleDeletePost?: (postId: string) => void;
+    handlePostCreated?: (newPost: IPost) => void;
+}
 
 const HomePage = () => {
-    const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState<IPost[]>([]);
     const [loading, setLoading] = useState(false);
     const [current, setCurrent] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -27,7 +36,6 @@ const HomePage = () => {
     const getDataPosts = async () => {
         setLoading(true);
         const res = await getAllPosts({ current: current, pageSize: LIMIT });
-        console.log("check res get all post", res);
         if (res && res?.data) {
             setPosts(res.data.results);
         }
@@ -42,22 +50,20 @@ const HomePage = () => {
         setLoading(true);
         const nextPage = current + 1;
 
-        try {
-            const res = await getAllPosts({
-                current: nextPage,
-                pageSize: LIMIT,
-            });
-            if (res && res?.data) {
-                const newPosts = res.data.results;
-                setPosts((prevPosts) => [...prevPosts, ...newPosts]);
-                setCurrent(res.data.current);
-                setHasMore(nextPage < res.data.totalPages);
-            }
-        } catch (error) {
-            toast.error("Không thể tải thêm bài viết");
-        } finally {
-            setLoading(false);
+        const res = await getAllPosts({
+            current: nextPage,
+            pageSize: LIMIT,
+        });
+        if (res && res?.data) {
+            const newPosts = res.data.results;
+            setPosts((prevPosts) => [...prevPosts, ...newPosts]);
+            setCurrent(res.data.current);
+            setHasMore(nextPage < res.data.totalPages);
+        } else {
+            toast.message(res.message);
         }
+        setLoading(false);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
     };
 
     // Handle function
@@ -79,9 +85,8 @@ const HomePage = () => {
                             if (post.id !== postId) return post;
                             return {
                                 ...post,
-                                isLiked: res.data.isLiked ?? !post.isLiked,
+                                isLiked: res?.data?.isLiked ?? !post.isLiked,
                                 likeCount:
-                                    res.data.likeCount ??
                                     (post.isLiked
                                         ? post.likeCount - 1
                                         : post.likeCount + 1),
@@ -103,10 +108,11 @@ const HomePage = () => {
         })();
 
         likeRequestCache.current.set(postId, likePromise);
+        console.log('check like promise', likePromise)
         return likePromise;
     }, []);
 
-    const handlePostCreated = useCallback((newPost: any) => {
+    const handlePostCreated = useCallback((newPost: IPost) => {
         setPosts((currentPosts) => [newPost, ...currentPosts]);
     }, []);
 

@@ -170,9 +170,17 @@ export class UsersService {
       take: pageSize,
       skip: skip,
       order: sort,
-      select: {
-        password: false,
-      },
+      select: [
+        'id',
+        'avatarColor',
+        'bio',
+        'email',
+        'username',
+        'codeExpired',
+        'isActive',
+        'role',
+        'createdAt',
+      ],
     });
 
     return {

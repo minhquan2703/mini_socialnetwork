@@ -6,11 +6,12 @@ import React, { useCallback, useState, useTransition } from "react";
 import { useSession } from "@/library/session.context";
 import ContainerChildComment from "./comment.child/container.child.comment";
 import { IComment } from "@/types/comment.type";
+import { ListCommentProps } from "./list.comment";
 
-interface CommentCardProps {
+interface CommentCardProps extends ListCommentProps {
     comment: IComment;
 }
-const CommentCard = (props: any) => {
+const CommentCard = (props: CommentCardProps) => {
     const moreActions: MenuProps["items"] = [
         { key: "1", label: "Báo cáo", danger: true },
         { key: "2", label: "Theo dõi" },
@@ -23,11 +24,11 @@ const CommentCard = (props: any) => {
         comment.isLiked
     );
     const [isShowChildComment, setIsShowChildComment] = useState(false);
-    const [isPending, startTransition] = useTransition();
+    const [, startTransition] = useTransition();
     const session = useSession();
     const handleOptimisticLike = useCallback(() => {
         if (!session?.user) {
-            setShowModal(true);
+            setShowModal?.(true);
             return;
         }
         // Immediate UI update
@@ -40,18 +41,13 @@ const CommentCard = (props: any) => {
 
         // API call in background with transition
         startTransition(() => {
-            handleLikeComment(comment.id).catch(() => {
-                // Revert on error
+            handleLikeComment?.(comment.id).catch(() => {
+                //revert on error
                 setCommentLocalIsLiked(localCommentIsLiked);
                 setCommentLocalLikeCount(localCommentLikeCount);
             });
         });
-    }, [
-        localCommentIsLiked,
-        localCommentLikeCount,
-        comment.id,
-        handleLikeComment,
-    ]);
+    }, [session?.user, localCommentIsLiked, localCommentLikeCount, setShowModal, handleLikeComment, comment.id]);
     return (
         <>
             <div
@@ -157,7 +153,7 @@ const CommentCard = (props: any) => {
                                             comment.user.username}
                                     </span>
                                     {/* Verified badge (optional) */}
-                                    {comment.user.verified && (
+                                    {/* {comment?.user?.verified && (
                                         <svg
                                             width="16"
                                             height="16"
@@ -166,7 +162,7 @@ const CommentCard = (props: any) => {
                                         >
                                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                                         </svg>
-                                    )}
+                                    )} */}
                                 </div>
                                 <Dropdown
                                     menu={{ items: moreActions }}

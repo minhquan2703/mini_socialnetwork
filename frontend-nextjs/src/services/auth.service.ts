@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { IRegister, IResendCode, IVerifyAccount } from "@/types/auth.type";
+import { GetUserPagination, IRegister, IResendCode, IVerifyAccount, UserListResponseData } from "@/types/auth.type";
 import { sendRequest, sendRequestFile } from "@/utils/api";
 
 
@@ -54,10 +54,10 @@ const postResendCode = async (data: IResendCode): Promise<IBackendRes<IResendCod
     return response
 } 
 
-const getUserPagination = async (data: any): Promise<IBackendRes<any>> =>{
+const getUserPagination = async (data: GetUserPagination): Promise<IBackendRes<UserListResponseData>> =>{
     const session = await auth()
     const { current, pageSize } = data
-    const res = await sendRequest<IBackendRes<any>>({
+    const res = await sendRequest<IBackendRes<UserListResponseData>>({
         url: `${USER_BASE_URL}`,
         method: "GET",
         queryParams: {

@@ -2,12 +2,14 @@
 import React from "react";
 import { Modal, Button, Typography } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import { useRouter } from "next/navigation";
 import { useHasMounted } from "@/utils/customHook";
 
-const ModalLoginRequire = (props: any) => {
+interface ModalLoginRequire {
+    showModal: boolean;
+    setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+}
+const ModalLoginRequire = (props: ModalLoginRequire) => {
     const { showModal, setShowModal } = props;
-    const router = useRouter();
     const { Title, Text } = Typography;
     const hasMounted = useHasMounted();
     if (!hasMounted) return <></>;

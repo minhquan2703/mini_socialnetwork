@@ -30,22 +30,17 @@ export class PostsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FilesInterceptor('files', 9))
+  @UseInterceptors(FilesInterceptor('files'))
   async create(
     @Body() createPostDto: CreatePostDto,
     @UploadedFiles() files: Express.Multer.File[],
     @Req() req: AuthenticatedRequest,
   ) {
-    const post = await this.postsService.createPost(
+    return await this.postsService.createPost(
       createPostDto,
       files,
       req.user.id,
     );
-
-    return {
-      message: 'Post created successfully',
-      data: post,
-    };
   }
 
   @Get(':postId/comments')

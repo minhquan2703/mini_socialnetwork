@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Upload } from './entities/upload.entity';
 import { Repository } from 'typeorm';
@@ -34,6 +34,9 @@ export class UploadsService {
   async uploadMultiplePost(files: Express.Multer.File[], userId: string) {
     const uploads: Upload[] = [];
 
+    if (files.length > 9) {
+      throw new BadRequestException('Maximum is 9 images');
+    }
     for (const file of files) {
       const cloudinaryResult = await this.cloudinaryService.uploadFile(
         file,

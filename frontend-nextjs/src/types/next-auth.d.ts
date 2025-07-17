@@ -1,4 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import NextAuth, { DefaultSession } from "next-auth";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { JWT } from "next-auth/jwt";
 
 interface IUser {
@@ -14,8 +16,8 @@ interface IUser {
 
 interface IUserPagination {
     id: string;
-    avatarColor: string;
-    bio: string;
+    avatarColor?: string;
+    bio?: string;
     email: string;
     username: string;
     codeExpired: string;

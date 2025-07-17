@@ -5,21 +5,34 @@ import CreateComment from "./create.comment";
 import ListComment from "./list.comment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { postToggleLike } from "@/services/like.service";
+import { HomePageProps } from "../homepage";
+import { IComment } from "@/types/comment.type";
+
+interface CommentPostProps extends HomePageProps {
+    postId: string;
+    showComment: boolean;
+    commentCount: number;
+    setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
 const LIMIT = 5;
 
-const CommentPost = ({ handleCommentCountUpdate, postId, showComment, commentCount, setShowModal }: any) => {
-    const [current, setCurrent] = useState(1);
-    const [comments, setComments] = useState([]);
-    const [loading, setLoading] = useState(true);    
+const CommentPost = ({
+    handleCommentCountUpdate,
+    postId,
+    showComment,
+    commentCount,
+    setShowModal,
+}: CommentPostProps) => {
+    const [current] = useState(1);
+    const [comments, setComments] = useState<IComment[]>([]);
     const likeRequestCache = useRef(new Map());
 
-
     useEffect(() => {
-        if(showComment){
-            fetchListComment()
+        if (showComment) {
+            fetchListComment();
         }
-    }, [current, showComment]);
+    }, [showComment]);
 
     const handleLikeComment = useCallback(async (commentId: string) => {
         if (likeRequestCache.current.has(commentId)) {
@@ -38,12 +51,10 @@ const CommentPost = ({ handleCommentCountUpdate, postId, showComment, commentCou
                             if (comment.id !== commentId) return comment;
                             return {
                                 ...comment,
-                                isLiked: res.data.isLiked ?? !comment.isLiked,
-                                likeCount:
-                                    res.data.likeCount ??
-                                    (comment.isLiked
-                                        ? comment.likeCount - 1
-                                        : comment.likeCount + 1),
+                                isLiked: res.data?.isLiked ?? !comment.isLiked,
+                                likeCount: comment.isLiked
+                                    ? comment.likeCount - 1
+                                    : comment.likeCount + 1,
                             };
                         })
                     );
@@ -61,27 +72,25 @@ const CommentPost = ({ handleCommentCountUpdate, postId, showComment, commentCou
         })();
 
         likeRequestCache.current.set(commentId, likePromise);
+        console.log('check handlelikecomment promise', likePromise)
         return likePromise;
     }, []);
 
-    const handleCommentCreated = useCallback((newComment: any) => {
+    const handleCommentCreated = useCallback((newComment: IComment) => {
         setComments((currentComments) => [newComment, ...currentComments]);
     }, []);
     const fetchListComment = async () => {
-        setLoading(true);
         const res = await getAllCommentOfOnePost({
             current: current,
             pageSize: LIMIT,
             postId: postId,
         });
         if (res?.data) {
-            setComments(res.data.results);
+            setComments(res.data?.results);
         }
-        setLoading(false)
     };
     return (
         <>
-
             <CreateComment
                 postId={postId}
                 handleCommentCreated={handleCommentCreated}
@@ -90,10 +99,8 @@ const CommentPost = ({ handleCommentCountUpdate, postId, showComment, commentCou
 
             {commentCount > 0 ? (
                 <ListComment
-                    postId={postId}
                     comments={comments}
                     handleLikeComment={handleLikeComment}
-                    loading={loading}
                     setShowModal={setShowModal}
                 />
             ) : (

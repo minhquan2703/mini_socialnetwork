@@ -4,7 +4,7 @@ import { sendRequest } from "@/utils/api";
 const LIKE_BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/likes`;
 
 const postToggleLike = async (data: ToggleLikeRequest): Promise<IBackendRes<ToggleLikeResponse>> => {
-    const { type, postId, commentId, photoId, childCommentId } = data;
+    const { type, postId, commentId, childCommentId } = data;
     const response = await  sendRequest<IBackendRes<ToggleLikeResponse>>({
         url: `${LIKE_BASE_URL}/toggle`,
         method: "POST",
@@ -12,7 +12,6 @@ const postToggleLike = async (data: ToggleLikeRequest): Promise<IBackendRes<Togg
             type,
             postId,
             commentId,
-            photoId,
             childCommentId,
         },
     })

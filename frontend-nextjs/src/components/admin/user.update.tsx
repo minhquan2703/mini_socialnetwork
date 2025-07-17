@@ -1,12 +1,13 @@
 import { handleUpdateUserAction } from "@/utils/action";
 import { Modal, Input, Form, Row, Col, message, notification } from "antd";
 import { startTransition, useEffect } from "react";
+import { toast } from "sonner";
 
 interface IProps {
     isUpdateModalOpen: boolean;
     setIsUpdateModalOpen: (v: boolean) => void;
-    dataUpdate: any;
-    setDataUpdate: any;
+    dataUpdate: unknown;
+    setDataUpdate: React.Dispatch<React.SetStateAction<unknown>>;
 }
 
 const UserUpdate = (props: IProps) => {
@@ -39,6 +40,9 @@ const UserUpdate = (props: IProps) => {
     const onFinish = async (values: any) => {
         if (dataUpdate) {
             const { name, phone } = values;
+            if (phone.length > 11) {
+                toast.error('Số điện thoại không được dài quá 11 số')
+            }
             startTransition(async () => {
                 const res = await handleUpdateUserAction({
                     id: dataUpdate.id,
@@ -96,7 +100,7 @@ const UserUpdate = (props: IProps) => {
                     </Col>
                     <Col span={24} md={12}>
                         <Form.Item label="Phone" name="phone">
-                            <Input />
+                            <Input  type="number" maxLength={10}/>
                         </Form.Item>
                     </Col>
 

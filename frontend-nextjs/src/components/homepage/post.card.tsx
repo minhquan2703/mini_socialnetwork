@@ -1,28 +1,24 @@
 "use client";
-import {
-    Card,
-    Avatar,
-    Button,
-    Divider,
-    Dropdown,
-    Space,
-    Image,
-    Tooltip,
-} from "antd";
+import { Card, Avatar, Button, Divider, Dropdown, Image, Tooltip } from "antd";
 import {
     CommentOutlined,
-    ShareAltOutlined,
     MoreOutlined,
     HeartFilled,
     HeartOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import React, { useState, useCallback, useTransition } from "react";
-import { toast } from "sonner";
 import { useSession } from "@/library/session.context";
 import CommentPost from "./comment/post.comment";
 import Profile from "./modals/profile";
-const PostCard = (props: any) => {
+import { IPost } from "@/types/post.type";
+import { HomePageProps } from "./homepage";
+
+interface PostCardProps extends HomePageProps {
+    post: IPost;
+    setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+}
+const PostCard = (props: PostCardProps) => {
     const {
         handleCommentCountUpdate,
         post,
@@ -43,23 +39,16 @@ const PostCard = (props: any) => {
             key: "delete",
             label: "Xoá bài viết",
             danger: true,
-            onClick: () => handleDeletePost(post.id),
+            onClick: () => handleDeletePost?.(post.id),
         },
     ];
     const [localIsLiked, setLocalIsLiked] = useState(post.isLiked);
     const [localLikeCount, setLocalLikeCount] = useState(post.likeCount);
-    const [isPending, startTransition] = useTransition();
+    const [, startTransition] = useTransition();
     const [showComment, setShowComment] = useState(false);
 
     const session = useSession();
 
-    const handleShare = () => {
-        if (!session?.user) {
-            setShowModal(true);
-            return;
-        }
-        toast.warning("Tính năng đang phát triển, vui lòng đợi");
-    };
     // Optimistic update handler  -> AI generated
     const handleOptimisticLike = useCallback(() => {
         if (!session?.user) {
@@ -73,7 +62,7 @@ const PostCard = (props: any) => {
 
         //API call in background with transition
         startTransition(() => {
-            handleLike(post.id).catch(() => {
+            handleLike?.(post.id).catch(() => {
                 setLocalIsLiked(localIsLiked);
                 setLocalLikeCount(localLikeCount);
             });
@@ -129,8 +118,8 @@ const PostCard = (props: any) => {
                                     cursor: "pointer",
                                 }}
                             >
-                                {post.user.name.charAt(0) ||
-                                    post.user.username.charAt(0)}
+                                {post.user.name?.charAt(0) ||
+                                    post.user.username?.charAt(0)}
                             </Avatar>
                         </Tooltip>
 
@@ -184,18 +173,18 @@ const PostCard = (props: any) => {
                 </p>
 
                 {/* Post Image */}
-                {post.mediaType === "image" &&
-                    post.photos &&
-                    post.photos.length > 0 && (
+                {post?.uploads && post.uploads[0]?.type === "image" &&
+                    post.uploads &&
+                    post.uploads.length > 0 && (
                         <div
                             style={{
                                 display: "grid",
                                 gridTemplateColumns:
-                                    post.photos.length === 1
+                                    post.uploads.length === 1
                                         ? "1fr"
-                                        : post.photos.length === 2
+                                        : post.uploads.length === 2
                                         ? "1fr 1fr"
-                                        : post.photos.length <= 4
+                                        : post.uploads.length <= 4
                                         ? "1fr 1fr"
                                         : "1fr 1fr 1fr",
                                 gap: "8px",
@@ -206,10 +195,10 @@ const PostCard = (props: any) => {
                             }}
                         >
                             <Image.PreviewGroup>
-                                {post.photos.map((photo) => (
+                                {post.uploads.map((upload) => (
                                     <Image
-                                        key={photo.id}
-                                        src={photo.url}
+                                        key={upload.id}
+                                        src={upload.url}
                                         alt="Post"
                                         style={{
                                             width: "100%",
@@ -226,7 +215,7 @@ const PostCard = (props: any) => {
                             </Image.PreviewGroup>
                         </div>
                     )}
-                {post.mediaType === "video" && post.mediaURL && (
+                {post?.uploads && post.uploads[0]?.type === "video" && (
                     <div
                         style={{
                             marginBottom: "16px",
@@ -239,7 +228,7 @@ const PostCard = (props: any) => {
                         }}
                     >
                         <video
-                            src={post.mediaURL}
+                            src={post.uploads?.[0]?.url}
                             controls
                             style={{
                                 width: "100%",
