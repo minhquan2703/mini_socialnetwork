@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   Req,
+  Put,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -20,6 +21,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { CommentsService } from '../comments/comments.service';
 import { AuthenticatedRequest } from '@/auths/auths.controller';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -81,6 +83,16 @@ export class PostsController {
   remove(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     const userId = req.user?.id;
     return this.postsService.remove(id, userId);
+  }
+
+  @Put()
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Body() updatePostDto: UpdatePostDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user?.id;
+    return this.postsService.update(updatePostDto, userId);
   }
 
   // @Patch('')

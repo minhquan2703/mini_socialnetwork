@@ -13,6 +13,8 @@ import CommentPost from "./comment/post.comment";
 import Profile from "./modals/profile";
 import { IPost } from "@/types/post.type";
 import { HomePageProps } from "./homepage";
+import TextArea from "antd/es/input/TextArea";
+import ModalConfirmUpdate from "./modals/modal.confirm.update";
 
 interface PostCardProps extends HomePageProps {
     post: IPost;
@@ -30,26 +32,31 @@ const PostCard = (props: PostCardProps) => {
         // { key: "1", label: "Lưu bài viết" },
         // { key: "2", label: "Sao chép liên kết" },
         // { type: "divider" },
-        { key: "3", label: "Báo cáo", danger: true },
+        { key: "report", label: "Báo cáo", danger: true },
     ];
     const authorActions: MenuProps["items"] = [
-        // { key: "update", label: "Chỉnh sửa bài viết" },
-        // { type: "divider" },
         {
             key: "delete",
             label: "Xoá bài viết",
             danger: true,
             onClick: () => handleDeletePost?.(post.id),
         },
+        {
+            key: "update",
+            label: "Chỉnh sửa bài viết",
+            onClick: () => handleUpdatePost(),
+        },
     ];
     const [localIsLiked, setLocalIsLiked] = useState(post.isLiked);
     const [localLikeCount, setLocalLikeCount] = useState(post.likeCount);
     const [, startTransition] = useTransition();
     const [showComment, setShowComment] = useState(false);
-
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [contentUpdate, setContentUpdate] = useState("");
+    const [isShowModalUpdate, setIsShowModalUpdate] = useState(false);
+    const [content, setContent] = useState(post.content);
     const session = useSession();
 
-    // Optimistic update handler  -> AI generated
     const handleOptimisticLike = useCallback(() => {
         if (!session?.user) {
             setShowModal(true);
@@ -67,7 +74,25 @@ const PostCard = (props: PostCardProps) => {
                 setLocalLikeCount(localLikeCount);
             });
         });
-    }, [localIsLiked, localLikeCount, post.id, handleLike]);
+    }, [
+        session?.user,
+        localIsLiked,
+        localLikeCount,
+        setShowModal,
+        handleLike,
+        post.id,
+    ]);
+
+    console.log('rendered component postcard');
+
+    const handleUpdatePost = () => {
+        setIsUpdating(true);
+        setContentUpdate(post.content);
+    };
+    const handleCancelUpdate = () => {
+        setIsUpdating(false);
+        setContentUpdate("");
+    };
 
     return (
         <>
@@ -160,20 +185,50 @@ const PostCard = (props: PostCardProps) => {
                 </div>
 
                 {/* Post Content */}
-                <p
-                    style={{
-                        fontSize: "15px",
-                        lineHeight: "24px",
-                        color: "#000",
-                        marginBottom: "16px",
-                        whiteSpace: "pre-wrap",
-                    }}
-                >
-                    {post.content}
-                </p>
+
+                {isUpdating ? (
+                    <>
+                        <TextArea
+                            value={contentUpdate}
+                            onChange={(e) => setContentUpdate(e.target.value)}
+                        />
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                marginTop: "10px",
+                            }}
+                        >
+                            <Button onClick={() => handleCancelUpdate()}>
+                                Huỷ chỉnh sửa
+                            </Button>
+                            <Button
+                                color="primary"
+                                variant="solid"
+                                onClick={() => setIsShowModalUpdate(true)}
+                            >
+                                Sửa bài viết
+                            </Button>
+                        </div>
+                    </>
+                ) : (
+                    <p
+                        style={{
+                            fontSize: "15px",
+                            lineHeight: "24px",
+                            color: "#000",
+                            marginBottom: "16px",
+                            whiteSpace: "pre-wrap",
+                        }}
+                    >
+                        {content}
+                    </p>
+                )}
 
                 {/* Post Image */}
-                {post?.uploads && post.uploads[0]?.type === "image" &&
+                {post?.uploads &&
+                    post.uploads[0]?.type === "image" &&
                     post.uploads &&
                     post.uploads.length > 0 && (
                         <div
@@ -330,6 +385,17 @@ const PostCard = (props: PostCardProps) => {
                     />
                 )}
             </Card>
+
+            {isShowModalUpdate && (
+                <ModalConfirmUpdate
+                    id={post.id}
+                    isShowModalUpdate={isShowModalUpdate}
+                    setIsShowModalUpdate={setIsShowModalUpdate}
+                    updatedContent={contentUpdate}
+                    setContent={setContent}
+                    setIsUpdating={setIsUpdating}
+                />
+            )}
         </>
     );
 };

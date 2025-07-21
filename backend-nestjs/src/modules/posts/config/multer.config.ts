@@ -15,10 +15,11 @@ export class MulterConfigService {
           callback(null, `${prefix}-${uniqueId}${ext}`);
         },
       }),
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       fileFilter: this.mixedFileFilter,
       limits: {
         fileSize: 100 * 1024 * 1024, // 100MB
-        files: 11, // 10 images + 1 video max
+        files: 10, //maximum 10 images/1 video
       },
     };
   }

@@ -14,8 +14,13 @@ interface CommentCardProps extends ListCommentProps {
 const CommentCard = (props: CommentCardProps) => {
     const moreActions: MenuProps["items"] = [
         { key: "1", label: "Báo cáo", danger: true },
-        { key: "2", label: "Theo dõi" },
+        // { key: "2", label: "Theo dõi" },
     ];
+    const authorActions: MenuProps["items"] = [
+        { key: "update", label: "Sửa" },
+        { key: "delete", label: "Xoá bình luận", danger: true },
+    ];
+
     const { comment, handleLikeComment, setShowModal } = props;
     const [localCommentLikeCount, setCommentLocalLikeCount] = useState(
         comment.likeCount
@@ -47,7 +52,14 @@ const CommentCard = (props: CommentCardProps) => {
                 setCommentLocalLikeCount(localCommentLikeCount);
             });
         });
-    }, [session?.user, localCommentIsLiked, localCommentLikeCount, setShowModal, handleLikeComment, comment.id]);
+    }, [
+        session?.user,
+        localCommentIsLiked,
+        localCommentLikeCount,
+        setShowModal,
+        handleLikeComment,
+        comment.id,
+    ]);
     return (
         <>
             <div
@@ -165,7 +177,7 @@ const CommentCard = (props: CommentCardProps) => {
                                     )} */}
                                 </div>
                                 <Dropdown
-                                    menu={{ items: moreActions }}
+                                    menu={{ items: comment?.isAuthor ? authorActions : moreActions }}
                                     placement="bottomRight"
                                     trigger={["hover"]}
                                 >

@@ -20,10 +20,10 @@ export class CloudinaryService {
       cloudinary.uploader
         .upload_stream(
           {
-            resource_type: 'auto', // Tự động detect image/video
+            resource_type: 'auto', //tự động detect image/video
             folder: folder,
             transformation: [
-              // Tối ưu hóa ảnh
+              //tối ưu hóa ảnh
               { quality: 'auto' },
               { fetch_format: 'auto' },
             ],

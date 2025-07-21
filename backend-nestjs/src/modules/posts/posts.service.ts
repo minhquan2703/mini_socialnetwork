@@ -10,8 +10,8 @@ import { Comment } from '../comments/entities/comment.entity';
 import aqp from 'api-query-params';
 import dayjs from 'dayjs';
 import { validate as isUuid } from 'uuid';
-import _ from 'lodash';
 import { UploadsService } from '../uploads/uploads.service';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -63,6 +63,7 @@ export class PostsService {
       id: savedPost.id,
       content: savedPost.content,
       isLiked: false,
+      isAuthor: true,
       likeCount: 0,
       commentCount: 0,
       user: {
@@ -163,6 +164,7 @@ export class PostsService {
           : undefined;
 
         //lọại bỏ mảng likes khỏi response để bảo mật
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { likes, ...postWithoutLikes } = post;
 
         //kiểm tra xem có phải tác giả ko
@@ -219,5 +221,18 @@ export class PostsService {
       throw new BadRequestException('có lỗi xảy ra trong quá trình xoá');
     }
     return { deleted: true };
+  }
+
+  async update(updatePostDto: UpdatePostDto, userId: string) {
+    const { id, ...data } = updatePostDto;
+    if (!userId) {
+      throw new BadRequestException('User was not found');
+    }
+    const post = await this.postRepository.findOne({ where: { id } });
+    if (!post) {
+      throw new BadRequestException('Post was not found');
+    }
+    await this.postRepository.update(id, data);
+    return await this.postRepository.findOne({ where: { id } });
   }
 }

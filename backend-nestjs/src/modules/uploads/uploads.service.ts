@@ -31,6 +31,25 @@ export class UploadsService {
     return this.uploadRepository.save(upload);
   }
 
+  async uploadAvatar(
+    file: Express.Multer.File,
+    userId: string,
+  ): Promise<Upload> {
+    const cloudinaryResult = await this.cloudinaryService.uploadFile(
+      file,
+      `user_avatar_${userId}`,
+    );
+
+    const upload = this.uploadRepository.create({
+      url: cloudinaryResult.secure_url,
+      publicId: cloudinaryResult.public_id,
+      type: cloudinaryResult.resource_type,
+      user: { id: userId },
+    });
+    await this.uploadRepository.save(upload);
+    return upload;
+  }
+
   async uploadMultiplePost(files: Express.Multer.File[], userId: string) {
     const uploads: Upload[] = [];
 
@@ -67,6 +86,15 @@ export class UploadsService {
       //xóa record khỏi database
       await this.uploadRepository.remove(upload);
     }
+  }
+
+  async deleteUploadByUrl(url: string) {
+    const upload = await this.uploadRepository.findOne({ where: { url: url } });
+    if (!upload) {
+      throw new BadRequestException('File was not found');
+    }
+    await this.cloudinaryService.deleteFile(upload.publicId);
+    await this.uploadRepository.remove(upload);
   }
 
   async findByPostId(postId: string): Promise<Upload[]> {

@@ -11,8 +11,8 @@ import { Button, Typography, Divider } from "antd";
 import { IPost } from "@/types/post.type";
 import { ToggleLikeResponse } from "@/types/like.type";
 
-export interface HomePageProps{
-    handleCommentCountUpdate?: (postId: string, increment: number) => void
+export interface HomePageProps {
+    handleCommentCountUpdate?: (postId: string, increment: number) => void;
     handleLike?: (postId: string) => Promise<ToggleLikeResponse>;
     handleDeletePost?: (postId: string) => void;
     handlePostCreated?: (newPost: IPost) => void;
@@ -25,8 +25,6 @@ const HomePage = () => {
     const [hasMore, setHasMore] = useState(true);
     const LIMIT = 7;
     const likeRequestCache = useRef(new Map());
-
-    // Fetch data
 
     useEffect(() => {
         getDataPosts();
@@ -66,7 +64,6 @@ const HomePage = () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
     };
 
-
     const handleLike = useCallback(async (postId: string) => {
         if (likeRequestCache.current.has(postId)) {
             return likeRequestCache.current.get(postId);
@@ -85,10 +82,9 @@ const HomePage = () => {
                             return {
                                 ...post,
                                 isLiked: res?.data?.isLiked ?? !post.isLiked,
-                                likeCount:
-                                    (post.isLiked
-                                        ? post.likeCount - 1
-                                        : post.likeCount + 1),
+                                likeCount: post.isLiked
+                                    ? post.likeCount - 1
+                                    : post.likeCount + 1,
                             };
                         })
                     );
@@ -141,6 +137,12 @@ const HomePage = () => {
         }
     };
 
+    // const handleUpdatePost = async(values: {content: string; postId: string}) =>{
+    //     const { content, postId } = values;
+    //     const res
+        
+    // };
+
     return (
         <div
             style={{ maxWidth: "680px", margin: "0 auto" }}
@@ -151,9 +153,9 @@ const HomePage = () => {
                 <div style={{ textAlign: "center", margin: "50px 0" }}>
                     <Typography.Text
                         style={{
-                        fontSize: "16px",
-                        fontWeight: "500",
-                        color: "#666",
+                            fontSize: "16px",
+                            fontWeight: "500",
+                            color: "#666",
                         }}
                     >
                         Chưa có bài viết nào. Hãy tạo bài viết đầu tiên!

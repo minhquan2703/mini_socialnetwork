@@ -44,3 +44,14 @@ export interface DeletePostResponse {
     deleted: boolean;
 }
 
+export interface UpdatePostRequest {
+    id: string;
+    content: string;
+}
+export interface UpdatePostResponse {
+    content: string;
+    createdAt: Date;
+    id: string;
+    isReported: boolean;
+    updatedAt: Date;
+}

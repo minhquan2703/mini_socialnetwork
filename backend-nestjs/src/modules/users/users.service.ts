@@ -19,6 +19,7 @@ import {
   VerifyAuthDto,
 } from '@/auths/dto/create-auth.dto';
 import dayjs from 'dayjs';
+import { UploadsService } from '../uploads/uploads.service';
 
 @Injectable()
 export class UsersService {
@@ -26,6 +27,7 @@ export class UsersService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private readonly mailerService: MailerService,
+    private uploadsService: UploadsService,
     @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
@@ -56,7 +58,7 @@ export class UsersService {
     }
     //hash password
     const hashPassword = await hashPasswordHelper(password);
-    const user = await this.userRepository.create({
+    const user = this.userRepository.create({
       username,
       email,
       password: hashPassword,
@@ -181,6 +183,7 @@ export class UsersService {
         'isActive',
         'role',
         'createdAt',
+        'image',
       ],
     });
 
@@ -251,9 +254,9 @@ export class UsersService {
     const newCode = Math.floor(100000 + Math.random() * 900000).toString();
 
     //response
-    this.mailerService.sendMail({
-      to: user.email, // list of receivers
-      subject: 'Kích hoạt tài khoản', // Subject line
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Kích hoạt tài khoản',
       template: 'register',
       context: {
         name: user.name ?? username,
@@ -280,6 +283,29 @@ export class UsersService {
     });
     return {
       imageUrl: fullImageUrl,
+    };
+  }
+
+  async setAvatar(userId: string, file: Express.Multer.File) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User was not found');
+    }
+    if (!file.mimetype.includes('image')) {
+      throw new BadRequestException('Only image file');
+    }
+    if (user.image) {
+      await this.uploadsService.deleteUploadByUrl(user.image);
+    }
+    const upload = this.uploadsService.uploadAvatar(file, userId);
+    await this.userRepository.update(userId, {
+      image: (await upload).url,
+    });
+    return {
+      user: {
+        id: user.id,
+        image: (await upload).url,
+      },
     };
   }
 }

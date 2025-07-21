@@ -1,4 +1,4 @@
-import { DeletePostResponse, GetAllPostsPagination, IGetAllPosts, IPost } from "@/types/post.type";
+import { DeletePostResponse, GetAllPostsPagination, IGetAllPosts, IPost, UpdatePostRequest, UpdatePostResponse } from "@/types/post.type";
 import { sendRequest, sendRequestFile } from "@/utils/apiAxios";
 
 const POST_BASE_URL = `/api/v1/posts`;
@@ -28,4 +28,17 @@ const deleteOnePost = async (postId: string): Promise<IBackendRes<DeletePostResp
     return response;
 };
 
-export { getAllPosts, postNewPost, deleteOnePost };
+const updatePost = async (data: UpdatePostRequest): Promise<IBackendRes<UpdatePostResponse>> => {
+    const { id, content } = data
+    const response = await sendRequest<IBackendRes<UpdatePostResponse>>({
+        url: `${POST_BASE_URL}`,
+        method: "PUT",
+        body: {
+            id,
+            content,
+        }
+    });
+    return response;
+};
+
+export { getAllPosts, postNewPost, deleteOnePost, updatePost };
