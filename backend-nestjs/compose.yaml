@@ -10,6 +10,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
+    volumes:
+    - backend-nestjs_minisocial_pgdata:/var/lib/postgresql/data
 
   backend:
     build: .
@@ -24,3 +26,5 @@ services:
       - db
     ports:
       - "8081:8081"
+volumes:
+  backend-nestjs_minisocial_pgdata:

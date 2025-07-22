@@ -24,3 +24,4 @@ jobs:
             docker stop client-container || true
             docker rm client-container || true
             docker run -d --name client-container -p 3000:3000 client
+            docker image prune -f
