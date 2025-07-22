@@ -18,7 +18,7 @@
             script: |
               cd /home/mini_socialnetwork/frontend-nextjs
               git fetch origin
-              git checkout main
+              git checkout production
               git pull
               docker build -t client .
               docker stop client-container || true
