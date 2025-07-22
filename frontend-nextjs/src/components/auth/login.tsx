@@ -7,6 +7,7 @@ import { useState } from "react";
 import ModalForgotPassword from "./modal.forgotpass";
 import { toast } from "sonner";
 import ModalActive from "./modal.active";
+import { signIn } from "next-auth/react";
 
 interface modalLogin {
     username: string;
@@ -23,9 +24,10 @@ const Login = () => {
         const { username, password } = values;
         setUserEmail("");
         setUsernameModal("");
-        await toast.promise(
-            authenticate(username, password).then((res) => {
-                if (res.error && +res.code === 2) {
+        toast.promise(
+            signIn("credentials", { username, password, redirect: false}).then((res) => {
+                console.log('check res login', res)
+                if (res?.error === "ActiveAccountError") {
                     setIsModalOpen(true);
                     setUsernameModal(username);
                     setUserEmail(username);
