@@ -1,6 +1,6 @@
 # Mini Social Network
 
-A fullstack mini social media project built with **Next.js**, **NestJS**, **PostgreSQL**, and **Socket.io**. Features include post infinite scroll, likes, comments, real-time chat, and an admin dashboard.
+A fullstack mini social network project built with **Next.js**, **NestJS**, **PostgreSQL**, and **Socket.io**. Features include post infinite scroll, likes, comments, real-time chat, and an admin dashboard.
 
 ## Demo
 ![Demo Screenshot](frontend-nextjs/public/demo/homepage.png)

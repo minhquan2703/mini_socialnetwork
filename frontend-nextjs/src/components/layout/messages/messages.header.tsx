@@ -44,7 +44,7 @@ const MessagesHeader = (props: any) => {
                         fontWeight: "700",
                     }}
                 >
-                    Logo Social Media mini
+                    Mini Social
                 </div>
                 <Dropdown menu={{ items }}>
                     <a

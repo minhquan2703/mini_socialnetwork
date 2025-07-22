@@ -60,7 +60,7 @@ const UserHeader = () => {
                         fontFamily: "sans-serif",
                     }}
                 >
-                    Social Media Mini
+                    Mini Social
                 </div>
 
                 {/* Search Bar */}

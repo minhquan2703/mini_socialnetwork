@@ -14,7 +14,7 @@ const MessagesFooter = () => {
                     background: "#fafafa",
                 }}
             >
-                Social Media Mini ©{new Date().getFullYear()} Created by
+                Mini Social ©{new Date().getFullYear()} Created by
                 @minhquan
             </Footer>
         </>
