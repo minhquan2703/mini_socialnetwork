@@ -60,7 +60,7 @@ const UserHeader = () => {
                         fontFamily: "sans-serif",
                     }}
                 >
-                    Mini Social Minh Quân
+                    Mini Social Minh Quânnnnnn
                 </div>
 
                 {/* Search Bar */}
