@@ -1,8 +1,8 @@
 "use client";
 import ModalSetAvatar from "@/components/homepage/modals/modal.setavatar";
 import { useSession } from "@/library/session.context";
-import { SearchOutlined, BellFilled } from "@ant-design/icons";
-import { Input, Layout, Avatar, Dropdown, Badge, Button, Space } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import { Input, Layout, Avatar, Dropdown, Button, Space } from "antd";
 import type { MenuProps } from "antd";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
@@ -60,7 +60,7 @@ const UserHeader = () => {
                         fontFamily: "sans-serif",
                     }}
                 >
-                    Mini Social
+                    Mini Social Minh Quân
                 </div>
 
                 {/* Search Bar */}
