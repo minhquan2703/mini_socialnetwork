@@ -1,0 +1,28 @@
+  name: Next Deployment
+
+  on:
+    push:
+      branches:
+        - main
+        - dev
+
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Deploy using ssh
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOSTFE }}
+            username: ${{ secrets.USERNAMEFE }}
+            password: ${{ secrets.PASSWORDFE }}
+            port: 22
+            script: |
+              cd /home/mini_socialnetwork/frontend-nextjs
+              git fetch origin
+              git checkout main
+              git pull
+              docker build -t client .
+              docker stop client-container || true
+              docker rm client-container || true
+              docker run -d --name client-container -p 3000:3000 client

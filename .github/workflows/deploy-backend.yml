@@ -1,0 +1,26 @@
+name: Nest Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy using ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOSTBE }}
+          username: ${{ secrets.USERNAMEBE }}
+          password: ${{ secrets.PASSWORDBE }}
+          port: 22
+          script: |
+            cd /home/mini_socialnetwork/backend-nestjs
+            git fetch origin
+            git checkout main
+            git pull
+            docker compose down || true
+            docker compose up --build -d
