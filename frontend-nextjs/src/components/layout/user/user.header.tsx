@@ -17,10 +17,10 @@ const UserHeader = () => {
             label: "Ảnh đại diện",
             onClick: () => setIsModalOpen(true),
         },
-        {
-            key: "settings",
-            label: "Thông tin tài khoản",
-        },
+        // {
+        //     key: "settings",
+        //     label: "Thông tin tài khoản",
+        // },
         {
             type: "divider",
         },
