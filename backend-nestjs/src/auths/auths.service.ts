@@ -1,11 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { ActiveAuthDto, CreateAuthDto } from './dto/create-auth.dto';
+import {
+  ActiveAuthDto,
+  CreateAuthDto,
+  RecoverPasswordDTO,
+} from './dto/create-auth.dto';
 import { UsersService } from '@/modules/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { comparePasswordHelper } from '@/helper/util';
+import { comparePasswordHelper, hashPasswordHelper } from '@/helper/util';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@/modules/users/entities/user.entity';
 import { Repository } from 'typeorm';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class AuthsService {
@@ -29,7 +34,6 @@ export class AuthsService {
   }
 
   async updateSession(user: any) {
-    const payload = { username: user?.username, sub: user.id };
     const currentUser = await this.userRepository.findOne({
       where: { id: user.id },
     });
@@ -67,6 +71,9 @@ export class AuthsService {
   handleSendCode = async (data: ActiveAuthDto) => {
     return await this.usersService.handleSendCode(data);
   };
+  handleSendCodeForgotPassword = async (email: string) => {
+    return await this.usersService.handleSendCodeForgotPassword(email);
+  };
   uploadAvatar = async (userId: string, imageUrl: string) => {
     const fullImageUrl = `${process.env.BACKEND_URL}${imageUrl}`;
     const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -91,4 +98,22 @@ export class AuthsService {
       },
     };
   };
+
+  async recoverPassword(recoverPasswordDTO: RecoverPasswordDTO) {
+    const { id, password, codeId } = recoverPasswordDTO;
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new BadRequestException('User was not found');
+    }
+    if (user.codeId !== codeId) {
+      throw new BadRequestException('Invalid codeId');
+    }
+    const expiredCheck = dayjs().isBefore(user.codeExpired);
+    if (!expiredCheck) {
+      throw new BadRequestException('Expired code');
+    }
+    const hashPassword = await hashPasswordHelper(password);
+    await this.userRepository.update(id, { password: hashPassword });
+    return true;
+  }
 }

@@ -27,6 +27,20 @@ export interface IGetCommentPagination {
     pageSize?: number;
     postId: string;
 }
+
+export interface DeleteCommentResponse {
+    deleted: boolean;
+}
+
+export interface UpdateCommentRequest {
+    id: string;
+    content: string;
+}
+
+export interface UpdateChildCommentRequest {
+    id: string;
+    content: string;
+}
 //Childcomment type
 export interface IChildComment {
     id: string;
@@ -40,6 +54,7 @@ export interface IChildComment {
     content: string;
     likeCount: number;
     isLiked: boolean;
+    isAuthor: boolean;
     timeBefore?: string;
     createdAtFormat: string;
 }

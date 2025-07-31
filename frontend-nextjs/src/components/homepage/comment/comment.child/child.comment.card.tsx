@@ -1,25 +1,40 @@
 "use client";
 
-import { HeartFilled, HeartOutlined} from "@ant-design/icons";
-import { Avatar, Button } from "antd";
+import { HeartFilled, HeartOutlined, MoreOutlined } from "@ant-design/icons";
+import { Avatar, Button, Dropdown, MenuProps } from "antd";
 import React, { useCallback, useState, useTransition } from "react";
 import { useSession } from "@/library/session.context";
 import { IChildComment } from "@/types/comment.type";
 import { AxiosResponse } from "axios";
 import { ToggleLikeResponse } from "@/types/like.type";
+import TextArea from "antd/es/input/TextArea";
+import ModalUpdateComment from "../../modals/modal.update.comment";
+import ModalDeleteComment from "../../modals/modal.delete.comment";
 
 interface ChildCommentCardProps {
-    childComment: IChildComment,
-    handleLike: (childCommentId: string) => Promise<AxiosResponse<ToggleLikeResponse>>;
+    childComment: IChildComment;
+    handleLike: (
+        childCommentId: string
+    ) => Promise<AxiosResponse<ToggleLikeResponse>>;
+    handleDeleteChildComment: (id: string) => void;
 }
-const ChildCommentCard = ({childComment, handleLike}: ChildCommentCardProps) => {
+const ChildCommentCard = ({
+    childComment,
+    handleLike,
+    handleDeleteChildComment,
+}: ChildCommentCardProps) => {
     const [localLikeCount, setLocalLikeCount] = useState<number>(
         childComment.likeCount
     );
     const [localIsLiked, setLocalIsLiked] = useState<boolean>(
         childComment.isLiked
     );
+    const [isUpdating, setIsUpdating] = useState<boolean>(false);
+    const [contentUpdate, setContentUpdate] = useState<string>("");
     const [isPending, startTransition] = useTransition();
+    const [isShowModalDelete, setIsShowModalDelete] = useState<boolean>(false);
+    const [isShowModalUpdate, setIsShowModalUpdate] = useState<boolean>(false);
+    const [content, setContent] = useState<string>(childComment.content)
     const session = useSession();
     const handleOptimisticLike = useCallback(() => {
         if (!session?.user) {
@@ -29,9 +44,7 @@ const ChildCommentCard = ({childComment, handleLike}: ChildCommentCardProps) => 
         // Immediate UI update
         setLocalIsLiked(!localIsLiked);
         setLocalLikeCount(
-            localIsLiked
-                ? localLikeCount - 1
-                : localLikeCount + 1
+            localIsLiked ? localLikeCount - 1 : localLikeCount + 1
         );
 
         startTransition(() => {
@@ -41,12 +54,28 @@ const ChildCommentCard = ({childComment, handleLike}: ChildCommentCardProps) => 
                 setLocalLikeCount(localLikeCount);
             });
         });
-    }, [
-        localIsLiked,
-        setLocalLikeCount,
-        childComment.id,
-        handleLike,
-    ]);
+    }, [localIsLiked, setLocalLikeCount, childComment.id, handleLike]);
+    const moreActions: MenuProps["items"] = [
+        { key: "1", label: "Báo cáo", danger: true },
+        // { key: "2", label: "Theo dõi" },
+    ];
+    const authorActions: MenuProps["items"] = [
+        { key: "update", label: "Sửa", onClick: () => handleUpdate() },
+        {
+            key: "delete",
+            label: "Xoá bình luận",
+            danger: true,
+            onClick: () => setIsShowModalDelete(true),
+        },
+    ];
+    const handleUpdate = () => {
+        setIsUpdating(true);
+        setContentUpdate(childComment.content);
+    };
+    const handleCancelUpdate = () => {
+        setIsUpdating(false);
+        setContentUpdate("");
+    };
     return (
         <>
             <div
@@ -55,7 +84,7 @@ const ChildCommentCard = ({childComment, handleLike}: ChildCommentCardProps) => 
                     transition: "all 0.3s ease",
                     display: "flex",
                     gap: "10px",
-                    marginLeft: "50px"
+                    marginLeft: "50px",
                 }}
             >
                 <div
@@ -115,42 +144,90 @@ const ChildCommentCard = ({childComment, handleLike}: ChildCommentCardProps) => 
                                     marginBottom: "6px",
                                 }}
                             >
-                                <div
+                                <span
                                     style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "8px",
+                                        fontSize: "14px",
+                                        fontWeight: "700",
+                                        color: "#1a1a1a",
+                                        cursor: "pointer",
+                                        transition: "color 0.2s ease",
                                     }}
+                                    className="username-hover"
                                 >
-                                    <span
+                                    {childComment.user.name ||
+                                        childComment.user.username}
+                                </span>
+                                <Dropdown
+                                    menu={{
+                                        items: childComment?.isAuthor
+                                            ? authorActions
+                                            : moreActions,
+                                    }}
+                                    placement="bottomRight"
+                                    trigger={["hover"]}
+                                >
+                                    <Button
+                                        type="text"
+                                        icon={<MoreOutlined />}
                                         style={{
-                                            fontSize: "14px",
-                                            fontWeight: "700",
-                                            color: "#1a1a1a",
-                                            cursor: "pointer",
-                                            transition: "color 0.2s ease",
+                                            color: "#999",
+                                            fontSize: "16px",
+                                            padding: "4px",
+                                            height: "auto",
+                                            opacity: 0.7,
+                                            transition: "opacity 0.2s ease",
                                         }}
-                                        className="username-hover"
-                                    >
-                                        {childComment.user.name ||
-                                            childComment.user.username}
-                                    </span>
-                                </div>
+                                    />
+                                </Dropdown>
                             </div>
 
-                            {/* Comment content */}
-                            <p
-                                style={{
-                                    fontSize: "14px",
-                                    lineHeight: "20px",
-                                    color: "#4a4a4a",
-                                    margin: 0,
-                                    whiteSpace: "pre-wrap",
-                                    wordBreak: "break-word",
-                                }}
-                            >
-                                {childComment.content}
-                            </p>
+                            {/* content */}
+                            {isUpdating ? (
+                                <>
+                                    <TextArea
+                                        value={contentUpdate}
+                                        onChange={(e) =>
+                                            setContentUpdate(e.target.value)
+                                        }
+                                    />
+                                    <div
+                                        style={{
+                                            width: "100%",
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            marginTop: "10px",
+                                        }}
+                                    >
+                                        <Button
+                                            onClick={() => handleCancelUpdate()}
+                                        >
+                                            Huỷ chỉnh sửa
+                                        </Button>
+                                        <Button
+                                            color="primary"
+                                            variant="solid"
+                                            onClick={() =>
+                                                setIsShowModalUpdate(true)
+                                            }
+                                        >
+                                            Sửa
+                                        </Button>
+                                    </div>
+                                </>
+                            ) : (
+                                <p
+                                    style={{
+                                        fontSize: "14px",
+                                        lineHeight: "20px",
+                                        color: "#4a4a4a",
+                                        margin: 0,
+                                        whiteSpace: "pre-wrap",
+                                        wordBreak: "break-word",
+                                    }}
+                                >
+                                    {content}
+                                </p>
+                            )}
                         </div>
 
                         {/* Actions bar */}
@@ -177,7 +254,13 @@ const ChildCommentCard = ({childComment, handleLike}: ChildCommentCardProps) => 
                             {/*like button*/}
                             <div style={{ display: "flex", gap: "5px" }}>
                                 <Button
-                                    icon={localIsLiked ? <HeartFilled /> : <HeartOutlined />}
+                                    icon={
+                                        localIsLiked ? (
+                                            <HeartFilled />
+                                        ) : (
+                                            <HeartOutlined />
+                                        )
+                                    }
                                     onClick={handleOptimisticLike}
                                     color="danger"
                                     style={{
@@ -190,7 +273,9 @@ const ChildCommentCard = ({childComment, handleLike}: ChildCommentCardProps) => 
                                             ? "scale(1.05)"
                                             : "scale(1)",
                                     }}
-                                    variant={localIsLiked ? "filled" : "outlined"}
+                                    variant={
+                                        localIsLiked ? "filled" : "outlined"
+                                    }
                                 ></Button>
                                 <span
                                     style={{
@@ -205,6 +290,27 @@ const ChildCommentCard = ({childComment, handleLike}: ChildCommentCardProps) => 
                     </div>
                 </div>
             </div>
+            {isShowModalUpdate && (
+                <ModalUpdateComment
+                    type="CHILDCOMMENT"
+                    id={childComment.id}
+                    updatedContent={contentUpdate}
+                    isShowModalUpdate={isShowModalUpdate}
+                    setIsShowModalUpdate={setIsShowModalUpdate}
+                    setContent={setContent}
+                    setIsUpdating={setIsUpdating}
+                />
+            )}
+            {isShowModalDelete && (
+                <ModalDeleteComment
+                    type="CHILDCOMMENT"
+                    id={childComment.id}
+                    content={childComment.content}
+                    isShow={isShowModalDelete}
+                    setIsShow={setIsShowModalDelete}
+                    handleDeleteComment={handleDeleteChildComment}
+                />
+            )}          
         </>
     );
 };

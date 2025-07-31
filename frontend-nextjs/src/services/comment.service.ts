@@ -1,4 +1,5 @@
 import {
+    DeleteCommentResponse,
     GetAllCommentsPagination,
     IChildComment,
     IComment,
@@ -7,6 +8,8 @@ import {
     IGetChildCommentPaginationResponse,
     IGetCommentPagination,
     IPostChildCommentRequest,
+    UpdateChildCommentRequest,
+    UpdateCommentRequest,
 } from "@/types/comment.type";
 import { sendRequest } from "@/utils/apiAxios";
 
@@ -32,7 +35,7 @@ const getAllCommentOfOnePost = async (
 ): Promise<IBackendRes<GetAllCommentsPagination>> => {
     const { current, pageSize, postId } = data;
     const response = await sendRequest<IBackendRes<GetAllCommentsPagination>>({
-        url: `${COMMENT_BASE_URL}/getallcomment-post/?current=${current}&pageSize=${pageSize}&postId=${postId}`,
+        url: `${COMMENT_BASE_URL}/all/?current=${current}&pageSize=${pageSize}&postId=${postId}`,
         method: "GET",
     });
     return response;
@@ -60,4 +63,44 @@ const getChildComment = async (data: IGetChildCommentPaginationRequest): Promise
     return response
 };
 
-export { postComment, getAllCommentOfOnePost, postChildComment, getChildComment };
+const deleteComment = async (commentId: string): Promise<IBackendRes<DeleteCommentResponse>> => {
+    const response = await sendRequest<IBackendRes<DeleteCommentResponse>>({
+        url: `${COMMENT_BASE_URL}/${commentId}`,
+        method: "DELETE",
+    });
+    return response;
+};
+
+const updateComment = async (data: UpdateCommentRequest): Promise<IBackendRes<any>> => {
+    const { id, content } = data
+    const response = await sendRequest<IBackendRes<any>>({
+        url: `${COMMENT_BASE_URL}`,
+        method: "PUT",
+        body: {
+            id,
+            content,
+        }
+    });
+    return response;
+};
+const deleteChildComment = async (id: string): Promise<IBackendRes<DeleteCommentResponse>> => {
+    const response = await sendRequest<IBackendRes<DeleteCommentResponse>>({
+        url: `${CHILDCOMMENT_BASE_URL}/${id}`,
+        method: "DELETE",
+    });
+    return response;
+};
+
+const updateChildComment = async (data: UpdateChildCommentRequest): Promise<IBackendRes<any>> => {
+    const { id, content } = data
+    const response = await sendRequest<IBackendRes<any>>({
+        url: `${CHILDCOMMENT_BASE_URL}`,
+        method: "PUT",
+        body: {
+            id,
+            content,
+        }
+    });
+    return response;
+};
+export { postComment, getAllCommentOfOnePost, postChildComment, getChildComment, deleteComment, updateComment, updateChildComment, deleteChildComment };

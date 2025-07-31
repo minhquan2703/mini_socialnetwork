@@ -7,9 +7,13 @@ import { useSession } from "@/library/session.context";
 import ContainerChildComment from "./comment.child/container.child.comment";
 import { IComment } from "@/types/comment.type";
 import { ListCommentProps } from "./list.comment";
+import ModalDeleteComment from "../modals/modal.delete.comment";
+import TextArea from "antd/es/input/TextArea";
+import ModalUpdateComment from "../modals/modal.update.comment";
 
 interface CommentCardProps extends ListCommentProps {
     comment: IComment;
+    handleDeleteComment: (commentId: string) => void;
 }
 const CommentCard = (props: CommentCardProps) => {
     const moreActions: MenuProps["items"] = [
@@ -17,18 +21,30 @@ const CommentCard = (props: CommentCardProps) => {
         // { key: "2", label: "Theo dõi" },
     ];
     const authorActions: MenuProps["items"] = [
-        { key: "update", label: "Sửa" },
-        { key: "delete", label: "Xoá bình luận", danger: true },
+        { key: "update", label: "Sửa", onClick: () => handleUpdate() },
+        {
+            key: "delete",
+            label: "Xoá bình luận",
+            danger: true,
+            onClick: () => setIsShowModalDelete(true),
+        },
     ];
 
-    const { comment, handleLikeComment, setShowModal } = props;
-    const [localCommentLikeCount, setCommentLocalLikeCount] = useState(
+    const { comment, handleLikeComment, setShowModal, handleDeleteComment } =
+        props;
+    const [localCommentLikeCount, setCommentLocalLikeCount] = useState<number>(
         comment.likeCount
     );
-    const [localCommentIsLiked, setCommentLocalIsLiked] = useState(
+    const [localCommentIsLiked, setCommentLocalIsLiked] = useState<boolean>(
         comment.isLiked
     );
-    const [isShowChildComment, setIsShowChildComment] = useState(false);
+    const [isShowChildComment, setIsShowChildComment] =
+        useState<boolean>(false);
+    const [isShowModalDelete, setIsShowModalDelete] = useState<boolean>(false);
+    const [isShowModalUpdate, setIsShowModalUpdate] = useState<boolean>(false);
+    const [isUpdating, setIsUpdating] = useState<boolean>(false);
+    const [contentUpdate, setContentUpdate] = useState("");
+    const [content, setContent] = useState(comment.content);
     const [, startTransition] = useTransition();
     const session = useSession();
     const handleOptimisticLike = useCallback(() => {
@@ -36,7 +52,6 @@ const CommentCard = (props: CommentCardProps) => {
             setShowModal?.(true);
             return;
         }
-        // Immediate UI update
         setCommentLocalIsLiked(!localCommentIsLiked);
         setCommentLocalLikeCount(
             localCommentIsLiked
@@ -60,6 +75,15 @@ const CommentCard = (props: CommentCardProps) => {
         handleLikeComment,
         comment.id,
     ]);
+    const handleUpdate = () => {
+        setIsUpdating(true);
+        setContentUpdate(comment.content);
+    };
+
+    const handleCancelUpdate = () => {
+        setIsUpdating(false);
+        setContentUpdate("");
+    };
     return (
         <>
             <div
@@ -94,17 +118,17 @@ const CommentCard = (props: CommentCardProps) => {
                             src={comment?.user?.image}
                             style={{
                                 backgroundColor: `${comment.user.avatarColor}`,
-                                color: "#fff",
+                                color: "#222",
                                 fontWeight: "600",
                                 fontSize: "14px",
-                                border: "2px solid #fff",
+                                border: "1px solid #f0f0f0",
                                 boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
                                 cursor: "pointer",
                                 transition: "transform 0.2s ease",
                             }}
                         >
-                            {comment.user.name.charAt(0) ||
-                                comment.user.username.charAt(0)}
+                            {comment.user.name.charAt(0).toUpperCase() ||
+                                comment.user.username.charAt(0).toUpperCase()}
                         </Avatar>
                         {/* Online indicator */}
                         {/* <div
@@ -177,7 +201,11 @@ const CommentCard = (props: CommentCardProps) => {
                                     )} */}
                                 </div>
                                 <Dropdown
-                                    menu={{ items: comment?.isAuthor ? authorActions : moreActions }}
+                                    menu={{
+                                        items: comment?.isAuthor
+                                            ? authorActions
+                                            : moreActions,
+                                    }}
                                     placement="bottomRight"
                                     trigger={["hover"]}
                                 >
@@ -198,18 +226,52 @@ const CommentCard = (props: CommentCardProps) => {
                             </div>
 
                             {/* Comment content */}
-                            <p
-                                style={{
-                                    fontSize: "14px",
-                                    lineHeight: "20px",
-                                    color: "#4a4a4a",
-                                    margin: 0,
-                                    whiteSpace: "pre-wrap",
-                                    wordBreak: "break-word",
-                                }}
-                            >
-                                {comment.content}
-                            </p>
+                            {isUpdating ? (
+                                <>
+                                    <TextArea
+                                        value={contentUpdate}
+                                        onChange={(e) =>
+                                            setContentUpdate(e.target.value)
+                                        }
+                                    />
+                                    <div
+                                        style={{
+                                            width: "100%",
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            marginTop: "10px",
+                                        }}
+                                    >
+                                        <Button
+                                            onClick={() => handleCancelUpdate()}
+                                        >
+                                            Huỷ chỉnh sửa
+                                        </Button>
+                                        <Button
+                                            color="primary"
+                                            variant="solid"
+                                            onClick={() =>
+                                                setIsShowModalUpdate(true)
+                                            }
+                                        >
+                                            Sửa bình luận
+                                        </Button>
+                                    </div>
+                                </>
+                            ) : (
+                                <p
+                                    style={{
+                                        fontSize: "14px",
+                                        lineHeight: "20px",
+                                        color: "#4a4a4a",
+                                        margin: 0,
+                                        whiteSpace: "pre-wrap",
+                                        wordBreak: "break-word",
+                                    }}
+                                >
+                                    {content}
+                                </p>
+                            )}
                         </div>
 
                         {/* Actions bar */}
@@ -293,6 +355,27 @@ const CommentCard = (props: CommentCardProps) => {
                 <ContainerChildComment
                     isShowChildComment={isShowChildComment}
                     commentId={comment.id}
+                />
+            )}
+            {isShowModalDelete && (
+                <ModalDeleteComment
+                    type="COMMENT"
+                    id={comment.id}
+                    content={comment.content}
+                    isShow={isShowModalDelete}
+                    setIsShow={setIsShowModalDelete}
+                    handleDeleteComment={handleDeleteComment}
+                />
+            )}
+            {isShowModalUpdate && (
+                <ModalUpdateComment
+                    type="COMMENT"
+                    id={comment.id}
+                    updatedContent={contentUpdate}
+                    isShowModalUpdate={isShowModalUpdate}
+                    setIsShowModalUpdate={setIsShowModalUpdate}
+                    setContent={setContent}
+                    setIsUpdating={setIsUpdating}
                 />
             )}
         </>

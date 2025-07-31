@@ -7,10 +7,24 @@ import { ToggleLikeResponse } from "@/types/like.type";
 
 export interface ListChildCommentProps {
     dataChildComments: IChildComment[];
-    handleLikeChildComment: (childCommentId: string) => Promise<AxiosResponse<ToggleLikeResponse>>;
+    handleLikeChildComment: (
+        childCommentId: string
+    ) => Promise<AxiosResponse<ToggleLikeResponse>>;
+    setDataChildComments:  React.Dispatch<React.SetStateAction<IChildComment[]>>;
 }
 
-const ListChildComment = ({ dataChildComments, handleLikeChildComment }: ListChildCommentProps) => {
+const ListChildComment = ({
+    dataChildComments,
+    handleLikeChildComment,
+    setDataChildComments,
+}: ListChildCommentProps) => {
+    const handleDeleteChildComment = async (id: string) => {
+        if (dataChildComments) {
+            setDataChildComments((current) =>
+                current.filter((childComment) => childComment.id !== id)
+            );
+        }
+    };
 
     return (
         <>
@@ -20,6 +34,7 @@ const ListChildComment = ({ dataChildComments, handleLikeChildComment }: ListChi
                         handleLike={handleLikeChildComment}
                         key={childComment.id}
                         childComment={childComment}
+                        handleDeleteChildComment={handleDeleteChildComment}
                     />
                 ))
             ) : (

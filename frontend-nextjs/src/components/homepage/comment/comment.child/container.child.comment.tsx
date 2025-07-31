@@ -97,6 +97,7 @@ const ContainerChildComment = ({
             <ListChildComment
                 dataChildComments={dataChildComments}
                 handleLikeChildComment={handleLikeChildComment}
+                setDataChildComments={setDataChildComments}
             />
         </>
     );

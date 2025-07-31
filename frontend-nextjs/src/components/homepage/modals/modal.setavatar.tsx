@@ -44,10 +44,8 @@ const ModalSetAvatar = (props: ModalSetAvatarProps) => {
         }
         setIsLoading(true)
         const formData = new FormData();
-        console.log("check selected file", selectedFile);
         formData.append("file", selectedFile);
         const res = await putAvatar(formData);
-        console.log("check res change avatar", res);
         if (res.data) {
             setIsModalOpen(false);
             setPreviewUrl(null);

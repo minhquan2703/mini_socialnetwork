@@ -41,6 +41,15 @@ export class UsersService {
     if (user) return true;
     return false;
   };
+
+  async findUserById(id: string) {
+    const user = await this.userRepository.findOne({ where: { id: id } });
+    if (!user) {
+      throw new BadRequestException('User was not found');
+    }
+    return user;
+  }
+
   async create(createUserDto: CreateUserDto) {
     const { username, name, email, password, phone, bio, image } =
       createUserDto;
@@ -141,18 +150,16 @@ export class UsersService {
       where: { id: data.id },
     });
     if (!user) {
-      throw new BadRequestException(
-        'Tài khoản đã bị xoá khỏi hệ thống, vui lòng đăng ký lại',
-      );
+      throw new BadRequestException('User was not found');
     }
     if (user.codeId !== data.code) {
-      throw new BadRequestException('Mã xác thực không hợp lệ');
+      throw new BadRequestException('Invalid code');
     }
     const expiredCheck = dayjs().isBefore(user.codeExpired);
     if (expiredCheck) {
       await this.userRepository.update({ id: data.id }, { isActive: true });
     } else {
-      throw new BadRequestException('Mã xác thực đã hết hạn');
+      throw new BadRequestException('Expired code');
     }
     return user;
   }
@@ -244,12 +251,10 @@ export class UsersService {
       where: { username: username },
     });
     if (!user) {
-      throw new BadRequestException(
-        'Tài khoản đã bị xoá khỏi hệ thống, vui lòng đăng ký lại',
-      );
+      throw new BadRequestException('User was not found');
     }
     if (user.email !== email) {
-      throw new BadRequestException('Email không khớp với tài khoản');
+      throw new BadRequestException('Invalid email');
     }
     const newCode = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -264,7 +269,7 @@ export class UsersService {
       },
     });
     await this.userRepository.update(
-      { username: username },
+      { id: user.id },
       { codeId: newCode, codeExpired: dayjs().add(10, 'minutes').toDate() },
     );
     //send email
@@ -275,17 +280,33 @@ export class UsersService {
     };
   }
 
-  async updateImage(userId: string, imageUrl: string) {
-    const fullImageUrl = `${process.env.BACKEND_URL}${imageUrl}`;
-    await this.userRepository.update(userId, {
-      image: fullImageUrl,
-      avatarColor: null,
+  async handleSendCodeForgotPassword(email: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new BadRequestException('User was not found');
+    }
+    const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    //response
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Quên mật khẩu',
+      template: 'forgotpass',
+      context: {
+        name: user.name,
+        activationCode: newCode,
+      },
+    });
+    await this.userRepository.update(user.id, {
+      codeId: newCode,
+      codeExpired: dayjs().add(10, 'minutes').toDate(),
     });
     return {
-      imageUrl: fullImageUrl,
+      id: user.id,
+      username: user.username,
+      email: user.email,
     };
   }
-
   async setAvatar(userId: string, file: Express.Multer.File) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {

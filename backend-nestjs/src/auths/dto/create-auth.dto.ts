@@ -29,3 +29,17 @@ export class ActiveAuthDto {
   @IsNotEmpty({ message: 'email không được để trống' })
   email: string;
 }
+export class ForgotPasswordDTO {
+  @IsNotEmpty({ message: 'email không được để trống' })
+  email: string;
+}
+export class RecoverPasswordDTO {
+  @IsNotEmpty({ message: 'id không được để trống' })
+  id: string;
+
+  @IsNotEmpty({ message: 'password không được để trống' })
+  password: string;
+
+  @IsNotEmpty({ message: 'codeId không được để trống' })
+  codeId: string;
+}

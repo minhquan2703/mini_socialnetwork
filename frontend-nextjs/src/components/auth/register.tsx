@@ -31,15 +31,26 @@ const Register = () => {
                         borderRadius: "5px",
                     }}
                 >
-                    <legend style={{fontSize: "15px", fontWeight: "600"}}>Đăng Ký Tài Khoản</legend>
+                    <legend style={{ fontSize: "15px", fontWeight: "600" }}>
+                        Đăng Ký Tài Khoản
+                    </legend>
                     <Form
                         name="basic"
                         onFinish={onFinish}
                         autoComplete="off"
                         layout="vertical"
                     >
-                        <Form.Item label="" name="name">
-                            <Input placeholder="Tên người dùng"/>
+                        <Form.Item
+                            label=""
+                            name="name"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng nhập họ và tên!",
+                                },
+                            ]}
+                        >
+                            <Input placeholder="Họ và tên" />
                         </Form.Item>
                         <Form.Item
                             label=""
@@ -51,7 +62,7 @@ const Register = () => {
                                 },
                             ]}
                         >
-                            <Input placeholder="Địa chỉ email"/>
+                            <Input placeholder="Địa chỉ email" />
                         </Form.Item>
                         <Form.Item
                             label=""
@@ -76,21 +87,24 @@ const Register = () => {
                                 },
                             ]}
                         >
-                            <Input.Password placeholder="Mật khẩu"/>
+                            <Input.Password placeholder="Mật khẩu" />
                         </Form.Item>
                         <Form.Item>
-                            <Button color="default" variant="solid" htmlType="submit">
+                            <Button
+                                color="default"
+                                variant="solid"
+                                htmlType="submit"
+                            >
                                 Đăng ký
                             </Button>
                         </Form.Item>
                     </Form>
                     <Link href={"/"}>
-                        <ArrowLeftOutlined/> Quay lại trang chủ
+                        <ArrowLeftOutlined /> Quay lại trang chủ
                     </Link>
                     <Divider />
                     <div style={{ textAlign: "center" }}>
-                        Đã có tài khoản?{" "}
-                        <Link href={"/auth"}>Đăng nhập</Link>
+                        Đã có tài khoản? <Link href={"/auth"}>Đăng nhập</Link>
                     </div>
                 </fieldset>
             </Col>

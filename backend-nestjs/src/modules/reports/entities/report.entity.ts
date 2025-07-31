@@ -1,6 +1,5 @@
 import { Comment } from '@/modules/comments/entities/comment.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
-import { Room } from '@/modules/rooms/entities/room.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import {
   Column,
@@ -12,30 +11,39 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Upload {
+export class Report {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  url: string;
+  reason: string;
 
-  @Column({ nullable: true })
-  publicId: string;
-
-  @Column({ nullable: true })
+  @Column()
   type: string;
 
-  @ManyToOne(() => User, (user) => user.uploads, { onDelete: 'CASCADE' })
+  @Column()
+  content: string;
+
+  @Column({ default: false })
+  isTackled: boolean;
+
+  @ManyToOne(() => User, (user) => user.authoredReports, {
+    onDelete: 'CASCADE',
+  })
+  author: User;
+
+  @ManyToOne(() => User, (user) => user.reports, {
+    onDelete: 'CASCADE',
+  })
   user: User;
 
-  @ManyToOne(() => Comment, (comment) => comment.uploads)
+  @ManyToOne(() => Comment, (comment) => comment.reports, {
+    onDelete: 'CASCADE',
+  })
   comment: Comment;
 
-  @ManyToOne(() => Post, (post) => post.uploads, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Post, (post) => post.reports, { onDelete: 'CASCADE' })
   post: Post;
-
-  @ManyToOne(() => Room, (room) => room.uploads, { onDelete: 'CASCADE' })
-  room: Room;
 
   @CreateDateColumn()
   createdAt: Date;

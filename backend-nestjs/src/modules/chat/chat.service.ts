@@ -77,7 +77,7 @@ export class ChatService {
     }
     const userInRoom = room.users.some((user) => user.id === userId);
     if (!userInRoom) {
-      throw new ForbiddenException('Not permission');
+      throw new ForbiddenException('Forbidden Exception');
     }
     const messages = await this.chatRepository.find({
       where: { room: { id: roomId } },

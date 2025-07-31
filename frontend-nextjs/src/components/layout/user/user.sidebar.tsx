@@ -41,7 +41,6 @@ const UserSideBar = () => {
                         </Link>
                     ),
                     icon: <HomeFilled />,
-                    onClick: () => alert("Tính năng đang phát triển"),
                 },
                 {
                     key: "messages",
@@ -49,6 +48,8 @@ const UserSideBar = () => {
                         <Link
                             href={"/messages"}
                             style={{ color: "inherit", textDecoration: "none" }}
+                            target="_blank"
+                            rel="noopener noreferrer"
                         >
                             <div
                                 style={{
@@ -182,12 +183,6 @@ const UserSideBar = () => {
                         </Link>
                     ),
                     icon: <HomeFilled />,
-                },
-                {
-                    key: "stories",
-                    label: "Bảng tin",
-                    icon: <AppstoreOutlined />,
-                    onClick: () => alert("Tính năng đang phát triển"),
                 },
                 {
                     type: "divider",
@@ -349,6 +344,7 @@ const UserSideBar = () => {
 
             {/* Navigation Menu */}
             <Menu
+                selectable={false}
                 mode="inline"
                 defaultSelectedKeys={["home"]}
                 items={!session?.user?.id ? itemsNotAuth : items}

@@ -131,7 +131,15 @@ export class RoomsService {
         };
       }),
     );
-    return results.filter((i) => i !== null);
+    const filteredResults = results.filter((i) => i !== null);
+    const sortedResults = filteredResults.sort((a, b) => {
+      // Room có tin nhắn mới nhất xếp trước
+      const aTime = a.lastestMessage?.createdAt || new Date(0);
+      const bTime = b.lastestMessage?.createdAt || new Date(0);
+
+      return new Date(bTime).getTime() - new Date(aTime).getTime();
+    });
+    return sortedResults;
   }
 
   async getDetailRoom(userId: string, roomId: string) {

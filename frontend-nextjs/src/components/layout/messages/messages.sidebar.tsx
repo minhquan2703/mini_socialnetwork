@@ -166,16 +166,20 @@ const MessagesSideBar = () => {
                                 size={48}
                                 style={{
                                     backgroundColor:
-                                        room.receiver?.avatarColor && "#fff",
+                                        room.receiver?.avatarColor,
+                                    color: "#222",
+                                    fontWeight: "600",
+                                    fontSize: "20px",
+                                    border: "1px solid #f0f0f0",
                                 }}
                             >
                                 {(room.receiver?.username &&
-                                    room.lastestMessage?.sender?.name?.charAt(
-                                        0
-                                    )) ||
-                                    room.lastestMessage?.sender?.username?.charAt(
-                                        0
-                                    )}
+                                    room.lastestMessage?.sender?.name
+                                        ?.charAt(0)
+                                        .toUpperCase()) ||
+                                    room.lastestMessage?.sender?.username
+                                        ?.charAt(0)
+                                        .toUpperCase()}
                             </Avatar>
 
                             <div

@@ -18,23 +18,43 @@ interface ModalProps {
 const ModalForgotPassword = (props: ModalProps) => {
     const [current, setCurrent] = useState<number>(0);
     const [userId, setUserId] = useState<string>("");
+    const [emailLocal, setEmailLocal] = useState<string>("");
     const [form] = Form.useForm();
     const { isModalOpen, setIsModalOpen } = props;
     const hasMounted = useHasMounted();
+    const handleResendCode = async () => {
+        const res = await sendRequest<IBackendRes<any>>({
+            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auths/resend-recover-password`,
+            method: "POST",
+            body: { email: emailLocal }
+        })
+        if (res?.data){
+            toast.success(`Mã xác thực đã được gửi đến địa chỉ email: ${emailLocal}`)
+        } else if(+res.statusCode === 429){
+            toast.error('Vui lòng đợi 30 giây trước khi gửi lại mã xác thực')
+        }
+        else{
+            toast.error('Lỗi không xác định, vui lòng thông báo cho quản trị viên :(')
+        }
+    }
     const onFinishStep0 = async (values: { email: string }) => {
         const { email } = values;
         const res = await sendRequest<IBackendRes<any>>({
-            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/resend-recover-password`,
+            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auths/resend-recover-password`,
             method: "POST",
-            body: {
-                email,
-            },
+            body: { email }
         });
         if (res?.data) {
             setUserId(res?.data?.id);
+            setEmailLocal(email);
             setCurrent(1);
-        } else {
-            toast.error(res.message);
+        } else if (+res.statusCode === 429) {
+            toast.error("Vui lòng kiểm tra mục spam hoặc đợi 30 giây để gửi lại")
+        } else if (res.message === "User was not found"){
+            toast.error("Địa chỉ email không tồn tại trong hệ thống")
+        }
+        else {
+            toast.error('Lỗi không xác định, vui lòng thông báo cho quản trị viên');
         }
     };
     const onFinishStep1 = async (values: {
@@ -43,20 +63,30 @@ const ModalForgotPassword = (props: ModalProps) => {
         confirmPassword: string;
     }) => {
         const { codeId, password, confirmPassword } = values;
+        if (password !== confirmPassword) {
+            toast.error('Mật khẩu nhập lại không trùng khớp')
+            return;
+        }
         const res = await sendRequest<IBackendRes<any>>({
-            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/forgot-password`,
+            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auths/recover-password`,
             method: "POST",
             body: {
                 codeId: codeId,
                 id: userId,
                 password: password,
-                confirmPassword: confirmPassword,
             },
         });
         if (res?.data) {
             setCurrent(2);
-        } else {
-            toast.error(res.message);
+        } else if (res.message === "Invalid codeId"){
+            toast.error("Mã xác thực không hợp lệ");
+        } else if (res.message === "Expired code"){
+            toast.error("Mã xác thực đã hết hạn")
+        }
+        // else if(res.message === )
+        
+        else {
+            toast.error("Lỗi không xác định, vui lòng thông báo cho quản trị viên");
         }
     };
     const resetModal = () => {
@@ -117,7 +147,7 @@ const ModalForgotPassword = (props: ModalProps) => {
                             </Form.Item>
                             <Form.Item>
                                 <Button type="primary" htmlType="submit">
-                                    Send code
+                                    Gửi mã
                                 </Button>
                             </Form.Item>
                         </Form>
@@ -140,7 +170,7 @@ const ModalForgotPassword = (props: ModalProps) => {
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please input your code!",
+                                        message: "Vui lòng nhập mã xác thực!",
                                     },
                                 ]}
                             >
@@ -152,7 +182,7 @@ const ModalForgotPassword = (props: ModalProps) => {
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please input new password!",
+                                        message: "Vui lòng nhập mật khẩu!",
                                     },
                                 ]}
                             >
@@ -164,16 +194,19 @@ const ModalForgotPassword = (props: ModalProps) => {
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please confirm password!",
+                                        message: "Vui lòng nhập lại mật khẩu!",
                                     },
                                 ]}
                             >
                                 <Input.Password />
                             </Form.Item>
                             <Form.Item>
-                                <Button type="primary" htmlType="submit">
-                                    Confirm
+                                <Button type="primary" htmlType="submit" style={{marginRight: 10}}>
+                                    Xác nhận
                                 </Button>
+                                <Button type="dashed" onClick={() => handleResendCode()}>
+                                    Gửi lại mã
+                                </Button>                                
                             </Form.Item>
                         </Form>
                     </>
@@ -202,7 +235,7 @@ const ModalForgotPassword = (props: ModalProps) => {
                             htmlType="submit"
                             onClick={() => resetModal()}
                         >
-                            Close
+                            Đóng
                         </Button>
                     </>
                 )}

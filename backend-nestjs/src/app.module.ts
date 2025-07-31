@@ -30,17 +30,19 @@ import { ChildComment } from './modules/child-comments/entities/child-comment.en
 import { ChildCommentsModule } from './modules/child-comments/child-comments.module';
 import { Upload } from './modules/uploads/entities/upload.entity';
 import { UploadsModule } from './modules/uploads/uploads.module';
+import { Report } from './modules/reports/entities/report.entity';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
-    // ThrottlerModule.forRoot({
-    //   throttlers: [
-    //     {
-    //       ttl: 10000,
-    //       limit: 5,
-    //     },
-    //   ],
-    // }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 10000,
+          limit: 5,
+        },
+      ],
+    }),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
@@ -65,6 +67,7 @@ import { UploadsModule } from './modules/uploads/uploads.module';
           Room,
           ChildComment,
           Upload,
+          Report,
         ],
       }),
     }),
@@ -82,7 +85,7 @@ import { UploadsModule } from './modules/uploads/uploads.module';
           },
         },
         defaults: {
-          from: '"No Reply" <no-reply@localhost>',
+          from: '"Nhỏ Xíu Network" <no-reply@localhost>',
         },
         template: {
           dir: process.cwd() + '/src/mail/templates/',
@@ -105,6 +108,7 @@ import { UploadsModule } from './modules/uploads/uploads.module';
     RoomsModule,
     ChildCommentsModule,
     UploadsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -117,10 +121,10 @@ import { UploadsModule } from './modules/uploads/uploads.module';
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ThrottlerGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

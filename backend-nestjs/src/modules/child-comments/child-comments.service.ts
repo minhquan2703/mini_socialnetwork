@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateChildCommentDto } from './dto/create-child-comment.dto';
 import { User } from '../users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +10,7 @@ import { Repository } from 'typeorm';
 import { Comment } from '../comments/entities/comment.entity';
 import { ChildComment } from './entities/child-comment.entity';
 import dayjs from 'dayjs';
+import { UpdateChildCommentDto } from './dto/update-child-comment.dto';
 
 @Injectable()
 export class ChildCommentsService {
@@ -32,8 +37,10 @@ export class ChildCommentsService {
     if (!comment) {
       throw new BadRequestException('invalid Comment');
     }
+
     const createdAtFormat = dayjs().format('DD/MM/YYYY [-] HH[:]mm');
     const childComment = new ChildComment();
+    const timeBefore = dayjs(childComment.createdAt).fromNow();
     childComment.content = content;
     childComment.user = user;
     childComment.comment = comment;
@@ -42,9 +49,11 @@ export class ChildCommentsService {
     return {
       id: childComment.id,
       content: childComment.content,
-      createdAtFormat,
+      createAt: createdAtFormat,
+      timeBefore,
       likeCount: 0,
       isLiked: false,
+      isAuthor: true,
       user: {
         id: childComment.user.id,
         username: childComment.user.username,
@@ -53,5 +62,46 @@ export class ChildCommentsService {
         avatarColor: childComment.user.avatarColor,
       },
     };
+  }
+
+  async remove(id: string, userId: string) {
+    const childComment = await this.childCommentRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+    if (!childComment) {
+      throw new BadRequestException('Child comment was not found');
+    }
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('User was not found');
+    }
+    if (user.role !== 'ADMIN') {
+      if (childComment.user.id !== userId) {
+        throw new ForbiddenException('Forbidden Exception');
+      }
+    }
+    await this.childCommentRepository.delete(id);
+    return { deleted: true, id: id };
+  }
+
+  async update(updateChildCommentDto: UpdateChildCommentDto, userId: string) {
+    const { id, content } = updateChildCommentDto;
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('User was not found');
+    }
+    const childComment = await this.childCommentRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+    if (!childComment) {
+      throw new BadRequestException('Child comment was not found');
+    }
+    if (childComment.user.id !== userId) {
+      throw new ForbiddenException('Forbidden Exception');
+    }
+    await this.childCommentRepository.update(id, { content: content });
+    return { id, content };
   }
 }
