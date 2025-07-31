@@ -5,6 +5,7 @@ import { useHasMounted } from "@/utils/customHook";
 import {
     CheckCircleFilled,
     ClockCircleOutlined,
+    LoadingOutlined,
     SmileOutlined,
     SolutionOutlined,
     UserOutlined,
@@ -22,6 +23,7 @@ interface PropsModalActive {
 const ModalActive = (props: PropsModalActive) => {
     const [current, setCurrent] = useState(0);
     const [userId, setUserId] = useState("");
+    const [isSending, setIsSending] = useState(false);
     const [form] = Form.useForm();
     const { isModalOpen, setIsModalOpen, userEmail, usernameModal } = props;
     const hasMounted = useHasMounted();
@@ -32,6 +34,7 @@ const ModalActive = (props: PropsModalActive) => {
     }, [usernameModal, userEmail, form]);
 
     const onFinishStep0 = async (values: IResendCode) => {
+        setIsSending(true);
         const res = await postResendCode(values);
         if (res?.data) {
             setUserId(res?.data?.id);
@@ -45,6 +48,7 @@ const ModalActive = (props: PropsModalActive) => {
                 "Lỗi không xác định, vui lòng thông báo cho quản trị viên"
             );
         }
+        setIsSending(false);
     };
     const onFinishStep1 = async (values: IVerifyAccount) => {
         const { code } = values;
@@ -152,9 +156,10 @@ const ModalActive = (props: PropsModalActive) => {
                             </Form.Item>
 
                             <Form.Item>
-                                <Button type="primary" htmlType="submit">
+                                <Button type="primary" htmlType="submit" disabled={isSending} style={{marginRight: "10px"}}>
                                     Gửi mã
                                 </Button>
+                                {isSending &&  <LoadingOutlined />}
                             </Form.Item>
                         </Form>
                     </>
@@ -192,8 +197,7 @@ const ModalActive = (props: PropsModalActive) => {
                                         color: "#1d39c4",
                                     }}
                                 >
-                                    Nếu không thấy email, hãy kiểm tra cả mục{" "}
-                                    <b>Spam</b> hoặc <b>Quảng cáo</b>.
+                                    Nếu không thấy email, hãy kiểm tra cả mục <b>Spam</b> hoặc <b>Quảng cáo</b>.
                                 </span>
                             </span>
                         </div>

@@ -32,8 +32,6 @@ const ModalDeleteComment = (props: ModalProps) => {
 
     const deleteTypeChildComment = async () => {
         const res = await deleteChildComment(id);
-        console.log("check res delete child comment", res);
-        console.log('check id', id)
         if (res.data) {
             setIsShow(false);
             handleDeleteComment(id);
