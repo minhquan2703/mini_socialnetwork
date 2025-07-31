@@ -11,6 +11,8 @@ import { ChildComment } from '../child-comments/entities/child-comment.entity';
 import { UploadsService } from '../uploads/uploads.service';
 import { Upload } from '../uploads/entities/upload.entity';
 import { CloudinaryService } from '@/commons/services/cloudinary.service';
+import { UsersModule } from '../users/users.module';
+import { Report } from '../reports/entities/report.entity';
 
 @Module({
   imports: [
@@ -21,9 +23,12 @@ import { CloudinaryService } from '@/commons/services/cloudinary.service';
       Comment,
       ChildComment,
       Upload,
+      Report,
     ]),
+    UsersModule,
   ],
   controllers: [PostsController],
   providers: [PostsService, CommentsService, UploadsService, CloudinaryService],
+  exports: [PostsService],
 })
 export class PostsModule {}

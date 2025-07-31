@@ -7,11 +7,10 @@ import { useState } from "react";
 import ModalForgotPassword from "./modal.forgotpass";
 import { toast } from "sonner";
 import ModalActive from "./modal.active";
-import { signIn } from "next-auth/react";
 
 interface modalLogin {
     username: string;
-    password: string
+    password: string;
 }
 
 const Login = () => {
@@ -25,9 +24,8 @@ const Login = () => {
         setUserEmail("");
         setUsernameModal("");
         toast.promise(
-            signIn("credentials", { username, password, redirect: false}).then((res) => {
-                console.log('check res login', res)
-                if (res?.error === "ActiveAccountError") {
+            authenticate(username, password).then((res) => {
+                if (+res?.code === 2) {
                     setIsModalOpen(true);
                     setUsernameModal(username);
                     setUserEmail(username);
@@ -45,8 +43,8 @@ const Login = () => {
                         } else {
                             window.location.href = "/";
                         }
-                    } catch (error) {
-                        console.error("Error getting session:", error);
+                    } catch {
+                        toast.error("Đã có lỗi xảy ra: ");
                         window.location.href = "/";
                     }
                 }, 1000);
@@ -59,7 +57,6 @@ const Login = () => {
             }
         );
     };
-
 
     return (
         <>

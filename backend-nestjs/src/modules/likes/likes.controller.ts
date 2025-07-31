@@ -2,6 +2,7 @@ import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { LikesService } from './likes.service';
 import { CreateLikeDto } from './dto/create-like.dto';
 import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
+import { SkipThrottle } from '@nestjs/throttler';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -14,6 +15,7 @@ export class LikesController {
   constructor(private readonly likesService: LikesService) {}
 
   @Post('toggle')
+  @SkipThrottle({ default: true })
   @UseGuards(JwtAuthGuard)
   async toggleLike(
     @Body() createLikeDto: CreateLikeDto,

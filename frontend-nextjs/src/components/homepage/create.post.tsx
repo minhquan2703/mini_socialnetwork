@@ -59,7 +59,6 @@ const CreatePostForm = (props: HomePageProps) => {
             }
         });
         const res = await postNewPost(data);
-        console.log('check res', res)
         if (handlePostCreated && res?.data) {
             setNewPost("");
             setFileList([]);

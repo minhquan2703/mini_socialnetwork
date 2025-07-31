@@ -32,33 +32,41 @@ const ModalActive = (props: PropsModalActive) => {
     }, [usernameModal, userEmail, form]);
 
     const onFinishStep0 = async (values: IResendCode) => {
-        const res = await postResendCode(values)
+        const res = await postResendCode(values);
         if (res?.data) {
-            setUserId(res?.data?.id)
+            setUserId(res?.data?.id);
             setCurrent(1);
-        } else if(res?.statusCode === 429) {
-            toast.error("Thời gian chờ để gửi lại mail là 90 giây");
-        }else{
-            toast.error(res?.message)
+        } else if (+res.statusCode === 429) {
+            toast.error(res.message);
+        } else if (res.message === "Invalid email") {
+            toast.error("Địa chỉ email không hợp lệ");
+        } else {
+            toast.error(
+                "Lỗi không xác định, vui lòng thông báo cho quản trị viên"
+            );
         }
     };
     const onFinishStep1 = async (values: IVerifyAccount) => {
-        const { code } = values
+        const { code } = values;
         const payload: IVerifyAccount = {
             id: userId,
-            code: code.trim()
-        }
-        const res = await postAuthVerifyAccount(payload)
+            code: code.trim(),
+        };
+        const res = await postAuthVerifyAccount(payload);
         if (res?.data) {
             setCurrent(2);
+        } else if (res.message === "Invalid code") {
+            toast.error("Mã xác thực không hợp lệ");
         } else {
-            toast.error(res.message);
+            toast.error(
+                "Lỗi không xác định, vui lòng thông báo cho quản trị viên"
+            );
         }
     };
-    const resetModal = () =>{
+    const resetModal = () => {
         setIsModalOpen(false);
         setCurrent(0);
-    }
+    };
     if (!hasMounted) return <></>;
 
     return (
@@ -99,7 +107,8 @@ const ModalActive = (props: PropsModalActive) => {
                                 margin: "24px 0",
                                 padding: "18px 24px",
                                 borderRadius: 14,
-                                background: "linear-gradient(90deg,#fffbe6 60%,#ffe58f 100%)",
+                                background:
+                                    "linear-gradient(90deg,#fffbe6 60%,#ffe58f 100%)",
                                 boxShadow: "0 2px 12px 0 #ffecb540",
                                 display: "flex",
                                 alignItems: "center",
@@ -109,10 +118,14 @@ const ModalActive = (props: PropsModalActive) => {
                                 fontWeight: 500,
                             }}
                         >
-                            <ClockCircleOutlined style={{ fontSize: 24, color: "#faad14" }} />
+                            <ClockCircleOutlined
+                                style={{ fontSize: 24, color: "#faad14" }}
+                            />
                             <span>
-                                Tài khoản <b>chưa xác thực</b> sẽ bị xoá sau <b>10 phút</b> kể từ lúc đăng ký. 
-                                Thời gian này sẽ được <b>đặt lại</b> sau khi gửi lại mã xác thực
+                                Tài khoản <b>chưa xác thực</b> sẽ bị xoá sau{" "}
+                                <b>10 phút</b> kể từ lúc đăng ký. Thời gian này
+                                sẽ được <b>đặt lại</b> sau khi gửi lại mã xác
+                                thực
                             </span>
                         </div>
                         <Form
@@ -126,18 +139,17 @@ const ModalActive = (props: PropsModalActive) => {
                                 <Input disabled value={usernameModal} />
                             </Form.Item>
                             <Form.Item
-                            label="Địa chỉ email"
-                            name="email"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng không bỏ trống!",
-                                },
-                            ]}
+                                label="Địa chỉ email"
+                                name="email"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Vui lòng không bỏ trống!",
+                                    },
+                                ]}
                             >
-                            <Input placeholder="Địa chỉ email đã đăng ký"/>
+                                <Input placeholder="Địa chỉ email đã đăng ký" />
                             </Form.Item>
-
 
                             <Form.Item>
                                 <Button type="primary" htmlType="submit">
@@ -154,7 +166,8 @@ const ModalActive = (props: PropsModalActive) => {
                                 margin: "24px 0",
                                 padding: "18px 24px",
                                 borderRadius: 14,
-                                background: "linear-gradient(90deg,#f0f5ff 60%,#e6f7ff 100%)",
+                                background:
+                                    "linear-gradient(90deg,#f0f5ff 60%,#e6f7ff 100%)",
                                 boxShadow: "0 2px 12px 0 #b5e3fa40",
                                 display: "flex",
                                 alignItems: "center",
@@ -165,12 +178,22 @@ const ModalActive = (props: PropsModalActive) => {
                                 minHeight: 64,
                             }}
                         >
-                            <SolutionOutlined style={{ fontSize: 24, color: "#1890ff" }} />
+                            <SolutionOutlined
+                                style={{ fontSize: 24, color: "#1890ff" }}
+                            />
                             <span>
-                                Vui lòng kiểm tra email của bạn để lấy <b>mã xác thực</b> và nhập vào ô bên dưới.
+                                Vui lòng kiểm tra email của bạn để lấy{" "}
+                                <b>mã xác thực</b> và nhập vào ô bên dưới.
                                 <br />
-                                <span style={{ fontWeight: 400, fontSize: 15, color: "#1d39c4" }}>
-                                    Nếu không thấy email, hãy kiểm tra cả mục <b>Spam</b> hoặc <b>Quảng cáo</b>.
+                                <span
+                                    style={{
+                                        fontWeight: 400,
+                                        fontSize: 15,
+                                        color: "#1d39c4",
+                                    }}
+                                >
+                                    Nếu không thấy email, hãy kiểm tra cả mục{" "}
+                                    <b>Spam</b> hoặc <b>Quảng cáo</b>.
                                 </span>
                             </span>
                         </div>
@@ -203,22 +226,41 @@ const ModalActive = (props: PropsModalActive) => {
                 {current === 2 && (
                     <>
                         <div
-                        style={{
-                            margin: "32px 0 16px 0",
-                            padding: "24px 0",
-                            borderRadius: 14,
-                            background: "linear-gradient(90deg,#f0f5ff 60%,#e6f7ff 100%)",
-                            boxShadow: "0 2px 12px 0 #b5e3fa40",
-                            alignItems: "center",
-                            textAlign: "center",
-                        }}
+                            style={{
+                                margin: "32px 0 16px 0",
+                                padding: "24px 0",
+                                borderRadius: 14,
+                                background:
+                                    "linear-gradient(90deg,#f0f5ff 60%,#e6f7ff 100%)",
+                                boxShadow: "0 2px 12px 0 #b5e3fa40",
+                                alignItems: "center",
+                                textAlign: "center",
+                            }}
                         >
-                        <CheckCircleFilled style={{ color: "#1890ff", fontSize: 30, marginBottom: 12 }}/>
-                            <p style={{ fontWeight: 400, fontSize: 16, color: "#0958d9" }}>
-                            Bạn đã kích hoạt tài khoản thành công.<br />Chúc bạn trải nghiệm vui vẻ trên mạng xã hội!
+                            <CheckCircleFilled
+                                style={{
+                                    color: "#1890ff",
+                                    fontSize: 30,
+                                    marginBottom: 12,
+                                }}
+                            />
+                            <p
+                                style={{
+                                    fontWeight: 400,
+                                    fontSize: 16,
+                                    color: "#0958d9",
+                                }}
+                            >
+                                Bạn đã kích hoạt tài khoản thành công.
+                                <br />
+                                Chúc bạn trải nghiệm vui vẻ trên mạng xã hội!
                             </p>
                         </div>
-                        <Button type="primary" htmlType="submit" onClick={() => setIsModalOpen(false)}>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            onClick={() => setIsModalOpen(false)}
+                        >
                             Đóng
                         </Button>
                     </>

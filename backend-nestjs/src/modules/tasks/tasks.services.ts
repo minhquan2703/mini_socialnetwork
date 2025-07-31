@@ -14,22 +14,22 @@ export class TasksService {
   ) {}
 
   //chạy mỗi 1 phút
-  @Cron('* * * * *')
-  async handleDeleteExpiredUsers() {
-    const now = new Date();
+  // @Cron('* * * * *')
+  // async handleDeleteExpiredUsers() {
+  //   const now = new Date();
 
-    const expiredUsers = await this.userRepository.find({
-      where: {
-        isActive: false,
-        codeExpired: LessThan(now),
-      },
-    });
+  //   const expiredUsers = await this.userRepository.find({
+  //     where: {
+  //       isActive: false,
+  //       codeExpired: LessThan(now),
+  //     },
+  //   });
 
-    if (expiredUsers.length > 0) {
-      for (const user of expiredUsers) {
-        await this.userRepository.delete(user.id);
-        this.logger.warn(`Đã xoá user chưa xác thực: ${user.email}`);
-      }
-    }
-  }
+  //   if (expiredUsers.length > 0) {
+  //     for (const user of expiredUsers) {
+  //       await this.userRepository.delete(user.id);
+  //       this.logger.warn(`Đã xoá user chưa xác thực: ${user.email}`);
+  //     }
+  //   }
+  // }
 }

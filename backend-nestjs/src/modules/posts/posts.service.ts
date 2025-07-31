@@ -12,6 +12,8 @@ import dayjs from 'dayjs';
 import { validate as isUuid } from 'uuid';
 import { UploadsService } from '../uploads/uploads.service';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { UsersService } from '../users/users.service';
+import _ from 'lodash';
 
 @Injectable()
 export class PostsService {
@@ -27,7 +29,15 @@ export class PostsService {
     @InjectRepository(Comment)
     private commentsRepository: Repository<Comment>,
     private uploadsService: UploadsService,
+    private userService: UsersService,
   ) {}
+  async findPostById(id: string) {
+    const post = await this.postRepository.findOne({ where: { id: id } });
+    if (!post) {
+      throw new BadRequestException('Post was not found');
+    }
+    return post;
+  }
   async createPost(
     createPostDto: CreatePostDto,
     files: Express.Multer.File[],
@@ -109,7 +119,7 @@ export class PostsService {
     const totalPages = Math.ceil(totalItems / pageSize);
 
     const data = await this.postRepository.find({
-      where: filter,
+      where: { ...filter, isDeleted: false },
       take: pageSize,
       skip: skip,
       order: { createdAt: 'DESC', ...sort },
@@ -181,11 +191,10 @@ export class PostsService {
         };
       }),
     );
-
-    return { results, totalPages, current };
+    const randomResults = _.shuffle(results);
+    return { results: randomResults, totalPages, current };
   }
 
-  // xoá 1 bài viết
   async remove(id: string, userId: string) {
     if (!isUuid(id) || !isUuid(userId)) {
       throw new BadRequestException('ID không đúng định dạng');
@@ -210,7 +219,7 @@ export class PostsService {
     if (!isAuthor && !isAdmin) {
       throw new BadRequestException('Bạn không có quyền xoá bài viết này');
     }
-    // Xóa tất cả uploads liên quan
+    //xóa tất cả uploads liên quan
     if (post.uploads) {
       for (const upload of post.uploads) {
         await this.uploadsService.deleteUpload(upload.id);
@@ -221,6 +230,19 @@ export class PostsService {
       throw new BadRequestException('có lỗi xảy ra trong quá trình xoá');
     }
     return { deleted: true };
+  }
+
+  async softDelete(id: string, userId: string) {
+    const post = await this.findPostById(id);
+    const user = await this.userService.findUserById(userId);
+    if (post.user.id !== user.id) {
+      throw new BadRequestException('Lack of authority');
+    }
+    await this.postRepository.update(post.id, { isDeleted: true });
+    return {
+      id: post.id,
+      isDeleted: post.isDeleted,
+    };
   }
 
   async update(updatePostDto: UpdatePostDto, userId: string) {

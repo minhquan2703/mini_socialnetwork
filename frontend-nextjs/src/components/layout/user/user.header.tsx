@@ -60,11 +60,11 @@ const UserHeader = () => {
                         fontFamily: "sans-serif",
                     }}
                 >
-                    Mini Social Minh Quân
+                    Nhỏ Xíu Network
                 </div>
 
                 {/* Search Bar */}
-                <div style={{ flex: 1, maxWidth: "420px", margin: "0 48px" }}>
+                {/* <div style={{ flex: 1, maxWidth: "420px", margin: "0 48px" }}>
                     <Input
                         placeholder="Tìm kiếm..."
                         prefix={<SearchOutlined />}
@@ -84,7 +84,7 @@ const UserHeader = () => {
                             },
                         }}
                     />
-                </div>
+                </div> */}
 
                 {/* Right Section */}
                 {!session?.user ? (

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -9,6 +13,8 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import aqp from 'api-query-params';
 import { ChildComment } from '../child-comments/entities/child-comment.entity';
+import { UploadsService } from '../uploads/uploads.service';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Injectable()
 export class CommentsService {
@@ -21,6 +27,7 @@ export class CommentsService {
     private postRepository: Repository<Post>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private uploadsService: UploadsService,
   ) {}
 
   async create(createCommentDto: CreateCommentDto, userId: string) {
@@ -54,6 +61,7 @@ export class CommentsService {
       updatedAt: updatedAtFormat,
       timeBefore: timeBefore,
       likeCount: 0,
+      isAuthor: true,
       isLiked: false,
       user: {
         id: user.id,
@@ -146,7 +154,9 @@ export class CommentsService {
           ? comment.likes?.some((like) => like.user.id === userId) || false
           : undefined;
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { likes, ...commentWithoutLikes } = comment;
+        const isAuthor = userId ? comment.user.id === userId : undefined;
 
         return {
           ...commentWithoutLikes,
@@ -155,7 +165,7 @@ export class CommentsService {
           timeBefore,
           createdAt: createdAtFormat,
           updatedAt: updatedAtFormat,
-          ...(userId && { isLiked }),
+          ...(userId && { isLiked, isAuthor }),
         };
       }),
     );
@@ -180,6 +190,7 @@ export class CommentsService {
     if (filter.pageSize) delete filter.pageSize;
     let filterCommentId = commentId;
     if (filter.commentId) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       filterCommentId = filter.commentId;
       delete filter.commentId;
     }
@@ -231,7 +242,8 @@ export class CommentsService {
       const isLiked = userId
         ? childComment.likes?.some((like) => like.user.id === userId) || false
         : undefined;
-
+      const isAuthor = userId ? childComment.user.id === userId : undefined;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { likes, createdAt, updatedAt, ...childCommentClone } =
         childComment;
       return {
@@ -240,9 +252,55 @@ export class CommentsService {
         createdAtFormat,
         isLiked,
         timeBefore,
-        ...(userId && { isLiked }),
+        ...(userId && { isLiked, isAuthor }),
       };
     });
     return { result, totalPages };
+  }
+
+  async remove(id: string, userId: string) {
+    const comment = await this.commentsRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+    if (!comment) {
+      throw new BadRequestException('Comment was not found');
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('User was not found');
+    }
+
+    const isAuthor = comment.user.id === user.id;
+    const isAdmin = user.role === 'ADMIN';
+
+    if (!isAuthor || !isAdmin) {
+      throw new ForbiddenException('Forbidden Exception');
+    }
+    //xóa tất cả uploads liên quan
+    if (comment.uploads) {
+      for (const upload of comment.uploads) {
+        await this.uploadsService.deleteUpload(upload.id);
+      }
+    }
+    await this.commentsRepository.delete(id);
+    return {
+      deleted: true,
+    };
+  }
+
+  async update(updateCommentDto: UpdateCommentDto, userId: string) {
+    const { id, content } = updateCommentDto;
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('User was not found');
+    }
+    const comment = await this.commentsRepository.findOne({ where: { id } });
+    if (!comment) {
+      throw new BadRequestException('Comment was not found');
+    }
+    await this.commentsRepository.update(id, { content: content });
+    return { id, content };
   }
 }

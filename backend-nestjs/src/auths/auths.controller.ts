@@ -10,6 +10,8 @@ import {
 import {
   ActiveAuthDto,
   CreateAuthDto,
+  ForgotPasswordDTO,
+  RecoverPasswordDTO,
   VerifyAuthDto,
 } from './dto/create-auth.dto';
 import { Public, ResponseMessage } from './decorator/customize';
@@ -47,6 +49,7 @@ export class AuthsController {
 
   @Post('login')
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 1 * 60 * 1000 } })
   @UseGuards(LocalAuthGuard)
   @ResponseMessage('Fetch login')
   async handleLogin(@Request() req) {
@@ -60,8 +63,24 @@ export class AuthsController {
   }
   @Public()
   @Post('resend-active-code')
-  @Throttle({ default: { limit: 1, ttl: 1.5 * 60 * 1000 } })
+  // @Throttle({ default: { limit: 1, ttl: 1.5 * 60 * 1000 } })
   async ResendActiveCode(@Body() activeDto: ActiveAuthDto) {
     return await this.authsService.handleSendCode(activeDto);
+  }
+
+  @Public()
+  @Post('resend-recover-password')
+  // @Throttle({ default: { limit: 1, ttl: 30 * 1000 } })
+  async mailForgotPassword(@Body() forgotPasswordDTO: ForgotPasswordDTO) {
+    return await this.authsService.handleSendCodeForgotPassword(
+      forgotPasswordDTO.email,
+    );
+  }
+
+  @Public()
+  @Post('recover-password')
+  // @Throttle({ default: { limit: 1, ttl: 30 * 1000 } })
+  async recoverPassword(@Body() recoverPasswordDTO: RecoverPasswordDTO) {
+    return await this.authsService.recoverPassword(recoverPasswordDTO);
   }
 }

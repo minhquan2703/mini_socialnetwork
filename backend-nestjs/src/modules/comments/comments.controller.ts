@@ -7,6 +7,9 @@ import {
   Req,
   Query,
   Request,
+  Delete,
+  Param,
+  Put,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -14,6 +17,7 @@ import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
 import { PublicOptional } from '@/auths/decorator/customize';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
 import { AuthenticatedRequest } from '@/auths/auths.controller';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @SkipThrottle()
 @Controller('comments')
@@ -32,7 +36,7 @@ export class CommentsController {
     return this.commentsService.create(createCommentDto, userId);
   }
 
-  @Get('getallcomment-post')
+  @Get('all')
   @PublicOptional()
   async getAllCommentOfOnePost(
     @Query() query: string,
@@ -68,5 +72,22 @@ export class CommentsController {
       userId,
       commentId,
     );
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  remove(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    const userId = req.user?.id;
+    return this.commentsService.remove(id, userId);
+  }
+
+  @Put()
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Body() updateCommentDto: UpdateCommentDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user?.id;
+    return this.commentsService.update(updateCommentDto, userId);
   }
 }

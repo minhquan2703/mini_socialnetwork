@@ -21,10 +21,7 @@ const Profile = ({ image, name, avatarColor, username, id }: ProfileProps) => {
             receiverId: id,
             type: "PRIVATE",
         });
-        console.log('check res', res);
-        console.log("check res nhan tin", res);
         if (res && res.data) {
-            console.log('check res create room', res)
             router.push(`/messages/${res.data.id}`);
         } else if (res.error && res.message === "Invalid Receiver") {
             toast.error("Tự kỉ hả...");

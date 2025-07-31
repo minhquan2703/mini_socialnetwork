@@ -2,6 +2,7 @@ import { ChildComment } from '@/modules/child-comments/entities/child-comment.en
 import { Comment } from '@/modules/comments/entities/comment.entity';
 import { Like } from '@/modules/likes/entities/like.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
+import { Report } from '@/modules/reports/entities/report.entity';
 import { Room } from '@/modules/rooms/entities/room.entity';
 import { Upload } from '@/modules/uploads/entities/upload.entity';
 import {
@@ -52,6 +53,9 @@ export class User {
   @Column({ nullable: true })
   codeId!: string;
 
+  @Column({ default: false })
+  isReported: boolean;
+
   @Column({ nullable: true })
   codeExpired!: Date;
 
@@ -75,10 +79,15 @@ export class User {
   @ManyToMany(() => Room, (room) => room.users)
   rooms: Room[];
 
+  @OneToMany(() => Report, (report) => report.author)
+  authoredReports: Report[];
+
+  @OneToMany(() => Report, (report) => report.user, { onDelete: 'CASCADE' })
+  reports: Report[];
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-    roomUsers: any;
 }

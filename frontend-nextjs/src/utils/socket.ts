@@ -33,7 +33,7 @@ export const getSocket = () => {
 // Thêm socket event handlers chung
 export const setupSocketHandlers = (socket: Socket) => {
     socket.on("connect", () => {
-        console.log("Connected to server:", socket.id);
+        console.log("Connected to server");
     });
 
     socket.on("connect_error", (error) => {

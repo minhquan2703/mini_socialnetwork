@@ -44,7 +44,7 @@ const MessagesHeader = (props: any) => {
                         fontWeight: "700",
                     }}
                 >
-                    Mini Social
+                    Nhỏ Xíu Network
                 </div>
                 <Dropdown menu={{ items }}>
                     <a

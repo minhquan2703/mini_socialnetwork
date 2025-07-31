@@ -7,7 +7,7 @@ import { SessionProvider } from "next-auth/react";
 // const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "Mini Social",
+    title: "Nhỏ Xíu Network",
     description: "Dự án cá nhân của Minh Quân",
     // viewport: "initial-scale=1, width=device-width",
 };

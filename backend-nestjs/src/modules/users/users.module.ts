@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Module, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,7 +10,7 @@ import { CloudinaryService } from '@/commons/services/cloudinary.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Upload]),
+    TypeOrmModule.forFeature([User, Upload, Post]),
     forwardRef(() => AuthsModule),
   ],
   controllers: [UsersController],

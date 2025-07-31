@@ -62,7 +62,6 @@ const UserUpdate = (props: IProps) => {
                     name,
                     phone: phone || "",
                 });
-                console.log('check res upate', res)
                 if (res?.data) {
                     handleCloseUpdateModal();
                     message.success("Update user succeed");

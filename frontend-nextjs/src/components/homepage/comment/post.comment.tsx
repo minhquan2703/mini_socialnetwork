@@ -72,7 +72,6 @@ const CommentPost = ({
         })();
 
         likeRequestCache.current.set(commentId, likePromise);
-        console.log('check handlelikecomment promise', likePromise)
         return likePromise;
     }, []);
 
@@ -102,6 +101,7 @@ const CommentPost = ({
                     comments={comments}
                     handleLikeComment={handleLikeComment}
                     setShowModal={setShowModal}
+                    setComments={setComments}
                 />
             ) : (
                 <div

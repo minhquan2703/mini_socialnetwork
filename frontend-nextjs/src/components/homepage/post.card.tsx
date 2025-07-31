@@ -36,15 +36,15 @@ const PostCard = (props: PostCardProps) => {
     ];
     const authorActions: MenuProps["items"] = [
         {
+            key: "update",
+            label: "Chỉnh sửa bài viết",
+            onClick: () => handleUpdatePost(),
+        },
+        {
             key: "delete",
             label: "Xoá bài viết",
             danger: true,
             onClick: () => handleDeletePost?.(post.id),
-        },
-        {
-            key: "update",
-            label: "Chỉnh sửa bài viết",
-            onClick: () => handleUpdatePost(),
         },
     ];
     const [localIsLiked, setLocalIsLiked] = useState(post.isLiked);
@@ -83,7 +83,6 @@ const PostCard = (props: PostCardProps) => {
         post.id,
     ]);
 
-    console.log('rendered component postcard');
 
     const handleUpdatePost = () => {
         setIsUpdating(true);
@@ -143,8 +142,8 @@ const PostCard = (props: PostCardProps) => {
                                     cursor: "pointer",
                                 }}
                             >
-                                {post.user.name?.charAt(0) ||
-                                    post.user.username?.charAt(0)}
+                                {post.user.name?.charAt(0).toUpperCase() ||
+                                    post.user.username?.charAt(0).toUpperCase()}
                             </Avatar>
                         </Tooltip>
 

@@ -1,6 +1,7 @@
 import { ChildComment } from '@/modules/child-comments/entities/child-comment.entity';
 import { Like } from '@/modules/likes/entities/like.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
+import { Report } from '@/modules/reports/entities/report.entity';
 import { Upload } from '@/modules/uploads/entities/upload.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import {
@@ -18,6 +19,12 @@ export class Comment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ default: false })
+  isDeleted: boolean;
+
+  @Column({ type: 'text' })
+  content: string;
+
   @ManyToOne(() => Post, (post) => post.comments, { onDelete: 'CASCADE' })
   post: Post;
 
@@ -27,16 +34,16 @@ export class Comment {
   @OneToMany(() => Like, (like) => like.comment, { onDelete: 'CASCADE' })
   likes: Like[];
 
+  @OneToMany(() => Report, (report) => report.comment, { onDelete: 'CASCADE' })
+  reports: Report[];
+
   @OneToMany(() => ChildComment, (childComment) => childComment.comment, {
     onDelete: 'CASCADE',
   })
   childComments: ChildComment[];
 
   @OneToMany(() => Upload, (upload) => upload.comment, { onDelete: 'CASCADE' })
-  upload: Upload[];
-
-  @Column({ type: 'text' })
-  content: string;
+  uploads: Upload[];
 
   @CreateDateColumn()
   createdAt: Date;
