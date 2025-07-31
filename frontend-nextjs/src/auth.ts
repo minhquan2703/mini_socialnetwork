@@ -2,10 +2,10 @@ export const runtime = 'nodejs';
 
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { ActiveAccountError, InvalidEmailPasswordError } from "./utils/errors";
 
 import { IUser } from "./types/next-auth";
 import { sendRequest } from "./utils/apiAxios";
+import { ActiveAccountError, InvalidEmailPasswordError, RateLimitError } from "./utils/errors";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     session: {
@@ -26,6 +26,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         password: credentials.password,
                     },
                 });
+                console.log("check res login", res)
                 if (+res.statusCode === 201) {
                     return {
                         id: res.data?.user?.id,
@@ -41,7 +42,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     throw new InvalidEmailPasswordError();
                 } else if (+res.statusCode === 400) {
                     throw new ActiveAccountError();
-                } else {
+                } else if (+res.statusCode === 429) {
+                    throw new RateLimitError()
+                }
+                else {
                     throw new Error("Internal server error");
                 }
             },

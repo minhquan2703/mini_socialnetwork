@@ -25,29 +25,38 @@ const Login = () => {
         setUsernameModal("");
         toast.promise(
             authenticate(username, password).then((res) => {
-                if (+res?.code === 2) {
-                    setIsModalOpen(true);
-                    setUsernameModal(username);
-                    setUserEmail(username);
-                    throw new Error(res.error);
+                switch (+res?.code) {
+                    case 1:
+                        throw new Error("tài khoản hoặc mật khẩu không hợp lệ");
+                    case 2:
+                        setIsModalOpen(true);
+                        setUsernameModal(username);
+                        setUserEmail(username);
+                        throw new Error("Tài khoản chưa được kích hoạt");
+                    case 3:
+                        throw new Error(
+                            "Bạn đã nhập sai quá 5 lần, hãy thử lại sau 1 phút"
+                        );
+                    case 0:
+                        throw new Error("Lỗi hệ thống");
+                    default:
+                        setTimeout(async () => {
+                            try {
+                                const response = await fetch(
+                                    "/api/auth/session"
+                                );
+                                const session = await response.json();
+                                if (session?.user?.role === "ADMIN") {
+                                    window.location.href = "/dashboard";
+                                } else {
+                                    window.location.href = "/";
+                                }
+                            } catch {
+                                toast.error("Đã có lỗi xảy ra: ");
+                                window.location.href = "/";
+                            }
+                        }, 1000);
                 }
-                if (res.error) {
-                    throw new Error(res.error);
-                }
-                setTimeout(async () => {
-                    try {
-                        const response = await fetch("/api/auth/session");
-                        const session = await response.json();
-                        if (session?.user?.role === "ADMIN") {
-                            window.location.href = "/dashboard";
-                        } else {
-                            window.location.href = "/";
-                        }
-                    } catch {
-                        toast.error("Đã có lỗi xảy ra: ");
-                        window.location.href = "/";
-                    }
-                }, 1000);
             }),
 
             {
