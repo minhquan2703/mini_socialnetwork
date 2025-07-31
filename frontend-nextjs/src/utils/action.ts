@@ -1,4 +1,4 @@
-'use server';
+"use server";
 import { auth, signIn } from "@/auth";
 import { revalidateTag } from "next/cache";
 import { sendRequest } from "./api";
@@ -11,17 +11,23 @@ export async function authenticate(username: string, password: string) {
             // callbackUrl: '/',
             redirect: false,
         });
+        console.log(">>> check r: ", r);
         return r;
     } catch (error) {
         if ((error as any).name === "InvalidEmailPasswordError") {
             return {
-                error: (error as any).type,
+                error: (error as any).name,
                 code: 1,
             };
         } else if ((error as any).name === "ActiveAccountError") {
             return {
-                error: (error as any).type,
+                error: (error as any).name,
                 code: 2,
+            };
+        } else if ((error as any).name === "RateLimitError") {
+            return {
+                error: (error as any).name,
+                code: 3,
             };
         } else {
             return {
@@ -40,11 +46,11 @@ export const handleCreateUserAction = async (data: any) => {
         headers: {
             Authorization: `Bearer ${session?.user?.access_token}`,
         },
-        body: { ...data }
-    })
-    revalidateTag("list-users")
+        body: { ...data },
+    });
+    revalidateTag("list-users");
     return res;
-}
+};
 
 export const handleUpdateUserAction = async (data: any) => {
     const session = await auth();
@@ -54,11 +60,11 @@ export const handleUpdateUserAction = async (data: any) => {
         headers: {
             Authorization: `Bearer ${session?.user?.access_token}`,
         },
-        body: { ...data }
-    })
-    revalidateTag("list-users")
+        body: { ...data },
+    });
+    revalidateTag("list-users");
     return res;
-}
+};
 
 export const handleDeleteUserAction = async (id: any) => {
     const session = await auth();
@@ -68,8 +74,8 @@ export const handleDeleteUserAction = async (id: any) => {
         headers: {
             Authorization: `Bearer ${session?.user?.access_token}`,
         },
-    })
+    });
 
-    revalidateTag("list-users")
+    revalidateTag("list-users");
     return res;
-}
+};

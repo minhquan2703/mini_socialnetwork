@@ -10,8 +10,20 @@ export class CustomAuthError extends AuthError {
   }
 }
 export class InvalidEmailPasswordError extends AuthError {
-  static type = "Tên tài khoản hoặc mật khẩu không hợp lệ"
+  constructor() {
+    super();
+    this.name = "InvalidEmailPasswordError";
+  }
 }
 export class ActiveAccountError extends AuthError {
-  static type = "Tài khoản chưa được kích hoạt"
+  constructor() {
+    super();
+    this.name = "ActiveAccountError";
+  }
+}
+export class RateLimitError extends AuthError {
+  constructor() {
+    super();
+    this.name = "RateLimitError";
+  }
 }

@@ -275,7 +275,7 @@ export class CommentsService {
     const isAuthor = comment.user.id === user.id;
     const isAdmin = user.role === 'ADMIN';
 
-    if (!isAuthor || !isAdmin) {
+    if (!isAuthor && !isAdmin) {
       throw new ForbiddenException('Forbidden Exception');
     }
     //xóa tất cả uploads liên quan
