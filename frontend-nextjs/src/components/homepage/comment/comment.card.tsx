@@ -10,6 +10,7 @@ import { ListCommentProps } from "./list.comment";
 import ModalDeleteComment from "../modals/modal.delete.comment";
 import TextArea from "antd/es/input/TextArea";
 import ModalUpdateComment from "../modals/modal.update.comment";
+import ModalReport from "../modals/modal.report";
 
 interface CommentCardProps extends ListCommentProps {
     comment: IComment;
@@ -17,7 +18,7 @@ interface CommentCardProps extends ListCommentProps {
 }
 const CommentCard = (props: CommentCardProps) => {
     const moreActions: MenuProps["items"] = [
-        { key: "1", label: "Báo cáo", danger: true },
+        { key: "1", label: "Báo cáo", danger: true, onClick: () => setIsShowReportModal(true) },
         // { key: "2", label: "Theo dõi" },
     ];
     const authorActions: MenuProps["items"] = [
@@ -45,6 +46,7 @@ const CommentCard = (props: CommentCardProps) => {
     const [isUpdating, setIsUpdating] = useState<boolean>(false);
     const [contentUpdate, setContentUpdate] = useState("");
     const [content, setContent] = useState(comment.content);
+    const [isShowReportModal, setIsShowReportModal] = useState<boolean>(false);
     const [, startTransition] = useTransition();
     const session = useSession();
     const handleOptimisticLike = useCallback(() => {
@@ -376,6 +378,14 @@ const CommentCard = (props: CommentCardProps) => {
                     setIsShowModalUpdate={setIsShowModalUpdate}
                     setContent={setContent}
                     setIsUpdating={setIsUpdating}
+                />
+            )}
+            {isShowReportModal && (
+                <ModalReport
+                    type="COMMENT"
+                    id={comment.id}
+                    isShow={isShowReportModal}
+                    setIsShow={setIsShowReportModal}
                 />
             )}
         </>

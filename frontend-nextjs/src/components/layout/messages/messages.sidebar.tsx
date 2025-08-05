@@ -69,7 +69,6 @@ const MessagesSideBar = () => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        marginBottom: 16,
                     }}
                 >
                     <Link href="/">
@@ -79,14 +78,7 @@ const MessagesSideBar = () => {
                             style={{ padding: "4px 8px" }}
                         />
                     </Link>
-                    <h2
-                        style={{
-                            margin: 0,
-                            fontSize: "20px",
-                            fontWeight: 600,
-                            flex: 1,
-                            textAlign: "center",
-                        }}
+                    <h2 className="m-0 fs-20 fw-600 flex-1 textalign-center"
                     >
                         Tin nhắn
                     </h2>
@@ -122,7 +114,7 @@ const MessagesSideBar = () => {
                 <Menu
                     mode="horizontal"
                     defaultSelectedKeys={["all-messages"]}
-                    items={menuItems}
+                    items={menuItems}   
                     style={{
                         border: "none",
                         justifyContent: "space-around",

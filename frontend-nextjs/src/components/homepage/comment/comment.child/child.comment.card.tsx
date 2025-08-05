@@ -10,6 +10,8 @@ import { ToggleLikeResponse } from "@/types/like.type";
 import TextArea from "antd/es/input/TextArea";
 import ModalUpdateComment from "../../modals/modal.update.comment";
 import ModalDeleteComment from "../../modals/modal.delete.comment";
+import ModalReport from "../../modals/modal.report";
+import ModalLoginRequire from "../../modals/modal.loginrequire";
 
 interface ChildCommentCardProps {
     childComment: IChildComment;
@@ -34,11 +36,13 @@ const ChildCommentCard = ({
     const [isPending, startTransition] = useTransition();
     const [isShowModalDelete, setIsShowModalDelete] = useState<boolean>(false);
     const [isShowModalUpdate, setIsShowModalUpdate] = useState<boolean>(false);
-    const [content, setContent] = useState<string>(childComment.content)
+    const [isShowReportModal, setIsShowReportModal] = useState<boolean>(false);
+    const [isShowModalLoginRequire, setIsShowModalLoginRequire] = useState<boolean>(false);
+    const [content, setContent] = useState<string>(childComment.content);
     const session = useSession();
     const handleOptimisticLike = useCallback(() => {
         if (!session?.user) {
-            // setShowModal(true);
+            setIsShowModalLoginRequire(true);
             return;
         }
         // Immediate UI update
@@ -56,7 +60,7 @@ const ChildCommentCard = ({
         });
     }, [localIsLiked, setLocalLikeCount, childComment.id, handleLike]);
     const moreActions: MenuProps["items"] = [
-        { key: "1", label: "Báo cáo", danger: true },
+        { key: "1", label: "Báo cáo", danger: true, onClick: () => setIsShowReportModal(true) },
         // { key: "2", label: "Theo dõi" },
     ];
     const authorActions: MenuProps["items"] = [
@@ -310,7 +314,21 @@ const ChildCommentCard = ({
                     setIsShow={setIsShowModalDelete}
                     handleDeleteComment={handleDeleteChildComment}
                 />
-            )}          
+            )}
+            {isShowReportModal && (
+                <ModalReport
+                    type="CHILDCOMMENT"
+                    id={childComment.id}
+                    isShow={isShowReportModal}
+                    setIsShow={setIsShowReportModal}
+                />
+            )}
+            {isShowModalLoginRequire && (
+            <ModalLoginRequire
+                showModal={isShowModalLoginRequire}
+                setShowModal={setIsShowModalLoginRequire}
+            />
+            )}
         </>
     );
 };

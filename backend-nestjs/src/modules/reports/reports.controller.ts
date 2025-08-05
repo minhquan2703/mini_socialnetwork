@@ -14,8 +14,10 @@ import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
 import { JwtAuthGuard } from '@/auths/passport/jwt-auth.guard';
 import { AuthenticatedRequest } from '@/auths/auths.controller';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @Controller('reports')
+@SkipThrottle()
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 

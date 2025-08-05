@@ -1,5 +1,6 @@
 import { Comment } from '@/modules/comments/entities/comment.entity';
 import { Like } from '@/modules/likes/entities/like.entity';
+import { Report } from '@/modules/reports/entities/report.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import {
   Entity,
@@ -21,6 +22,11 @@ export class ChildComment {
 
   @OneToMany(() => Like, (like) => like.childComment, { onDelete: 'CASCADE' })
   likes: Like[];
+
+  @OneToMany(() => Report, (report) => report.childComment, {
+    onDelete: 'CASCADE',
+  })
+  reports: Report[];
 
   @ManyToOne(() => Comment, (comment) => comment.childComments, {
     onDelete: 'CASCADE',

@@ -15,6 +15,7 @@ import { IPost } from "@/types/post.type";
 import { HomePageProps } from "./homepage";
 import TextArea from "antd/es/input/TextArea";
 import ModalConfirmUpdate from "./modals/modal.confirm.update";
+import ModalReport from "./modals/modal.report";
 
 interface PostCardProps extends HomePageProps {
     post: IPost;
@@ -32,7 +33,12 @@ const PostCard = (props: PostCardProps) => {
         // { key: "1", label: "Lưu bài viết" },
         // { key: "2", label: "Sao chép liên kết" },
         // { type: "divider" },
-        { key: "report", label: "Báo cáo", danger: true },
+        {
+            key: "report",
+            label: "Báo cáo",
+            danger: true,
+            onClick: () => setIsShowReportModal(true),
+        },
     ];
     const authorActions: MenuProps["items"] = [
         {
@@ -55,6 +61,7 @@ const PostCard = (props: PostCardProps) => {
     const [contentUpdate, setContentUpdate] = useState("");
     const [isShowModalUpdate, setIsShowModalUpdate] = useState(false);
     const [content, setContent] = useState(post.content);
+    const [isShowReportModal, setIsShowReportModal] = useState(false);
     const session = useSession();
 
     const handleOptimisticLike = useCallback(() => {
@@ -82,7 +89,6 @@ const PostCard = (props: PostCardProps) => {
         handleLike,
         post.id,
     ]);
-
 
     const handleUpdatePost = () => {
         setIsUpdating(true);
@@ -169,18 +175,24 @@ const PostCard = (props: PostCardProps) => {
                             </div>
                         </div>
                     </div>
-                    <Dropdown
-                        menu={{
-                            items: post.isAuthor ? authorActions : moreActions,
-                        }}
-                        placement="bottomRight"
-                    >
-                        <Button
-                            type="text"
-                            icon={<MoreOutlined />}
-                            style={{ color: "#666", fontSize: "18px" }}
-                        />
-                    </Dropdown>
+                    {session?.user?.id && (
+                        <>
+                            <Dropdown
+                                menu={{
+                                    items: post.isAuthor
+                                        ? authorActions
+                                        : moreActions,
+                                }}
+                                placement="bottomRight"
+                            >
+                                <Button
+                                    type="text"
+                                    icon={<MoreOutlined />}
+                                    style={{ color: "#666", fontSize: "18px" }}
+                                />
+                            </Dropdown>
+                        </>
+                    )}
                 </div>
 
                 {/* Post Content */}
@@ -393,6 +405,14 @@ const PostCard = (props: PostCardProps) => {
                     updatedContent={contentUpdate}
                     setContent={setContent}
                     setIsUpdating={setIsUpdating}
+                />
+            )}
+            {isShowReportModal && (
+                <ModalReport
+                    type="POST"
+                    id={post.id}
+                    isShow={isShowReportModal}
+                    setIsShow={setIsShowReportModal}
                 />
             )}
         </>
