@@ -187,6 +187,8 @@ const ChatBox = (props: props) => {
                                                                     ?.avatarColor ||
                                                                 "#1890ff",
                                                             flexShrink: 0,
+                                                            color: "#000",
+                                                            fontWeight: "600",
                                                         }}
                                                     >
                                                         {name

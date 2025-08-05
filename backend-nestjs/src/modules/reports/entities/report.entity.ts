@@ -1,3 +1,4 @@
+import { ChildComment } from '@/modules/child-comments/entities/child-comment.entity';
 import { Comment } from '@/modules/comments/entities/comment.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
 import { User } from '@/modules/users/entities/user.entity';
@@ -41,6 +42,11 @@ export class Report {
     onDelete: 'CASCADE',
   })
   comment: Comment;
+
+  @ManyToOne(() => ChildComment, (childComment) => childComment.reports, {
+    onDelete: 'CASCADE',
+  })
+  childComment: ChildComment;
 
   @ManyToOne(() => Post, (post) => post.reports, { onDelete: 'CASCADE' })
   post: Post;

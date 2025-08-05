@@ -51,7 +51,7 @@ export class AuthsService {
     };
   }
 
-  async login(user: any) {
+  login(user: any) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const payload = { username: user.username, sub: user.id };
     return {

@@ -33,7 +33,7 @@ export class UploadsController {
 
   @Post('multiple')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FilesInterceptor('files', 10)) // Tối đa 10 files
+  @UseInterceptors(FilesInterceptor('files', 10)) //Tối đa 10 files
   async uploadMultiple(
     @UploadedFiles() files: Express.Multer.File[],
     @Req() req: AuthenticatedRequest,
