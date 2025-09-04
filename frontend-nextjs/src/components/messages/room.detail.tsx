@@ -19,7 +19,6 @@ import SkeletonAvatar from "antd/es/skeleton/Avatar";
 import {
     UserOutlined,
     FileTextOutlined,
-    SettingOutlined,
     BlockOutlined,
     LogoutOutlined,
     CrownOutlined,
@@ -157,7 +156,6 @@ const DetailRoom = (props: DetailRoomProps) => {
                 )
                     .charAt(0)
                     .toUpperCase(),
-                isOnline: Math.random() > 0.5,
             };
         } else if (data?.type === "GROUP") {
             return {
@@ -165,7 +163,6 @@ const DetailRoom = (props: DetailRoomProps) => {
                 image: data.avatar,
                 avatarColor: "#f0f0f0",
                 initial: (data.name || "G").charAt(0).toUpperCase(),
-                isOnline: false,
             };
         }
         return {
@@ -173,7 +170,6 @@ const DetailRoom = (props: DetailRoomProps) => {
             image: null,
             avatarColor: "#f0f0f0",
             initial: "U",
-            isOnline: false,
         };
     };
 
@@ -290,16 +286,9 @@ const DetailRoom = (props: DetailRoomProps) => {
                 variant="borderless"
                 style={{
                     textAlign: "center",
-                    // background:
-                    //     "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                     background: "rgba(255,255,255,0.2)",
                 }}
             >
-                {/* <Badge 
-                    dot={displayInfo.isOnline} 
-                    color="green" 
-                    offset={[-10, 10]}
-                > */}
                 <Avatar
                     size={80}
                     src={displayInfo.image}
@@ -325,14 +314,6 @@ const DetailRoom = (props: DetailRoomProps) => {
                 >
                     {displayInfo.name}
                 </Title>
-
-                {/* <Text style={{ color: 'rgba(255,255,255,0.8)' }}>
-                    {data.type === "PRIVATE" 
-                        ? (displayInfo.isOnline ? "Đang hoạt động" : "Không hoạt động")
-                        : `${data.users?.length || 0} thành viên`
-                    }
-                </Text> */}
-                {/* Action Buttons */}
                 {data.type === "PRIVATE" && (
                     <div
                         style={{
@@ -391,30 +372,6 @@ const DetailRoom = (props: DetailRoomProps) => {
                     </span>
                 )}
             />
-            {/* Media Preview */}
-            {/* <Card
-                title={
-                    <div
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                        }}
-                    >
-                        <PictureOutlined />
-                        <span>Ảnh & Video gần đây</span>
-                    </div>
-                }
-                size="small"
-                style={{ margin: "0", borderRadius: 0 }}
-                extra={
-                    <Button type="link" size="small">
-                        Xem tất cả
-                    </Button>
-                }
-            >
-                <MiniGallery/>
-            </Card> */}
             <ModalGallery
                 roomId={roomId}
                 isModalOpen={isShowModalGallery}

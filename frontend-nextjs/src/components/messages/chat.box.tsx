@@ -47,6 +47,7 @@ const ChatBox = (props: props) => {
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [isShowUpload, setIsShowUpload] = useState(false);
     const [isCheckingBlocked, setIsCheckingBlocked] = useState(true);
+    const blobUrls = useRef<string[]>([]);
 
     const handlePreview = async (file: UploadFile) => {
         if (!file.url && !file.preview) {
@@ -76,18 +77,16 @@ const ChatBox = (props: props) => {
             return "Cuộc trò chuyện đã bị chặn";
         }
         return "Đang kiểm tra trạng thái chặn...";
-    }   
+    };
 
-    const handleUrlFile = useCallback(
-        (file: UploadFile): string | undefined => {
-            if (file.originFileObj) {
-                const url = URL.createObjectURL(file.originFileObj as RcFile);
-                return url;
-            }
-            return undefined;
-        },
-        []
-    );
+    const handleUrlFile = useCallback((file: UploadFile) => {
+        if (!file.originFileObj) return;
+        const url = URL.createObjectURL(file.originFileObj as RcFile);
+        blobUrls.current.push(url);
+        return url;
+    }, []);
+    useEffect(() => () => { blobUrls.current.forEach(URL.revokeObjectURL); }, []);
+
 
     const uploadProps: UploadProps = {
         listType: "picture-card",
@@ -210,7 +209,7 @@ const ChatBox = (props: props) => {
             socket.off("blockOrUnBlock");
         };
     }, [socket, isConnected, roomId]);
-    const handleBlockAction = ( data: { blocked: boolean }) => {
+    const handleBlockAction = (data: { blocked: boolean }) => {
         if (data.blocked === true) {
             setIsBlocked(true);
         } else {
@@ -407,7 +406,7 @@ const ChatBox = (props: props) => {
                                     fileList={fileList}
                                     onPreview={handlePreview}
                                 >
-                                    {fileList.length > 8 ? null : uploadButton}
+                                    {fileList.length > 4 ? null : uploadButton}
                                 </Upload>
                                 {previewImage && (
                                     <Image
@@ -457,11 +456,6 @@ const ChatBox = (props: props) => {
                                                       required: true,
                                                       message: "",
                                                   },
-                                                  {
-                                                      required:
-                                                          isCheckingBlocked,
-                                                      message: "haha",
-                                                  },
                                               ]
                                             : []
                                     }
@@ -490,15 +484,17 @@ const ChatBox = (props: props) => {
                                     </Button>
                                 </Form.Item>
                             </Form>
-                        ) :                                 <div
-                                    style={{
-                                        textAlign: "center",
-                                        color: "red",
-                                        fontWeight: "bold",
-                                    }}
-                                >
-                                    {getStateBlock()}
-                                </div>}
+                        ) : (
+                            <div
+                                style={{
+                                    textAlign: "center",
+                                    color: "red",
+                                    fontWeight: "bold",
+                                }}
+                            >
+                                {getStateBlock()}
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="chatbox-detail-room">

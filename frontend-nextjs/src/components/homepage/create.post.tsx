@@ -139,7 +139,7 @@ const CreatePostForm = (props: HomePageProps) => {
                                     {...uploadProps}
                                     fileList={fileList}
                                 >
-                                    {fileList.length > 8 ? null : uploadButton}
+                                    {fileList.length > 4 ? null : uploadButton}
                                 </Dragger>
                                 {previewImage && (
                                     <Image

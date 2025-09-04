@@ -2,10 +2,9 @@
 "use client";
 import { Image, Modal, Spin } from "antd";
 import ReactPlayer from "react-player";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getFilesInRoom } from "@/services/chat.service";
 import "@/components/messages/modals/modalGallery.scss"
-import { set } from "lodash";
 
 interface PropsModalActive {
   isModalOpen: boolean;
@@ -52,7 +51,6 @@ const ModalGallery = (props: PropsModalActive) => {
     const res = await getFilesInRoom(roomId);
     if (res.data && res.statusCode === 200) {
       setMediaFiles(res.data);
-      console.log(res.data);
     } else {
       setErrorGetFiles(true);
     }
@@ -137,4 +135,4 @@ const ModalGallery = (props: PropsModalActive) => {
   );
 };
 
-export default ModalGallery;
+export default React.memo(ModalGallery);
