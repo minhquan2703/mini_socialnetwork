@@ -1,0 +1,101 @@
+/* ModalGallery.scss */
+.modal-gallery {
+  .mg-grid {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    max-height: 350px;
+    overflow-y: auto;
+  }
+
+  .mg-player {
+    margin-top: 30px;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .mg-image-card {
+    display: inline-block;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    height: 100px;
+
+    .mg-image {
+      width: 113px;
+      height: 100px;
+
+      /* Antd wraps an img with class .ant-image-img */
+      .ant-image-img {
+        width: 113px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+    }
+  }
+
+  .mg-video-thumb {
+    position: relative;
+    width: 113px;
+    height: 100px;
+    border-radius: 5px;
+    background: #222;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .mg-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .mg-play-triangle {
+      width: 0;
+      height: 0;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+      border-left: 12px solid #fff;
+      margin-left: 2px;
+      display: inline-block;
+    }
+  }
+
+  .mg-duration {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1;
+  }
+
+  .mg-error {
+    padding: 20px;
+    text-align: center;
+    color: #888;
+  }
+
+  .mg-no-files {
+    padding: 20px;
+    text-align: center;
+    color: #888;
+  }
+  .mg-loading {
+    padding: 20px;
+    text-align: center;
+    color: #888;
+  }
+}

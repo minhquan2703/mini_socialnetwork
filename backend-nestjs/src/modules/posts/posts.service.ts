@@ -47,19 +47,19 @@ export class PostsService {
     if (!user) {
       throw new BadRequestException('User was not found');
     }
-    if (!files) {
-      throw new BadRequestException('File was not found');
-    }
     const { content } = createPostDto;
     const post = new Post();
     post.content = content;
     post.user = user;
     //upload files nếu có
-    for (const file of files) {
-      if (file.mimetype.includes('video') && files.length > 1) {
-        throw new BadRequestException('Maximum is 1 video or 9 images');
+    if (files) {
+      for (const file of files) {
+        if (file.mimetype.includes('video') && files.length > 1) {
+          throw new BadRequestException('Maximum is 1 video or 9 images');
+        }
       }
     }
+
     if (files && files.length > 0) {
       const uploads = await this.uploadsService.uploadMultiplePost(
         files,

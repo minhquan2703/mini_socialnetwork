@@ -37,6 +37,40 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @Post('block')
+  @UseGuards(JwtAuthGuard)
+  async blockUser(
+    @Req() req: AuthenticatedRequest,
+    @Body('blockedUserId') blockedUserId: string,
+  ) {
+    const userId = req.user.id;
+    return await this.usersService.blockUser(blockedUserId, userId);
+  }
+
+  @Delete('block/:blockedUserId')
+  @UseGuards(JwtAuthGuard)
+  async unblockUser(
+    @Req() req: AuthenticatedRequest,
+    @Param('blockedUserId') blockedUserId: string,
+  ) {
+    const userId = req.user.id;
+    return await this.usersService.unblockUser(blockedUserId, userId);
+  }
+
+  @Get('block')
+  @UseGuards(JwtAuthGuard)
+  async getBlockedUsers(@Req() req: AuthenticatedRequest) {
+    const userId = req.user.id;
+    return await this.usersService.getBlockedUsers(userId);
+  }
+
+  @Get('blocked-by')
+  @UseGuards(JwtAuthGuard)
+  async isBlockedBy(@Req() req: AuthenticatedRequest) {
+    const userId = req.user.id;
+    return await this.usersService.isBlockedBy(userId);
+  }
+
   @Get()
   async findAll(
     @Query() query: string,

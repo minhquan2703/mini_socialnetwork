@@ -1,3 +1,4 @@
+import { Chat } from '@/modules/chat/entities/chat.entity';
 import { Comment } from '@/modules/comments/entities/comment.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
 import { Room } from '@/modules/rooms/entities/room.entity';
@@ -34,8 +35,8 @@ export class Upload {
   @ManyToOne(() => Post, (post) => post.uploads, { onDelete: 'CASCADE' })
   post: Post;
 
-  @ManyToOne(() => Room, (room) => room.uploads, { onDelete: 'CASCADE' })
-  room: Room;
+  @ManyToOne(() => Chat, (chat) => chat.uploads, { onDelete: 'CASCADE' })
+  chat: Chat;
 
   @CreateDateColumn()
   createdAt: Date;

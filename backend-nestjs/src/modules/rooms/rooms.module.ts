@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Room } from './entities/room.entity';
 import { User } from '../users/entities/user.entity';
 import { Chat } from '../chat/entities/chat.entity';
+import { Upload } from '../uploads/entities/upload.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Room, User, Chat])],
+  imports: [TypeOrmModule.forFeature([Room, User, Chat, Upload])],
   controllers: [RoomsController],
   providers: [RoomsService],
   exports: [RoomsService],

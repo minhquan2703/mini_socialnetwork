@@ -5,14 +5,11 @@ import {
     Skeleton,
     Divider,
     Button,
-    Space,
     Typography,
-    Badge,
     Tooltip,
-    Image,
 } from "antd";
 import type { MenuProps } from "antd";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IDetailRoom, UserInRoom } from "@/types/room.type";
 import { useSession } from "@/library/session.context";
 import { getDetailRoom } from "@/services/chat.service";
@@ -21,103 +18,84 @@ import { useRouter } from "next/navigation";
 import SkeletonAvatar from "antd/es/skeleton/Avatar";
 import {
     UserOutlined,
-    PictureOutlined,
     FileTextOutlined,
-    LinkOutlined,
     SettingOutlined,
-    BellOutlined,
-    SearchOutlined,
-    StarOutlined,
     BlockOutlined,
     LogoutOutlined,
     CrownOutlined,
-    VideoCameraOutlined,
-    PhoneOutlined,
     MoreOutlined,
-    LeftOutlined,
-    UndoOutlined,
-    ZoomInOutlined,
-    ZoomOutOutlined,
-    RotateRightOutlined,
-    RotateLeftOutlined,
-    SwapOutlined,
-    DownloadOutlined,
-    RightOutlined,
 } from "@ant-design/icons";
-
-const { Title, Text } = Typography;
+import ModalGallery from "@/components/messages/modals/modal.gallery";
+import ModalBlock from "./modals/modal.block";
+import {
+    deleteUnblockUser,
+    getBlockedUsers,
+    getIsBlockedByUsers,
+} from "@/services/auth.service";
+const { Title } = Typography;
 
 type MenuItem = Required<MenuProps>["items"][number];
 
 interface DetailRoomProps {
     roomId: string;
+    isBlocking: boolean;
+    setIsBlocking: React.Dispatch<React.SetStateAction<boolean>>;
+    isBlocked: boolean;
+    setIsBlocked: React.Dispatch<React.SetStateAction<boolean>>;
+    isCheckingBlocked: boolean;
+    setIsCheckingBlocked: React.Dispatch<React.SetStateAction<boolean>>;
+    handleBlockOrUnBlock: (blocked: boolean) => void;
+    setIsShowUpload: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const DetailRoom = ({ roomId }: DetailRoomProps) => {
+const DetailRoom = (props: DetailRoomProps) => {
+    const {
+        roomId,
+        isBlocking,
+        setIsBlocking,
+        // isBlocked,
+        setIsBlocked,
+        setIsCheckingBlocked,
+        handleBlockOrUnBlock,
+        setIsShowUpload
+    } = props;
     const [data, setData] = useState<IDetailRoom>();
+    const [isShowModalGallery, setIsShowModalGallery] =
+        useState<boolean>(false);
+    const [isShowModalBlock, setIsShowModalBlock] = useState<boolean>(false);
     const [otherInChatPrivate, setOtherInChatPrivate] = useState<UserInRoom>();
     const [loading, setLoading] = useState(true);
-    const [currentImage, setCurrentImage] = useState(0);
+
     const router = useRouter();
     const session = useSession();
 
-    // Sample media files for demo
-    const mediaFiles = [
-        {
-            id: 1,
-            type: "image",
-            url: "https://res.cloudinary.com/du5xndm99/image/upload/v1752637955/posts/ewu8tsaau84cz3efw91r.png",
-            name: "image1.jpg",
-        },
-        {
-            id: 2,
-            type: "image",
-            url: "https://res.cloudinary.com/du5xndm99/image/upload/v1752637959/posts/lhtnnhy2ixtuhr9bdbty.png",
-            name: "image2.jpg",
-        },
-        {
-            id: 3,
-            type: "image",
-            url: "https://res.cloudinary.com/du5xndm99/image/upload/v1753087308/user_avatar_448747e4-a4fc-46e3-a5e0-7a2fc0c04062/hmu69lfjh5xqykeddywf.jpg",
-            name: "image3.jpg",
-        },
-        {
-            id: 4,
-            type: "image",
-            url: "https://picsum.photos/120/120?random=4",
-            name: "image4.jpg",
-        },
-        {
-            id: 5,
-            type: "image",
-            url: "https://picsum.photos/120/120?random=5",
-            name: "image5.jpg",
-        },
-        {
-            id: 6,
-            type: "image",
-            url: "https://picsum.photos/120/120?random=6",
-            name: "image6.jpg",
-        },
-    ];
-    const onDownload = () => {
-        const file = mediaFiles[currentImage];
-        const url = file.url;
-        const suffix = url.slice(url.lastIndexOf("."));
-        const filename = Date.now() + suffix;
-
-        fetch(url)
-            .then((response) => response.blob())
-            .then((blob) => {
-                const blobUrl = URL.createObjectURL(new Blob([blob]));
-                const link = document.createElement("a");
-                link.href = blobUrl;
-                link.download = filename;
-                document.body.appendChild(link);
-                link.click();
-                URL.revokeObjectURL(blobUrl);
-                link.remove();
-            });
+    const handleCheckIsBlocked = async (id: string) => {
+        const res = await getIsBlockedByUsers();
+        if (res && res.data) {
+            const blockedUsers = res.data;
+            const isBlockedNow = blockedUsers.some((user) => user.id === id);
+            setIsBlocked(isBlockedNow);
+        }
+    };
+    const handleCheckIsBlocking = async (id: string) => {
+        const res = await getBlockedUsers();
+        if (res && res.data) {
+            const blockedUsers = res.data;
+            const isBlockingNow = blockedUsers.find((user) => user.id === id);
+            setIsBlocking(isBlockingNow ? true : false);
+        }
+    };
+    const handleUnblockUser = async () => {
+        if (otherInChatPrivate?.id) {
+            const res = await deleteUnblockUser(otherInChatPrivate?.id);
+            if (res && res.data) {
+                toast.success("Bỏ chặn người dùng thành công");
+                handleBlockOrUnBlock(false);
+                setIsBlocking(false);
+            } else {
+                toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+            }
+        }
     };
 
     useEffect(() => {
@@ -129,15 +107,15 @@ const DetailRoom = ({ roomId }: DetailRoomProps) => {
                     router.replace("/messages/notfound");
                     return;
                 }
-
                 const detail = res.data;
                 const otherUser =
-                    detail.type === "PRIVATE"
-                        ? detail.users.find((u) => u.id !== session?.user?.id)
-                        : undefined;
+                    detail.type === "PRIVATE" &&
+                    detail.users.find((u) => u.id !== session?.user?.id);
 
                 setData(detail);
-                setOtherInChatPrivate(otherUser);
+                if (otherUser) {
+                    setOtherInChatPrivate(otherUser);
+                }
             } catch (error) {
                 console.error("Error fetching room detail:", error);
                 toast.error("Không thể tải thông tin phòng chat");
@@ -146,25 +124,40 @@ const DetailRoom = ({ roomId }: DetailRoomProps) => {
                 setLoading(false);
             }
         })();
-    }, [roomId, session?.user?.id, router]);
+    }, []);
+
+    useEffect(() => {
+        if (otherInChatPrivate?.id && data?.type === "PRIVATE") {
+            const checkBlockStatus = async () => {
+                setIsCheckingBlocked(true);
+                try {
+                    await Promise.all([
+                        handleCheckIsBlocking(otherInChatPrivate.id),
+                        handleCheckIsBlocked(otherInChatPrivate.id),
+                    ]);
+                } catch (error) {
+                    console.error("Error checking block status:", error);
+                } finally {
+                    setIsCheckingBlocked(false);
+                }
+            };
+
+            checkBlockStatus();
+        }
+    }, [otherInChatPrivate?.id, data?.type]);
 
     const getDisplayInfo = () => {
         if (data?.type === "PRIVATE" && otherInChatPrivate) {
             return {
-                name:
-                    otherInChatPrivate.name ||
-                    otherInChatPrivate.username ||
-                    "Unknown User",
+                name: otherInChatPrivate.name || otherInChatPrivate.username,
                 image: otherInChatPrivate.image,
                 avatarColor: otherInChatPrivate.avatarColor || "#f0f0f0",
                 initial: (
-                    otherInChatPrivate.name ||
-                    otherInChatPrivate.username ||
-                    "U"
+                    otherInChatPrivate.name || otherInChatPrivate.username
                 )
                     .charAt(0)
                     .toUpperCase(),
-                isOnline: Math.random() > 0.5, // Demo online status
+                isOnline: Math.random() > 0.5,
             };
         } else if (data?.type === "GROUP") {
             return {
@@ -238,21 +231,25 @@ const DetailRoom = ({ roomId }: DetailRoomProps) => {
               }
             : null,
 
-        {
-            key: "settings",
-            icon: <SettingOutlined />,
-            label: "Tùy chỉnh cuộc trò chuyện",
-            children: [
-                { key: "theme", label: "Đổi chủ đề" },
-                { key: "nickname", label: "Đặt biệt danh" },
-            ],
-        },
+        // {
+        //     key: "settings",
+        //     icon: <SettingOutlined />,
+        //     label: "Tùy chỉnh cuộc trò chuyện",
+        //     children: [
+        //         { key: "theme", label: "Đổi chủ đề" },
+        //         { key: "nickname", label: "Đặt biệt danh" },
+        //     ],
+        // },
         data?.type === "PRIVATE"
             ? {
                   key: "block",
                   icon: <BlockOutlined />,
-                  label: "Chặn người dùng",
+                  label: isBlocking ? "Bỏ chặn" : "Chặn người dùng",
                   style: { color: "#ff4d4f" },
+                  onClick: () =>
+                      isBlocking
+                          ? handleUnblockUser()
+                          : setIsShowModalBlock(true),
               }
             : {
                   key: "leave",
@@ -260,6 +257,12 @@ const DetailRoom = ({ roomId }: DetailRoomProps) => {
                   label: "Rời nhóm",
                   style: { color: "#ff4d4f" },
               },
+        {
+            key: "files",
+            icon: <FileTextOutlined />,
+            label: "Kho lưu trữ ảnh và video",
+            onClick: () => setIsShowModalGallery(true),
+        },
     ];
 
     if (loading || !data) {
@@ -389,7 +392,7 @@ const DetailRoom = ({ roomId }: DetailRoomProps) => {
                 )}
             />
             {/* Media Preview */}
-            <Card
+            {/* <Card
                 title={
                     <div
                         style={{
@@ -410,102 +413,26 @@ const DetailRoom = ({ roomId }: DetailRoomProps) => {
                     </Button>
                 }
             >
-                <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(3, 1fr)",
-                        gap: "4px",
-                        border: "none",
-                    }}
-                >
-                    <Image.PreviewGroup
-                        preview={{
-                            toolbarRender: (
-                                _,
-                                {
-                                    transform: { scale },
-                                    actions: {
-                                        onActive,
-                                        onFlipY,
-                                        onFlipX,
-                                        onRotateLeft,
-                                        onRotateRight,
-                                        onZoomOut,
-                                        onZoomIn,
-                                        onReset,
-                                    },
-                                }
-                            ) => (
-                                <Space size={12} className="toolbar-wrapper">
-                                    <LeftOutlined
-                                        disabled={currentImage === 0}
-                                        onClick={() => onActive?.(-1)}
-                                    />
-                                    <RightOutlined
-                                        disabled={
-                                            currentImage ===
-                                            mediaFiles.length - 1
-                                        }
-                                        onClick={() => onActive?.(1)}
-                                    />
-                                    <DownloadOutlined onClick={onDownload} />
-                                    <SwapOutlined
-                                        rotate={90}
-                                        onClick={onFlipY}
-                                    />
-                                    <SwapOutlined onClick={onFlipX} />
-                                    <RotateLeftOutlined
-                                        onClick={onRotateLeft}
-                                    />
-                                    <RotateRightOutlined
-                                        onClick={onRotateRight}
-                                    />
-                                    <ZoomOutOutlined
-                                        disabled={scale === 1}
-                                        onClick={onZoomOut}
-                                    />
-                                    <ZoomInOutlined
-                                        disabled={scale === 50}
-                                        onClick={onZoomIn}
-                                    />
-                                    <UndoOutlined onClick={onReset} />
-                                </Space>
-                            ),
-                            onChange: (index) => {
-                                setCurrentImage(index);
-                            },
-                        }}
-                    >
-                        {mediaFiles.slice(0, 6).map((file) => (
-                            <div
-                                key={file.id}
-                                style={{
-                                    aspectRatio: "1",
-                                    overflow: "hidden",
-                                    borderRadius: "6px",
-                                }}
-                            >
-                                <Image
-                                    src={file.url}
-                                    alt={file.name}
-                                    width="100%"
-                                    height="100%"
-                                    style={{ objectFit: "cover" }}
-                                    preview={{
-                                        mask: (
-                                            <div style={{ fontSize: "12px" }}>
-                                                Xem
-                                            </div>
-                                        ),
-                                    }}
-                                />
-                            </div>
-                        ))}
-                    </Image.PreviewGroup>
-                </div>
-            </Card>
+                <MiniGallery/>
+            </Card> */}
+            <ModalGallery
+                roomId={roomId}
+                isModalOpen={isShowModalGallery}
+                setIsModalOpen={setIsShowModalGallery}
+            />
+            {isShowModalBlock && otherInChatPrivate && (
+                <ModalBlock
+                    isShowModal={isShowModalBlock}
+                    setIsShowModal={setIsShowModalBlock}
+                    id={otherInChatPrivate.id}
+                    name={otherInChatPrivate.name}
+                    setIsBlocking={setIsBlocking}
+                    handleBlockOrUnBlock={handleBlockOrUnBlock}
+                    setIsShowUpload={setIsShowUpload}
+                />
+            )}
         </div>
     );
 };
 
-export default DetailRoom;
+export default React.memo(DetailRoom);

@@ -6,6 +6,7 @@ import { Room, RoomType } from './entities/room.entity';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { Chat } from '../chat/entities/chat.entity';
 import dayjs from 'dayjs';
+import { Upload } from '../uploads/entities/upload.entity';
 
 @Injectable()
 export class RoomsService {
@@ -16,6 +17,8 @@ export class RoomsService {
     private chatRepository: Repository<Chat>,
     @InjectRepository(Room)
     private roomRepository: Repository<Room>,
+    @InjectRepository(Upload)
+    private uploadRepository: Repository<Upload>,
   ) {}
 
   async createRoomChat(createRoomDto: CreateRoomDto, senderId: string) {
@@ -172,6 +175,50 @@ export class RoomsService {
       throw new BadRequestException('Room was not found');
     }
     return room;
+  }
+
+  async getFiles(userId: string, roomId: string) {
+    const room = await this.roomRepository.findOne({
+      where: { id: roomId },
+      relations: ['users'],
+      select: {
+        id: true,
+        users: { id: true },
+      },
+    });
+
+    if (!room) {
+      throw new BadRequestException('Room was not found');
+    }
+
+    if (userId && !room.users.some((u) => u.id === userId)) {
+      throw new BadRequestException('Forbidden Exception');
+    }
+
+    const uploads = await this.uploadRepository.find({
+      where: {
+        chat: {
+          room: { id: roomId },
+        },
+      },
+      relations: ['user', 'chat'],
+      select: {
+        id: true,
+        url: true,
+        type: true,
+        createdAt: true,
+        user: {
+          id: true,
+          name: true,
+          username: true,
+          avatarColor: true,
+          image: true,
+        },
+      },
+      order: { createdAt: 'DESC' },
+    });
+
+    return uploads;
   }
 
   async findById(roomId: string) {

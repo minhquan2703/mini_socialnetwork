@@ -18,6 +18,13 @@ export interface IVerifyAccount {
     code: string;
 }
 
+export interface BlockUser {
+    blocked: boolean;
+}
+
+export interface UnblockUser {
+    unblocked: boolean;}
+
 interface IUserFullProfile {
     id: string;
     email: string;

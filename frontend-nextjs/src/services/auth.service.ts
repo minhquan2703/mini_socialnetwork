@@ -1,4 +1,11 @@
-import { IRegister, IResendCode, IVerifyAccount } from "@/types/auth.type";
+import {
+    BlockUser,
+    IRegister,
+    IResendCode,
+    IVerifyAccount,
+    UnblockUser,
+} from "@/types/auth.type";
+import { UserInRoom } from "@/types/room.type";
 import { sendRequest, sendRequestFile } from "@/utils/apiAxios";
 
 const AUTH_BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auths`;
@@ -58,4 +65,52 @@ const postResendCode = async (
     return response;
 };
 
-export { postAuthRegister, postAuthVerifyAccount, postResendCode, putAvatar };
+const postBlockUser = async (
+    userId: string
+): Promise<IBackendRes<BlockUser>> => {
+    const response = await sendRequest<IBackendRes<BlockUser>>({
+        url: `${USER_BASE_URL}/block/`,
+        method: "POST",
+        body: {
+            blockedUserId: userId,
+        },
+    });
+    return response;
+};
+
+const deleteUnblockUser = async (
+    userId: string
+): Promise<IBackendRes<UnblockUser>> => {
+    const response = await sendRequest<IBackendRes<UnblockUser>>({
+        url: `${USER_BASE_URL}/block/${userId}`,
+        method: "DELETE",
+    });
+    return response;
+};
+
+const getBlockedUsers = async (): Promise<IBackendRes<UserInRoom[]>> => {
+    const response = await sendRequest<IBackendRes<UserInRoom[]>>({
+        url: `${USER_BASE_URL}/block`,
+        method: "GET",
+    });
+    return response;
+}
+
+const getIsBlockedByUsers = async (): Promise<IBackendRes<UserInRoom[]>> => {
+    const response = await sendRequest<IBackendRes<UserInRoom[]>>({
+        url: `${USER_BASE_URL}/blocked-by`,
+        method: "GET",
+    });
+    return response;
+}
+
+export {
+    postAuthRegister,
+    postAuthVerifyAccount,
+    postResendCode,
+    putAvatar,
+    postBlockUser,
+    deleteUnblockUser,
+    getBlockedUsers,
+    getIsBlockedByUsers,
+};

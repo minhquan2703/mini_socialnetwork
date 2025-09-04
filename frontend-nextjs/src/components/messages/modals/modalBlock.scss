@@ -1,0 +1,15 @@
+.modal-block {
+    .content {
+        margin-bottom: 20px;
+    }
+
+    .action {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+}
+
+.btn {
+    width: 80px;
+}

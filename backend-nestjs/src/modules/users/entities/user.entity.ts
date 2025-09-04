@@ -9,6 +9,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -84,6 +85,14 @@ export class User {
 
   @OneToMany(() => Report, (report) => report.user, { onDelete: 'CASCADE' })
   reports: Report[];
+
+  @ManyToMany(() => User)
+  @JoinTable({
+    name: 'user_blocks',
+    joinColumn: { name: 'blocker_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'blocked_id', referencedColumnName: 'id' },
+  })
+  blockedUsers: User[];
 
   @CreateDateColumn()
   createdAt: Date;
