@@ -1,4 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -12,8 +11,16 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { JwtService } from '@nestjs/jwt';
 import { RoomsService } from '../rooms/rooms.service';
-import { User } from '../users/entities/user.entity';
 import dayjs from 'dayjs';
+
+interface Sender {
+  id: string;
+  name: string;
+  username: string;
+  image: string;
+  avatarColor: string;
+}
+
 @WebSocketGateway({
   cors: {
     origin: process.env.FRONTEND_URL,
@@ -82,53 +89,70 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     await client.join(roomId);
     console.log(`User ${client.data.user?.id} joined room: ${roomId}`);
 
-    // Thông báo cho client đã join thành công
-    client.emit('joinedRoom', { roomId, success: true });
+    //thông báo cho client đã join thành công
+    // client.emit('joinedRoom', { roomId, success: true });
   }
 
-  @SubscribeMessage('sendMessage')
-  async handleSendMessage(
+  @SubscribeMessage('notify.success')
+  notifySuccess(
     @ConnectedSocket() client: Socket,
     @MessageBody()
-    payload: { roomId: string; content: string },
+    payload: {
+      roomId: string;
+      id: string;
+      content?: string;
+      tempId: string;
+      createdAt: Date;
+      sender: Sender;
+      uploads?: Express.Multer.File[];
+    },
   ) {
-    const { roomId, content } = payload;
-    const sender: User = client.data.user;
-    if (!sender) {
-      throw new BadRequestException('Error Authenticated');
-    }
-    const room = await this.roomService.findById(roomId);
-    if (!room) {
-      throw new BadRequestException('Invalid Room');
-    }
-    console.log('check message', roomId, content);
-    if (room?.isBlocked) {
-      throw new BadRequestException('isBlocked');
+    const { roomId, id, createdAt, sender, content, uploads, tempId } = payload;
+    const createdAtFormat = dayjs(createdAt).format('DD/MM/YYYY [-] HH[:]mm');
+    this.server.to(roomId).emit('message.success', {
+      id: id,
+      tempId: tempId,
+      sender: {
+        id: sender.id,
+        name: sender.name,
+        username: sender.username,
+        image: sender.image,
+        avatarColor: sender.avatarColor,
+      },
+      content: content,
+      uploads: uploads,
+      createdAtFormat: createdAtFormat,
+      status: 'success',
+    });
+    client.broadcast.emit('message.success', {
+      id: id,
+      sender: {
+        id: sender.id,
+        name: sender.name,
+        username: sender.username,
+        image: sender.image,
+        avatarColor: sender.avatarColor,
+      },
+      content: content,
+      uploads: uploads,
+      createdAtFormat: createdAtFormat,
+      status: 'success',
+    });
+  }
+
+  @SubscribeMessage('handleBlockOrUnBlock')
+  handleBlockOrUnBlock(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { blocked: boolean },
+  ) {
+    const { blocked } = payload;
+    if (blocked) {
+      client.broadcast.emit('blockOrUnBlock', { blocked: true });
+    } else {
+      client.broadcast.emit('blockOrUnBlock', { blocked: false });
     }
 
-    // Lưu tin nhắn vào database
-    const saved = await this.chatService.saveMessage({
-      roomId: roomId,
-      content: content,
-      senderId: sender.id,
-    });
-    const createdAtFormat = dayjs(saved.message.createdAt).format(
-      'DD/MM/YYYY [-] HH[:]mm',
-    );
-    this.server.to(room.id).emit('receiveMessage', {
-      id: saved.message.id,
-      roomId: saved.room.id,
-      senderId: saved.sender?.id,
-      sender: {
-        id: saved.sender.id,
-        name: saved.sender?.name,
-        username: saved.sender?.username,
-        image: saved.sender?.image,
-        avatarColor: saved.sender?.avatarColor,
-      },
-      content: saved.message.content,
-      createdAtFormat: createdAtFormat,
-    });
+    // client.emit('blockOrUnBlock', { blocked });
   }
 
   @SubscribeMessage('leaveRoom')

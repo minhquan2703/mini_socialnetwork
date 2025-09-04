@@ -1,3 +1,5 @@
+import { UploadFile } from "antd";
+
 export interface IRoom {
     id: string;
     type: string;
@@ -31,9 +33,26 @@ export interface UserInRoom {
 }
 export interface IDetailRoom {
     id: string;
-    theme?: string;
-    avatar?: string;
+    theme: string;
+    avatar: string;
     type: string;
     name: string;
     users: UserInRoom[];
 }
+
+export interface IMessage {
+    id: string;
+    tempId?: string;
+    content: string;
+    createdAtFormat: string;
+    sender: {
+        id?: string;
+        name?: string;
+        username?: string;
+        image?: string;
+        avatarColor?: string;
+    };
+    uploads?: UploadFile[];
+    status?: string;
+}
+

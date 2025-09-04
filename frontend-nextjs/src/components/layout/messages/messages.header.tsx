@@ -10,10 +10,10 @@ const MessagesHeader = (props: any) => {
 
     // const { data: session, status } = useSession();
     const items: MenuProps["items"] = [
-        {
-            key: "1",
-            label: <span>Cài đặt</span>,
-        },
+        // {
+        //     key: "1",
+        //     label: <span>Cài đặt</span>,
+        // },
 
         {
             key: "4",

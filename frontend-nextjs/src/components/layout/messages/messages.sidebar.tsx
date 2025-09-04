@@ -78,8 +78,7 @@ const MessagesSideBar = () => {
                             style={{ padding: "4px 8px" }}
                         />
                     </Link>
-                    <h2 className="m-0 fs-20 fw-600 flex-1 textalign-center"
-                    >
+                    <h2>
                         Tin nhắn
                     </h2>
                     <Button

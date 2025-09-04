@@ -73,7 +73,26 @@ export class UploadsService {
 
     return this.uploadRepository.save(uploads);
   }
+  async uploadMultipleChat(files: any[], senderId: string) {
+    const uploads: Upload[] = [];
 
+    for (const file of files) {
+      const cloudinaryResult = await this.cloudinaryService.uploadFile(
+        file,
+        'chat',
+      );
+
+      const upload: Upload = this.uploadRepository.create({
+        url: cloudinaryResult.secure_url,
+        publicId: cloudinaryResult.public_id,
+        type: cloudinaryResult.resource_type,
+        user: { id: senderId },
+      });
+      uploads.push(upload);
+    }
+
+    return this.uploadRepository.save(uploads);
+  }
   async deleteUpload(uploadId: string): Promise<void> {
     const upload = await this.uploadRepository.findOne({
       where: { id: uploadId },

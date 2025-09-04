@@ -18,6 +18,7 @@ const CreatePostForm = (props: HomePageProps) => {
     const [newPost, setNewPost] = useState("");
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState("");
+
     const [isShowUpload, setIsShowUpload] = useState(false);
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -131,7 +132,7 @@ const CreatePostForm = (props: HomePageProps) => {
                         />
                         <Divider style={{ margin: "16px 0" }} />
                         {/* upload image */}
-                        {isShowUpload && (
+                        {isShowUpload && 
                             <>
                                 <Dragger
                                     style={{ marginBottom: "10px" }}
@@ -151,10 +152,11 @@ const CreatePostForm = (props: HomePageProps) => {
                                                 !visible && setPreviewImage(""),
                                         }}
                                         src={previewImage}
+                                        alt="preview"
                                     />
                                 )}
                             </>
-                        )}
+                        }
 
                         <div
                             style={{

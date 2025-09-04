@@ -2,26 +2,30 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useSocket } from "@/library/socket.context";
 import { useSession } from "@/library/session.context";
-import { Input, Button, Spin, Empty, Avatar, Form, Tooltip } from "antd";
-import { SendOutlined } from "@ant-design/icons";
-import { getMessages } from "@/services/chat.service";
+import {
+    Input,
+    Button,
+    Spin,
+    Empty,
+    Form,
+    UploadFile,
+    Upload,
+    Image,
+} from "antd";
+import type { RcFile, UploadProps } from "antd/es/upload/interface";
+import {
+    FileImageFilled,
+    PlusOutlined,
+    SendOutlined,
+    UploadOutlined,
+} from "@ant-design/icons";
+import { createMessage, getMessages } from "@/services/chat.service";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import DetailRoom from "./room.detail";
-
-interface Message {
-    id: string;
-    senderId: string;
-    content: string;
-    createdAtFormat: string;
-    sender?: {
-        id: string;
-        name: string;
-        username: string;
-        image?: string;
-        avatarColor?: string;
-    };
-}
+import "./chatbox.scss";
+import { IMessage } from "@/types/room.type";
+import Message from "./message";
 interface props {
     roomId: string;
 }
@@ -30,28 +34,94 @@ const ChatBox = (props: props) => {
     const { roomId } = props;
     const session = useSession();
     const { socket, isConnected } = useSocket();
-    const userId = session?.user?.id || "";
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [isBlocking, setIsBlocking] = useState(false);
+    const [isBlocked, setIsBlocked] = useState(false);
+    const userId = session?.user?.id;
+    const [messages, setMessages] = useState<IMessage[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const [form] = Form.useForm();
+    const [previewImage, setPreviewImage] = useState("");
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [fileList, setFileList] = useState<UploadFile[]>([]);
+    const [isShowUpload, setIsShowUpload] = useState(false);
+    const [isCheckingBlocked, setIsCheckingBlocked] = useState(true);
+
+    const handlePreview = async (file: UploadFile) => {
+        if (!file.url && !file.preview) {
+            file.preview = URL.createObjectURL(file.originFileObj as File);
+        }
+
+        setPreviewImage(file.url || (file.preview as string));
+        setPreviewOpen(true);
+    };
+
+    // const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    //     //nhấn Enter mà không có Shift thì submit form
+    //     if (e.key === "Enter" && !e.shiftKey) {
+    //         e.preventDefault(); //ngăn xuống dòng mặc định
+    //         form.submit();
+    //     }
+    // };
+
+    const getStateBlock = () => {
+        if (isBlocked && !isBlocking) {
+            return "Bạn đã bị chặn";
+        }
+        if (!isBlocked && isBlocking) {
+            return "Bạn đã chặn người này";
+        }
+        if (isBlocked && isBlocking) {
+            return "Cuộc trò chuyện đã bị chặn";
+        }
+        return "Đang kiểm tra trạng thái chặn...";
+    }   
+
+    const handleUrlFile = useCallback(
+        (file: UploadFile): string | undefined => {
+            if (file.originFileObj) {
+                const url = URL.createObjectURL(file.originFileObj as RcFile);
+                return url;
+            }
+            return undefined;
+        },
+        []
+    );
+
+    const uploadProps: UploadProps = {
+        listType: "picture-card",
+        fileList,
+        multiple: true,
+        beforeUpload: () => false,
+        onChange: ({ fileList: newFileList }) => {
+            setFileList(newFileList);
+        },
+        onPreview: handlePreview,
+        onRemove: (file) => {
+            const newFileList = fileList.filter((f) => f.uid !== file.uid);
+            setFileList(newFileList);
+        },
+        showUploadList: {
+            showPreviewIcon: true,
+            showRemoveIcon: true,
+        },
+    };
+
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
     }, [messages]);
 
     useEffect(() => {
+        if (!session?.user) {
+            router.push("/");
+            return;
+        }
         const loadMessages = async () => {
-            if (!session?.user?.access_token) {
-                toast.error("Vui lòng đặng nhập để tiếp tục");
-                router.replace("/auth");
-            }
-
             setIsLoading(true);
             const res = await getMessages(roomId);
             if (res.data) {
-
-                setMessages(res.data);
+                setMessages(Array.isArray(res.data) ? res.data : [res.data]);
             } else if (res.statusCode === 404 || res.statusCode === 400) {
                 router.replace("/messages/notfound");
             } else if (res.statusCode === 403) {
@@ -66,43 +136,221 @@ const ChatBox = (props: props) => {
         loadMessages();
     }, [roomId, router, session]);
 
-    const handleReceive = useCallback((msg: Message) => {
+    const handleTempMessage = (msg: IMessage) => {
         setMessages((prev) => [...prev, msg]);
-    }, []);
+    };
+    const handleReceive = (msg: IMessage) => {
+        setMessages((prev) => {
+            if (msg.tempId) {
+                return prev.map((m) => {
+                    if (m.tempId === msg.tempId) {
+                        return {
+                            ...msg,
+                            status: "success",
+                        };
+                    }
+                    return m;
+                });
+            } else {
+                const isDuplicate = prev.some((m) => m.id === msg.id);
+
+                if (isDuplicate) {
+                    return prev;
+                }
+
+                return [
+                    ...prev,
+                    {
+                        ...msg,
+                        status: "success",
+                    },
+                ];
+            }
+        });
+    };
+
+    const handleErrorMessage = (tempId: string, message: string) => {
+        setMessages((prev) =>
+            prev.map((m) => {
+                if (m.tempId === tempId) {
+                    return {
+                        ...m,
+                        status: "error",
+                    };
+                }
+                return m;
+            })
+        );
+        if (message === "Maximum is 1 video or 4 images") {
+            toast.error("Chỉ được gửi tối đa 1 video hoặc 4 hình ảnh");
+        } else {
+            toast.error("Gửi tin nhắn thất bại, vui lòng thử lại");
+        }
+    };
+    const handleBlockOrUnBlock = useCallback(
+        (blocked: boolean) => {
+            socket?.emit("handleBlockOrUnBlock", {
+                blocked: blocked,
+            });
+        },
+        [socket, roomId]
+    );
+
     //socket events
     useEffect(() => {
         if (!socket) return;
 
         socket.emit("joinRoom", roomId);
-        socket.on("receiveMessage", handleReceive);
+        socket.on("message.success", handleReceive);
+        socket.on("blockOrUnBlock", handleBlockAction);
 
         return () => {
             socket.emit("leaveRoom", roomId);
-            socket.off("receiveMessage");
+            socket.off("message.success");
+            socket.off("blockOrUnBlock");
         };
-    }, [socket, isConnected]);
-
-    const sendMessage = (value: {messageText: string}) => {
-        const { messageText } = value;
-        if (!messageText || !isConnected) return;
-        if (socket?.active) {
-            socket.emit("sendMessage", {
-                roomId,
-                content: messageText.trim(),
-            });
+    }, [socket, isConnected, roomId]);
+    const handleBlockAction = ( data: { blocked: boolean }) => {
+        if (data.blocked === true) {
+            setIsBlocked(true);
+        } else {
+            setIsBlocked(false);
         }
-        form.resetFields();
+        setIsCheckingBlocked(false);
+    };
+    const validateFileList = (files: any[]) => {
+        const firstFile = files[0].originFileObj || files[0];
+        const firstFileType = firstFile.type;
+        for (const file of files) {
+            if (!file.type.includes("image") && !file.type.includes("video")) {
+                return {
+                    valid: false,
+                    message: "Chỉ được gửi ảnh hoặc video",
+                };
+            }
+
+            const sizeInMB =
+                (file.size || (file.originFileObj || file).size) /
+                (1024 * 1024);
+            if (sizeInMB > 100) {
+                return {
+                    valid: false,
+                    message: "file không được vượt quá 100 MB",
+                };
+            }
+        }
+
+        if (firstFileType.startsWith("video/")) {
+            if (files.length > 1) {
+                return {
+                    valid: false,
+                    message: "Video chỉ được gửi 1 file duy nhất",
+                };
+            }
+        }
+
+        if (firstFileType.startsWith("image/")) {
+            const hasNonImage = files.some((file) => {
+                const fileType = (file.originFileObj || file).type;
+                return !fileType.startsWith("image/");
+            });
+
+            if (!hasNonImage && files.length > 4) {
+                return {
+                    valid: false,
+                    message: "Tối đa chỉ được 4 ảnh",
+                };
+            }
+
+            if (hasNonImage) {
+                return {
+                    valid: false,
+                    message: "Khi gửi ảnh, chỉ được gửi các file ảnh",
+                };
+            }
+        }
+
+        return { valid: true };
+    };
+    const sendMessage = async (value: { messageText: string }) => {
+        const { messageText } = value;
+        if (messageText) {
+            if (!messageText.trim() && fileList.length === 0) {
+                toast.error("Tin nhắn không được để trống");
+                return;
+            }
+        }
+        if (fileList.length > 0) {
+            const validation = validateFileList(fileList);
+            if (!validation.valid) {
+                toast.error(validation.message);
+                return;
+            }
+        }
+        if (socket?.active) {
+            const tempId = `temp-${crypto.randomUUID()}`;
+            handleTempMessage({
+                id: tempId,
+                tempId: tempId,
+                content: messageText ? messageText.trim() : "",
+                createdAtFormat: "",
+                sender: {
+                    id: session?.user?.id,
+                    name: session?.user?.name,
+                    username: session?.user?.username,
+                    image: session?.user?.image,
+                    avatarColor: session?.user?.avatarColor,
+                },
+                uploads: fileList,
+                status: "sending",
+            });
+
+            const data = new FormData();
+            data.append("roomId", roomId);
+            data.append("content", messageText ? messageText.trim() : "");
+            fileList.forEach((file) => {
+                if (file.originFileObj) {
+                    data.append("files", file.originFileObj);
+                }
+            });
+            setIsShowUpload(false);
+            form.resetFields();
+            setFileList([]);
+            const res = await createMessage(data);
+            if (res.data) {
+                socket.emit("notify.success", {
+                    roomId: roomId,
+                    id: res.data.message.id,
+                    tempId: tempId,
+                    content: res.data.message.content,
+                    createdAt: res.data.message.createdAt,
+                    sender: {
+                        id: res.data.sender.id,
+                        name: res.data.sender.name,
+                        username: res.data.sender.username,
+                        image: res.data.sender.image,
+                        avatarColor: res.data.sender.avatarColor,
+                    },
+                    uploads: res.data.uploads,
+                });
+            }
+            if (res.error) {
+                handleErrorMessage(tempId, res.message);
+            }
+        }
     };
 
-    if (!roomId || !session) {
+    const uploadButton = (
+        <button className="upload-btn" type="button">
+            <span className="icon-wrapper">
+                <FileImageFilled className="main-icon" />
+                <PlusOutlined className="plus-icon" />
+            </span>
+        </button>
+    );
+    if (!roomId) {
         return (
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    padding: "50px",
-                }}
-            >
+            <div className="chatbox-loading-container">
                 <Spin tip="Đang tải..." size="large">
                     <></>
                 </Spin>
@@ -112,45 +360,12 @@ const ChatBox = (props: props) => {
 
     return (
         <>
-            <div
-                style={{
-                    display: "flex",
-                    width: "100%",
-                    maxHeight: "calc(100vh - 55px)",
-                    height: "calc(100vh - 55px)",
-                }}
-            >
-                <div
-                    style={{
-                        height: "100%",
-                        overflow: "hidden",
-                        display: "flex",
-                        flexDirection: "column",
-                        zIndex: "100",
-                        width: "65%",
-                    }}
-                >
+            <div className="chatbox-root">
+                <div className="chatbox-main">
                     {/* Messages */}
-                    <div
-                        style={{
-                            flex: 1,
-                            scrollbarWidth: "none",
-                            overflowY: "auto",
-                            overflowX: "hidden",
-                            padding: "20px",
-                            backgroundColor: "#fff",
-                            border: "1px solid #fff",
-                            borderRadius: "10px",
-                        }}
-                    >
+                    <div className="chatbox-messages">
                         {isLoading ? (
-                            <Spin
-                                tip="Đang tải..."
-                                style={{
-                                    display: "block",
-                                    margin: "50px auto",
-                                }}
-                            >
+                            <Spin tip="Đang tải..." className="chatbox-spin">
                                 <></>
                             </Spin>
                         ) : messages.length === 0 ? (
@@ -164,103 +379,13 @@ const ChatBox = (props: props) => {
                                     "Unknown";
 
                                 return (
-                                    <>
-                                        <div
-                                            key={msg.id}
-                                            style={{
-                                                display: "flex",
-                                                justifyContent: isOwn
-                                                    ? "flex-end"
-                                                    : "flex-start",
-                                                marginBottom: "15px",
-                                                gap: "10px",
-                                            }}
-                                        >
-                                            {/* Other's message: Avatar + Name + Content */}
-                                            {!isOwn && (
-                                                <>
-                                                    <Avatar
-                                                        src={msg?.sender?.image}
-                                                        style={{
-                                                            backgroundColor:
-                                                                msg?.sender
-                                                                    ?.avatarColor ||
-                                                                "#1890ff",
-                                                            flexShrink: 0,
-                                                            color: "#000",
-                                                            fontWeight: "600",
-                                                        }}
-                                                    >
-                                                        {name
-                                                            .charAt(0)
-                                                            .toUpperCase()}
-                                                    </Avatar>
-                                                    <div
-                                                        style={{
-                                                            maxWidth: "70%",
-                                                        }}
-                                                    >
-                                                        <div
-                                                            style={{
-                                                                fontSize:
-                                                                    "12px",
-                                                                color: "#666",
-                                                                marginBottom:
-                                                                    "2px",
-                                                            }}
-                                                        >
-                                                            {name}
-                                                        </div>
-                                                        <Tooltip
-                                                            title={
-                                                                msg.createdAtFormat
-                                                            }
-                                                            placement="left"
-                                                        >
-                                                            {" "}
-                                                            <div
-                                                                style={{
-                                                                    padding:
-                                                                        "8px 12px",
-                                                                    backgroundColor:
-                                                                        "#f2f2f2",
-                                                                    borderRadius:
-                                                                        "8px",
-                                                                    wordBreak:
-                                                                        "break-word",
-                                                                }}
-                                                            >
-                                                                {msg.content}
-                                                            </div>
-                                                        </Tooltip>
-                                                    </div>
-                                                </>
-                                            )}
-
-                                            {/* Own message: Content only */}
-                                            {isOwn && (
-                                                <Tooltip
-                                                    title={msg.createdAtFormat}
-                                                    placement="right"
-                                                >
-                                                    <div
-                                                        style={{
-                                                            maxWidth: "70%",
-                                                            padding: "8px 12px",
-                                                            backgroundColor:
-                                                                "#1890ff",
-                                                            color: "#fff",
-                                                            borderRadius: "8px",
-                                                            wordBreak:
-                                                                "break-word",
-                                                        }}
-                                                    >
-                                                        {msg.content}
-                                                    </div>
-                                                </Tooltip>
-                                            )}
-                                        </div>
-                                    </>
+                                    <Message
+                                        key={msg.id}
+                                        isOwn={isOwn}
+                                        msg={msg}
+                                        name={name}
+                                        handleUrlFile={handleUrlFile}
+                                    />
                                 );
                             })
                         )}
@@ -268,54 +393,126 @@ const ChatBox = (props: props) => {
                     </div>
 
                     {/* Input */}
-                    <div
-                        style={{
-                            padding: "15px",
-                            backgroundColor: "#fff",
-                            borderTop: "1px solid #e8e8e8",
-                            borderRadius: "0 0 10px 10px",
-                            flexShrink: 0,
-                        }}
-                    >
-                        <Form
-                            form={form}
-                            size="middle"
-                            onFinish={sendMessage}
-                            autoComplete="off"
-                            style={{ display: "flex", gap: "10px" }}
-                        >
-                            <Form.Item
-                                label=""
-                                name="messageText"
-                                style={{ width: "90%" }}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "",
-                                    },
-                                ]}
-                            >
-                                <Input placeholder="Nhập tin nhắn..." autoFocus/>
-                            </Form.Item>
-                            <Form.Item>
-                                <Button
-                                    color="default"
-                                    icon={<SendOutlined />}
-                                    variant="solid"
-                                    htmlType="submit"
-                                    size="middle"
-                                    disabled={!isConnected}
+                    <div className="chatbox-input-container">
+                        {/* upload image */}
+                        {isShowUpload && (
+                            <>
+                                {/* <div style={{display:"flex"}}> */}
+                                <Upload
+                                    listType="picture-circle"
+                                    style={{
+                                        marginBottom: "10px",
+                                    }}
+                                    {...uploadProps}
+                                    fileList={fileList}
+                                    onPreview={handlePreview}
                                 >
-                                    Gửi
-                                </Button>
-                            </Form.Item>
-                        </Form>
+                                    {fileList.length > 8 ? null : uploadButton}
+                                </Upload>
+                                {previewImage && (
+                                    <Image
+                                        wrapperStyle={{ display: "none" }}
+                                        preview={{
+                                            visible: previewOpen,
+                                            onVisibleChange: (visible) =>
+                                                setPreviewOpen(visible),
+                                            afterOpenChange: (visible) =>
+                                                !visible && setPreviewImage(""),
+                                        }}
+                                        src={previewImage}
+                                        alt=""
+                                    />
+                                )}
+                                {/* </div> */}
+                            </>
+                        )}
+                        {!isBlocked && !isBlocking ? (
+                            <Form
+                                form={form}
+                                size="middle"
+                                onFinish={sendMessage}
+                                autoComplete="off"
+                                className="chatbox-form"
+                                disabled={isCheckingBlocked}
+                            >
+                                <Button
+                                    className={
+                                        isShowUpload
+                                            ? "btn-upload-active"
+                                            : "btn-upload"
+                                    }
+                                    icon={<UploadOutlined />}
+                                    onClick={() =>
+                                        setIsShowUpload(!isShowUpload)
+                                    }
+                                />
+                                <Form.Item
+                                    label=""
+                                    name="messageText"
+                                    className="chatbox-form-message"
+                                    rules={
+                                        fileList.length === 0
+                                            ? [
+                                                  {
+                                                      required: true,
+                                                      message: "",
+                                                  },
+                                                  {
+                                                      required:
+                                                          isCheckingBlocked,
+                                                      message: "haha",
+                                                  },
+                                              ]
+                                            : []
+                                    }
+                                    style={{ marginBottom: 0, flex: 1 }}
+                                >
+                                    <Input
+                                        placeholder="Nhập tin nhắn..."
+                                        autoFocus
+                                        // onKeyDown={handleKeyDown}
+                                        style={{
+                                            resize: "none",
+                                        }}
+                                    />
+                                </Form.Item>
+                                <Form.Item>
+                                    <Button
+                                        color="default"
+                                        icon={<SendOutlined />}
+                                        className="chatbox-btn-send"
+                                        variant="solid"
+                                        htmlType="submit"
+                                        size="middle"
+                                        disabled={!isConnected}
+                                    >
+                                        Gửi
+                                    </Button>
+                                </Form.Item>
+                            </Form>
+                        ) :                                 <div
+                                    style={{
+                                        textAlign: "center",
+                                        color: "red",
+                                        fontWeight: "bold",
+                                    }}
+                                >
+                                    {getStateBlock()}
+                                </div>}
                     </div>
                 </div>
-                <div
-                    style={{ width: "35%", height: "100%", overflow: "hidden" }}
-                >
-                    <DetailRoom roomId={roomId}/>
+                <div className="chatbox-detail-room">
+                    <DetailRoom
+                        roomId={roomId}
+                        isBlocking={isBlocking}
+                        setIsBlocking={setIsBlocking}
+                        isBlocked={isBlocked}
+                        setIsBlocked={setIsBlocked}
+                        isCheckingBlocked={isCheckingBlocked}
+                        setIsCheckingBlocked={setIsCheckingBlocked}
+                        handleBlockOrUnBlock={handleBlockOrUnBlock}
+                        setIsShowUpload={setIsShowUpload}
+                    />
                 </div>
             </div>
         </>

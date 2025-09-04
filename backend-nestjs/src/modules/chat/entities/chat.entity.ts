@@ -1,4 +1,5 @@
 import { Room } from '@/modules/rooms/entities/room.entity';
+import { Upload } from '@/modules/uploads/entities/upload.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import {
   Entity,
@@ -7,6 +8,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 
 @Entity()
@@ -22,9 +24,11 @@ export class Chat {
   room: Room;
 
   @Column()
-  content: string;
+  content?: string;
+
+  @OneToMany(() => Upload, (upload) => upload.chat, { onDelete: 'CASCADE' })
+  uploads: Upload[];
 
   @CreateDateColumn()
   createdAt: Date;
-  message: Room[];
 }

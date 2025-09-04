@@ -233,17 +233,27 @@ export class UsersService {
     //check id hợp lệ:
     if (!isUuid(id))
       throw new BadRequestException('id không đúng định dạng UUID');
-    await this.dataSource
-      .createQueryBuilder()
-      .delete()
-      .from('room_users_user')
-      .where('userId = :id', { id })
-      .execute();
-    const result = await this.userRepository.delete(id);
-    if (result.affected === 0) {
-      throw new BadRequestException('id không tồn tại');
-    }
-    return { deleted: true };
+    return this.dataSource.transaction(async (manager) => {
+      await manager
+        .createQueryBuilder()
+        .delete()
+        .from('room_users_user')
+        .where('userId = :id', { id })
+        .execute();
+
+      await manager
+        .createQueryBuilder()
+        .delete()
+        .from('user_blocks')
+        .where('blocker_id = :id OR blocked_id = :id', { id })
+        .execute();
+
+      const result = await this.userRepository.delete(id);
+      if (result.affected === 0) {
+        throw new BadRequestException('id không tồn tại');
+      }
+      return { deleted: true };
+    });
   }
   async handleSendCode(data: ActiveAuthDto) {
     const { username, email } = data;
@@ -287,7 +297,6 @@ export class UsersService {
     }
     const newCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    //response
     await this.mailerService.sendMail({
       to: user.email,
       subject: 'Quên mật khẩu',
@@ -328,5 +337,85 @@ export class UsersService {
         image: (await upload).url,
       },
     };
+  }
+
+  async blockUser(blockedUserId: string, userId: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['blockedUsers'],
+    });
+    if (!user) {
+      throw new NotFoundException('User was not found');
+    }
+    const blockedUser = await this.userRepository.findOne({
+      where: { id: blockedUserId },
+    });
+    if (!blockedUser) {
+      throw new NotFoundException('Blocked user was not found');
+    }
+    if (user.blockedUsers.some((u) => u.id === blockedUserId)) {
+      throw new BadRequestException('User is already blocked');
+    }
+    user.blockedUsers.push(blockedUser);
+    await this.userRepository.save(user);
+    return { blocked: true };
+  }
+
+  async unblockUser(blockedUserId: string, userId: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['blockedUsers'],
+    });
+    if (!user) {
+      throw new NotFoundException('User was not found');
+    }
+    const blockedUser = await this.userRepository.findOne({
+      where: { id: blockedUserId },
+    });
+    if (!blockedUser) {
+      throw new NotFoundException('Blocked user was not found');
+    }
+    if (!user.blockedUsers.some((u) => u.id === blockedUserId)) {
+      throw new BadRequestException('User is not blocked');
+    }
+    user.blockedUsers = user.blockedUsers.filter((u) => u.id !== blockedUserId);
+    await this.userRepository.save(user);
+    return { unblocked: true };
+  }
+
+  getBlockedUsers = async (userId: string) => {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['blockedUsers'],
+      select: {
+        id: true,
+        blockedUsers: {
+          id: true,
+          name: true,
+          username: true,
+          avatarColor: true,
+          image: true,
+        },
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('User was not found');
+    }
+    return user.blockedUsers;
+  };
+  async isBlockedBy(userId: string) {
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.blockedUsers', 'blockedUser')
+      .where('blockedUser.id = :userId', { userId })
+      .select([
+        'user.id',
+        'user.name',
+        'user.username',
+        'user.avatarColor',
+        'user.image',
+      ])
+      .getMany();
+    return users;
   }
 }

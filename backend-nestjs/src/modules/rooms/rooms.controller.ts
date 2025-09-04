@@ -40,4 +40,14 @@ export class RoomsController {
     const userId = req.user.id;
     return await this.roomsService.getAllRooms(userId);
   }
+
+  @Get('files/:roomId')
+  @UseGuards(JwtAuthGuard)
+  async getFiles(
+    @Param('roomId') roomId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user.id;
+    return await this.roomsService.getFiles(userId, roomId);
+  }
 }
