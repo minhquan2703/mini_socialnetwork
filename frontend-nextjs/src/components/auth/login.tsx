@@ -1,5 +1,5 @@
 "use client";
-import { Button, Col, Divider, Form, Input, Row } from "antd";
+import { Button, Col, Divider, Form, Input, Row, Tooltip } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { authenticate } from "@/utils/action";
@@ -71,82 +71,92 @@ const Login = () => {
         <>
             <Row justify={"center"} style={{ marginTop: "30px" }}>
                 <Col xs={21} md={14} lg={7}>
-                    <fieldset
-                        style={{
-                            padding: "15px",
-                            margin: "5px",
-                            border: "1px solid #ccc",
-                            borderRadius: "5px",
-                        }}
-                    >
-                        <legend style={{ fontSize: "18px", fontWeight: "600" }}>
-                            Đăng Nhập
-                        </legend>
-                        <Form
-                            size="large"
-                            name="basic"
-                            onFinish={onFinish}
-                            autoComplete="off"
-                            layout="vertical"
+                    <Tooltip title={"Tài khoản test: test01 - 123"}>
+                        <fieldset
+                            style={{
+                                padding: "15px",
+                                margin: "5px",
+                                border: "1px solid #ccc",
+                                borderRadius: "5px",
+                            }}
                         >
-                            <Form.Item
-                                label=""
-                                name="username"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Vui lòng nhập tên tài khoản!",
-                                    },
-                                ]}
+                            <legend
+                                style={{ fontSize: "18px", fontWeight: "600" }}
                             >
-                                <Input placeholder="Tên tài khoản" />
-                            </Form.Item>
+                                Đăng Nhập
+                            </legend>
 
-                            <Form.Item
-                                label=""
-                                name="password"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Vui lòng nhập mật khẩu",
-                                    },
-                                ]}
+                            <Form
+                                size="large"
+                                name="basic"
+                                onFinish={onFinish}
+                                autoComplete="off"
+                                layout="vertical"
                             >
-                                <Input.Password placeholder="Mật khẩu" />
-                            </Form.Item>
-                            <div style={{ display: "flex" }}>
-                                <Form.Item>
-                                    <Button
-                                        color="default"
-                                        variant="solid"
-                                        htmlType="submit"
-                                        size="middle"
-                                    >
-                                        Đăng nhập
-                                    </Button>
-                                </Form.Item>
-                                <Button
-                                    color="primary"
-                                    variant="text"
-                                    size="middle"
-                                    onClick={() =>
-                                        setIsModalForgotPasswordOpen(true)
-                                    }
-                                    style={{ marginLeft: "auto" }}
+                                <Form.Item
+                                    label=""
+                                    name="username"
+                                    initialValue={"test01"}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message:
+                                                "Vui lòng nhập tên tài khoản!",
+                                        },
+                                    ]}
                                 >
-                                    Quên mật khẩu
-                                </Button>
+                                    <Input placeholder="Tên tài khoản" />
+                                </Form.Item>
+
+                                <Form.Item
+                                    label=""
+                                    name="password"
+                                    initialValue={"123"}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Vui lòng nhập mật khẩu",
+                                        },
+                                    ]}
+                                >
+                                    <Input.Password placeholder="Mật khẩu" />
+                                </Form.Item>
+                                <div style={{ display: "flex" }}>
+                                    <Form.Item>
+                                        <Button
+                                            color="default"
+                                            variant="solid"
+                                            htmlType="submit"
+                                            size="middle"
+                                        >
+                                            Đăng nhập
+                                        </Button>
+                                    </Form.Item>
+                                    <Button
+                                        color="primary"
+                                        variant="text"
+                                        size="middle"
+                                        onClick={() =>
+                                            setIsModalForgotPasswordOpen(true)
+                                        }
+                                        style={{ marginLeft: "auto" }}
+                                    >
+                                        Quên mật khẩu
+                                    </Button>
+                                </div>
+                            </Form>
+                            <Link href={"/"}>
+                                <ArrowLeftOutlined /> Quay lại trang chủ
+                            </Link>
+                            <Divider />
+                            <div style={{ textAlign: "center"}}>
+                                <span>Chưa có tài khoản?&nbsp;&nbsp;</span>
+                                <Link href={"/auth/register"}>
+                                    Đăng ký
+                                </Link>
                             </div>
-                        </Form>
-                        <Link href={"/"}>
-                            <ArrowLeftOutlined /> Quay lại trang chủ
-                        </Link>
-                        <Divider />
-                        <div style={{ textAlign: "center" }}>
-                            Chưa có tài khoản?{" "}
-                            <Link href={"/auth/register"}>Đăng ký tại đây</Link>
-                        </div>
-                    </fieldset>
+                        </fieldset>
+                    </Tooltip>
                 </Col>
             </Row>
             <ModalActive
