@@ -258,6 +258,7 @@ const PostCard = (props: PostCardProps) => {
                                 borderRadius: "8px",
                                 overflow: "hidden",
                                 background: "#f8f8f8",
+                                objectFit: "cover",
                             }}
                         >
                             <Image.PreviewGroup>

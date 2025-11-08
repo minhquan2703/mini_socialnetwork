@@ -60,11 +60,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           name: payload.name,
         };
 
-        console.log(
-          'User connected successfully:',
-          client.id,
-          client.data.user,
-        );
       } catch (jwtError) {
         console.error('JWT verification failed:', jwtError);
         client.emit('error', { message: 'Authentication failed' });
